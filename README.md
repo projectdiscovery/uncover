@@ -3,7 +3,7 @@
   <br>
 </h1>
 
-<h4 align="center">Quickly discover exposed assets on the internet using multiple search engines.</h4>
+<h4 align="center">Quickly discover exposed hosts on the internet using multiple search engines.</h4>
 
 <p align="center">
 <img src="https://img.shields.io/github/go-mod/go-version/projectdiscovery/uncover">
@@ -25,7 +25,7 @@
 
 ---
 
-**uncover** is a go wrapper using APIs of well known search engines to quickly discover exposed hosts on the internet. It is built with automation in mind, so you can query it and utilize the results with your current pipeline tools.
+**uncover** is a go wrapper using APIs of well known search engines to quickly discover exposed hosts on the internet. It is built with automation in mind, so you can query it and utilize the results with your current pipeline tools. Currently, it supports **shodan**, **censys**, and **fofa** search engine.
 
 # Features
 
