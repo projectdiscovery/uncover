@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Ask an question / advise on using uncover
+    url: https://github.com/projectdiscovery/uncover/discussions/categories/q-a
+    about: Ask a question or request support for using uncover
+
+  - name: Share idea / feature to discuss for uncover
+    url: https://github.com/projectdiscovery/uncover/discussions/categories/ideas
+    about: Share idea / feature to discuss for uncover
+
+  - name: Connect with PD Team (Discord)
+    url: https://discord.gg/projectdiscovery
+    about: Connect with PD Team for direct communication
