@@ -112,10 +112,10 @@ Required keys can be obtained by signing up on [Shodan](https://account.shodan.i
 
 ## Running Uncover
 
-**uncover** supports multiple ways to make the query including **stdin** or `q` flag, for example:-
+**uncover** supports multiple ways to make the query including **stdin** or `q` flag
 
 ```console
-echo grafana | uncover 
+echo 'ssl:"Uber Technologies, Inc."' | uncover 
                                         
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
@@ -129,12 +129,49 @@ echo grafana | uncover
 [WRN] Developers assume no liability and are not responsible for any misuse or damage.
 [WRN] By using uncover, you also agree to the terms of the APIs used.
 
-52.18.18.74:443
-139.162.175.222:8081
-2a02:20c8:2640::2:3000
-34.90.119.170:80
-222.209.83.170:3001
-52.35.140.14:443
+107.180.12.116:993
+107.180.26.155:443
+104.244.99.31:443
+161.28.20.79:443
+104.21.8.108:443
+198.71.233.203:443
+104.17.237.13:443
+162.255.165.171:443
+12.237.119.61:443
+192.169.250.211:443
+104.16.251.50:443
+```
+
+Running **uncover**  with **file** input containing multiple search queries per line.
+
+```console
+cat dorks.txt
+
+ssl:"Uber Technologies, Inc."
+title:"Grafana"
+```
+
+```console
+uncover -q dorks.txt
+                                        
+  __  ______  _________ _   _____  _____
+ / / / / __ \/ ___/ __ \ | / / _ \/ ___/
+/ /_/ / / / / /__/ /_/ / |/ /  __/ /    
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.1    
+                                        
+
+    projectdiscovery.io
+
+[WRN] Use with caution. You are responsible for your actions
+[WRN] Developers assume no liability and are not responsible for any misuse or damage.
+[WRN] By using uncover, you also agree to the terms of the APIs used.
+
+107.180.12.116:993
+107.180.26.155:443
+104.244.99.31:443
+161.28.20.79:443
+104.21.8.108:443
+198.71.233.203:443
 2607:7c80:54:3::74:3001
 104.198.55.35:80
 46.101.82.244:3000
@@ -142,7 +179,7 @@ echo grafana | uncover
 138.197.147.213:8086
 ```
 
-**uncover** supports `field` flag to print specific field in the output, currently `ip`, `port`, `host` fields are supported. for example:-
+**uncover** supports `field` flag to specify fields to return, currently `ip`, `port`, `host` are supported.
 
 ```console
 uncover -q jira -f host -silent
@@ -172,7 +209,7 @@ https://130.211.54.173:443/version
 https://54.184.250.232:443/version
 ```
 
-**uncover** supports multiple search engine, as default **shodan** is used, `engine` flag can be used to specify any available search engines. for example:-
+**uncover** supports multiple search engine, as default **shodan** is used, `engine` flag can be used to specify any available search engines.
 
 ```console
 echo jira | uncover -e shodan,censys -silent
@@ -191,27 +228,31 @@ echo jira | uncover -e shodan,censys -silent
 42.194.226.30:2626
 ```
 
-Output of **uncover** can be further piped to other projects in workflow accepting **stdin** as input, for example:-
+Output of **uncover** can be further piped to other projects in workflow accepting **stdin** as input.
 
 
-- `uncover -q http.title:"GitLab" | httpx` - Runs [httpx](https://github.com/projectdiscovery/httpx) for web server probing the found result.
-- `uncover -q example | httpx | nuclei` - Runs [httpx](https://github.com/projectdiscovery/httpx) / [nuclei](https://github.com/projectdiscovery/nuclei) for vulnerability assessment on found host.
 - `uncover -q example -f ip | naabu` - Runs [naabu](https://github.com/projectdiscovery/naabu) for port scanning on the found host.
+- `uncover -q title:GitLab | httpx` - Runs [httpx](https://github.com/projectdiscovery/httpx) for web server probing the found result.
 
 
 ```console
-uncover -q http.title:GeoWebServer -silent | httpx -silent
+uncover -q http.title:GitLab -silent | httpx -silent
 
-https://108.213.48.77
-https://173.241.180.147
-https://173.239.95.16
-http://179.49.67.66
-https://109.88.84.93
-https://181.174.200.162
-https://142.179.224.207
+https://15.185.150.109
+https://139.162.137.16
+https://164.68.115.243
+https://135.125.215.186
+https://163.172.59.119
+http://15.236.10.197
+https://129.206.117.248
 ```
 
-## Note
+- `uncover -q 'org:"Example  Inc."' | httpx | nuclei` - Runs [httpx](https://github.com/projectdiscovery/httpx) / [nuclei](https://github.com/projectdiscovery/nuclei) for vulnerability assessment.
+
+
+![image](https://user-images.githubusercontent.com/8293321/156753063-86ea4c5d-92ad-4c24-a7af-871c12aa278c.png)
+
+## Notes:
 
 -  **keys/ credentials** are required to configure before running or using this project.
 - `query` flag supports all the filters supported by underlying API in use.
