@@ -95,11 +95,13 @@ func (agent *Agent) query(URL string, session *uncover.Session, shodanRequest *S
 		}
 		// has hostnames?
 		if hostnames, ok := shodanResult["hostnames"]; ok {
-			for _, hostname := range hostnames.([]interface{}) {
-				result.Host = fmt.Sprint(hostname)
-				raw, _ := json.Marshal(shodanResult)
-				result.Raw = raw
+			if _, ok := hostnames.([]interface{}); ok {
+				for _, hostname := range hostnames.([]interface{}) {
+					result.Host = fmt.Sprint(hostname)
+				}
 			}
+			raw, _ := json.Marshal(shodanResult)
+			result.Raw = raw
 			results <- result
 		} else {
 			raw, _ := json.Marshal(shodanResult)

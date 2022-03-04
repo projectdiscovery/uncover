@@ -22,7 +22,7 @@ var (
 
 // Options contains the configuration options for tuning the enumeration process.
 type Options struct {
-	Query        goflags.FileNormalizedStringSlice
+	Query        goflags.FileCommaSeparatedStringSlice
 	Engine       goflags.FileNormalizedStringSlice
 	ConfigFile   string
 	ProviderFile string
@@ -46,7 +46,7 @@ func ParseOptions() *Options {
 	flagSet.SetDescription(`quickly discover exposed assets on the internet using multiple search engines.`)
 
 	flagSet.CreateGroup("input", "Input",
-		flagSet.FileNormalizedStringSliceVarP(&options.Query, "query", "q", []string{}, "search query or list (file or comma separated or stdin)"),
+		flagSet.FileCommaSeparatedStringSliceVarP(&options.Query, "query", "q", []string{}, "search query or list (file or comma separated or stdin)"),
 		flagSet.FileNormalizedStringSliceVarP(&options.Engine, "engine", "e", []string{}, "search engine to query (shodan,fofa,censys) (default shodan)"),
 	)
 
@@ -74,7 +74,7 @@ func ParseOptions() *Options {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-
+	
 	options.configureOutput()
 
 	showBanner()
