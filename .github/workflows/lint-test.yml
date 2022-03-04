@@ -14,7 +14,7 @@ jobs:
         with:
           go-version: 1.17
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
