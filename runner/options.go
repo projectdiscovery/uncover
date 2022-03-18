@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/fileutil"
@@ -12,7 +13,6 @@ import (
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/gologger/formatter"
 	"github.com/projectdiscovery/gologger/levels"
-	"github.com/projectdiscovery/sliceutil"
 )
 
 var (
@@ -35,6 +35,8 @@ type Options struct {
 	Verbose      bool
 	NoColor      bool
 	Timeout      int
+	Delay        int
+	delay        time.Duration
 	Provider     *Provider
 }
 
@@ -53,7 +55,8 @@ func ParseOptions() *Options {
 	flagSet.CreateGroup("config", "Config",
 		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", defaultProviderConfigLocation, "provider configuration file"),
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
-		flagSet.IntVar(&options.Timeout, "timeout", 10, "timeout in seconds"),
+		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
+		flagSet.IntVar(&options.Delay, "delay", 1, "delay between requests in seconds (0 to disable)"),
 	)
 
 	flagSet.CreateGroup("output", "Output",
@@ -74,7 +77,7 @@ func ParseOptions() *Options {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	
+
 	options.configureOutput()
 
 	showBanner()
@@ -187,12 +190,11 @@ func (options *Options) validateOptions() error {
 		return errors.New("no engine specified")
 	}
 
-	options.dedupe()
+	if options.Delay < 0 {
+		return errors.New("delay can't be negative")
+	} else {
+		options.delay = time.Duration(options.Delay) * time.Second
+	}
 
 	return nil
-}
-
-func (options *Options) dedupe() {
-	options.Engine = sliceutil.Dedupe(options.Engine)
-	options.Query = sliceutil.Dedupe(options.Query)
 }

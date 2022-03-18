@@ -9,11 +9,12 @@ require (
 	github.com/projectdiscovery/folderutil v0.0.0-20220212074351-38f1c1d2fdd4
 	github.com/projectdiscovery/goflags v0.0.8-0.20220304165250-2530b305a4a9
 	github.com/projectdiscovery/gologger v1.1.4
-	github.com/projectdiscovery/sliceutil v0.0.0-20210804143453-61f3e7fd43ea
 	github.com/projectdiscovery/stringsutil v0.0.0-20210804142656-fd3c28dbaafe
+	go.uber.org/ratelimit v0.2.0
 )
 
 require (
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect

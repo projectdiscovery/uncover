@@ -67,7 +67,8 @@ INPUT:
 CONFIG:
    -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
    -config string         flag configuration file (default "$HOME/.config/uncover/config.yaml")
-   -timeout int           timeout in seconds (default 10)
+   -timeout int           timeout in seconds (default 30)
+   -delay int             delay between requests in seconds (0 to disable) (default 1)
 
 OUTPUT:
    -o, -output string  output file to write found results
