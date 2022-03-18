@@ -17,6 +17,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
+	"go.uber.org/ratelimit"
 )
 
 func init() {
@@ -42,6 +43,18 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 	if !r.options.Provider.HasKeys() {
 		return errors.New("no keys provided")
 	}
+
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter ratelimit.Limiter
+	if r.options.Delay > 0 {
+		censysRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
+		fofaRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
+		shodanRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
+	} else {
+		censysRateLimiter = ratelimit.NewUnlimited()
+		fofaRateLimiter = ratelimit.NewUnlimited()
+		shodanRateLimiter = ratelimit.NewUnlimited()
+	}
+
 	var agents []uncover.Agent
 	// declare clients
 	for _, engine := range r.options.Engine {
@@ -51,11 +64,11 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		)
 		switch engine {
 		case "shodan":
-			agent, err = shodan.New()
+			agent, err = shodan.NewWithOptions(&uncover.AgentOptions{RateLimiter: shodanRateLimiter})
 		case "censys":
-			agent, err = censys.New()
+			agent, err = censys.NewWithOptions(&uncover.AgentOptions{RateLimiter: censysRateLimiter})
 		case "fofa":
-			agent, err = fofa.New()
+			agent, err = fofa.NewWithOptions(&uncover.AgentOptions{RateLimiter: fofaRateLimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
