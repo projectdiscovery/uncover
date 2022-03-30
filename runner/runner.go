@@ -12,11 +12,13 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/gologger"
+	"github.com/projectdiscovery/iputil"
 	"github.com/projectdiscovery/stringsutil"
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
+	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
 	"go.uber.org/ratelimit"
 )
 
@@ -40,19 +42,21 @@ func NewRunner(options *Options) (*Runner, error) {
 
 // RunEnumeration runs the subdomain enumeration flow on the targets specified
 func (r *Runner) Run(ctx context.Context, query ...string) error {
-	if !r.options.Provider.HasKeys() {
+	if !r.options.Provider.HasKeys() && !r.options.hasAnyAnonymousProvider() {
 		return errors.New("no keys provided")
 	}
 
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter ratelimit.Limiter
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter ratelimit.Limiter
 	if r.options.Delay > 0 {
 		censysRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		fofaRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		shodanRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
+		shodanIdbRateLimiter = ratelimit.New(1024) // seems a reasonable upper limit
 	} else {
 		censysRateLimiter = ratelimit.NewUnlimited()
 		fofaRateLimiter = ratelimit.NewUnlimited()
 		shodanRateLimiter = ratelimit.NewUnlimited()
+		shodanIdbRateLimiter = ratelimit.NewUnlimited()
 	}
 
 	var agents []uncover.Agent
@@ -69,6 +73,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			agent, err = censys.NewWithOptions(&uncover.AgentOptions{RateLimiter: censysRateLimiter})
 		case "fofa":
 			agent, err = fofa.NewWithOptions(&uncover.AgentOptions{RateLimiter: fofaRateLimiter})
+		case "shodan-idb":
+			agent, err = shodanidb.NewWithOptions(&uncover.AgentOptions{RateLimiter: shodanIdbRateLimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
@@ -102,12 +108,15 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			Limit: r.options.Limit,
 		}
 		for _, agent := range agents {
+			// skip all agents for pure ips/cidrs
+			if shouldSkipForAgent(agent, uncoverQuery) {
+				continue
+			}
 			wg.Add(1)
 			go func(agent uncover.Agent, uncoverQuery *uncover.Query) {
 				defer wg.Done()
-
 				keys := r.options.Provider.GetKeys()
-				if keys.Empty() {
+				if keys.Empty() && agent.Name() != "shodan-idb" {
 					gologger.Error().Label(agent.Name()).Msgf("empty keys\n")
 					return
 				}
@@ -115,7 +124,6 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 				if err != nil {
 					gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
 				}
-
 				ch, err := agent.Query(session, uncoverQuery)
 				if err != nil {
 					gologger.Warning().Msgf("%s\n", err)
@@ -133,6 +141,9 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						}
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", string(data))
 						outputWriter.Write(data)
+					case r.options.Raw:
+						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
+						outputWriter.WriteString(result.RawData())
 					default:
 						port := fmt.Sprint(result.Port)
 						replacer := strings.NewReplacer(
@@ -159,4 +170,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 
 	wg.Wait()
 	return nil
+}
+
+func shouldSkipForAgent(agent uncover.Agent, uncoverQuery *uncover.Query) bool {
+	return (iputil.IsIP(uncoverQuery.Query) || iputil.IsCIDR(uncoverQuery.Query)) && agent.Name() != "shodan-idb"
 }
