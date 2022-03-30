@@ -70,7 +70,7 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 
 func (agent *Agent) queryURL(session *uncover.Session, URL string, shodanRequest *ShodanRequest) (*http.Response, error) {
 	shodanURL := fmt.Sprintf(URL, session.Keys.Shodan, url.QueryEscape(shodanRequest.Query), shodanRequest.Page)
-	request, err := http.NewRequest(http.MethodGet, shodanURL, nil)
+	request, err := uncover.NewHTTPRequest(http.MethodGet, shodanURL, nil)
 	if err != nil {
 		return nil, err
 	}
