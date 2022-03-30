@@ -72,7 +72,7 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 func (agent *Agent) queryURL(session *uncover.Session, URL string, fofaRequest *FofaRequest) (*http.Response, error) {
 	base64Query := base64.StdEncoding.EncodeToString([]byte(fofaRequest.Query))
 	fofaURL := fmt.Sprintf(URL, session.Keys.FofaEmail, session.Keys.FofaKey, base64Query, Fields, fofaRequest.Page, fofaRequest.Size)
-	request, err := http.NewRequest(http.MethodGet, fofaURL, nil)
+	request, err := uncover.NewHTTPRequest(http.MethodGet, fofaURL, nil)
 	if err != nil {
 		return nil, err
 	}
