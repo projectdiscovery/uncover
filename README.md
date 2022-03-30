@@ -62,7 +62,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query or list (file or comma separated or stdin)
-   -e, -engine string[]  search engine to query (shodan,fofa,censys) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys) (default shodan)
 
 CONFIG:
    -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
@@ -72,8 +72,9 @@ CONFIG:
 
 OUTPUT:
    -o, -output string  output file to write found results
-   -f, -field string   field to display in output (ip,port,host) (default ip:port)
+   -f, -field string   field to display in output (ip,port,host) (default "ip:port")
    -j, -json           write output in JSONL(ines) format
+   -r, -raw            write raw output as received by the remote api
    -l, -limit int      limit the number of results to return (default 100)
    -nc, -no-color      disable colors in output
 

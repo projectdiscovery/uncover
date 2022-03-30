@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -29,6 +30,7 @@ type Options struct {
 	OutputFile   string
 	OutputFields string
 	JSON         bool
+	Raw          bool
 	Limit        int
 	Silent       bool
 	Version      bool
@@ -49,7 +51,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.FileCommaSeparatedStringSliceVarP(&options.Query, "query", "q", []string{}, "search query or list (file or comma separated or stdin)"),
-		flagSet.FileNormalizedStringSliceVarP(&options.Engine, "engine", "e", []string{}, "search engine to query (shodan,fofa,censys) (default shodan)"),
+		flagSet.FileNormalizedStringSliceVarP(&options.Engine, "engine", "e", []string{}, "search engine to query (shodan,shodan-idb,fofa,censys) (default shodan)"),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -63,6 +65,7 @@ func ParseOptions() *Options {
 		flagSet.StringVarP(&options.OutputFile, "output", "o", "", "output file to write found results"),
 		flagSet.StringVarP(&options.OutputFields, "field", "f", "ip:port", "field to display in output (ip,port,host)"),
 		flagSet.BoolVarP(&options.JSON, "json", "j", false, "write output in JSONL(ines) format"),
+		flagSet.BoolVarP(&options.Raw, "raw", "r", false, "write raw output as received by the remote api"),
 		flagSet.IntVarP(&options.Limit, "limit", "l", 100, "limit the number of results to return"),
 		flagSet.BoolVarP(&options.NoColor, "no-color", "nc", false, "disable colors in output"),
 	)
@@ -106,6 +109,7 @@ func ParseOptions() *Options {
 
 	if len(options.Engine) == 0 {
 		options.Engine = append(options.Engine, "shodan")
+		options.Engine = append(options.Engine, "shodan-idb")
 	}
 
 	// we make the assumption that input queries aren't that much
@@ -197,4 +201,13 @@ func (options *Options) validateOptions() error {
 	}
 
 	return nil
+}
+
+func (options *Options) hasAnyAnonymousProvider() bool {
+	for _, engine := range options.Engine {
+		if strings.EqualFold(engine, "shodan-idb") {
+			return true
+		}
+	}
+	return false
 }
