@@ -109,6 +109,7 @@ func ParseOptions() *Options {
 
 	if len(options.Engine) == 0 {
 		options.Engine = append(options.Engine, "shodan")
+		options.Engine = append(options.Engine, "shodan-idb")
 	}
 
 	// we make the assumption that input queries aren't that much

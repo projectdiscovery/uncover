@@ -12,6 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/gologger"
+	"github.com/projectdiscovery/iputil"
 	"github.com/projectdiscovery/stringsutil"
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
@@ -107,10 +108,13 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			Limit: r.options.Limit,
 		}
 		for _, agent := range agents {
+			// skip all agents for pure ips/cidrs
+			if shouldSkipForAgent(agent, uncoverQuery) {
+				continue
+			}
 			wg.Add(1)
 			go func(agent uncover.Agent, uncoverQuery *uncover.Query) {
 				defer wg.Done()
-
 				keys := r.options.Provider.GetKeys()
 				if keys.Empty() && agent.Name() != "shodan-idb" {
 					gologger.Error().Label(agent.Name()).Msgf("empty keys\n")
@@ -120,7 +124,6 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 				if err != nil {
 					gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
 				}
-
 				ch, err := agent.Query(session, uncoverQuery)
 				if err != nil {
 					gologger.Warning().Msgf("%s\n", err)
@@ -167,4 +170,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 
 	wg.Wait()
 	return nil
+}
+
+func shouldSkipForAgent(agent uncover.Agent, uncoverQuery *uncover.Query) bool {
+	return (iputil.IsIP(uncoverQuery.Query) || iputil.IsCIDR(uncoverQuery.Query)) && agent.Name() != "shodan-idb"
 }
