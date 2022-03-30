@@ -76,17 +76,16 @@ func (agent *Agent) query(URL string, session *uncover.Session, shodanRequest *S
 		return
 	}
 	for ip := range ipChan {
-		// query certificates
 		resp, err := agent.queryURL(session, URL, &ShodanRequest{Query: ip})
 		if err != nil {
 			results <- uncover.Result{Source: agent.Name(), Error: err}
-			return
+			continue
 		}
 
 		shodanResponse := &ShodanResponse{}
 		if err := json.NewDecoder(resp.Body).Decode(shodanResponse); err != nil {
 			results <- uncover.Result{Source: agent.Name(), Error: err}
-			return
+			continue
 		}
 
 		// we must output all combinations of ip/hostname with ports
