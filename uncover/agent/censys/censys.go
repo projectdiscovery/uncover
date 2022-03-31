@@ -69,7 +69,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, censysRequest
 	if censysRequest.Cursor != "" {
 		censysURL += fmt.Sprintf("&cursor=%s", censysRequest.Cursor)
 	}
-	request, err := http.NewRequest(http.MethodGet, censysURL, nil)
+	request, err := uncover.NewHTTPRequest(http.MethodGet, censysURL, nil)
 	if err != nil {
 		return nil, err
 	}
