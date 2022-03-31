@@ -25,7 +25,7 @@
 
 ---
 
-**uncover** is a go wrapper using APIs of well known search engines to quickly discover exposed hosts on the internet. It is built with automation in mind, so you can query it and utilize the results with your current pipeline tools. Currently, it supports **shodan**, **censys**, and **fofa** search engine.
+**uncover** is a go wrapper using APIs of well known search engines to quickly discover exposed hosts on the internet. It is built with automation in mind, so you can query it and utilize the results with your current pipeline tools. Currently, it supports **shodan**,**shodan-internetdb**, **censys**, and **fofa** search API.
 
 # Features
 
@@ -35,7 +35,7 @@
 </h1>
 
 - Simple and Handy utility to query multiple search engine
-- Multiple Search engine support (**Shodan**, **Censys**, **Fofa**)
+- Multiple Search engine support (**Shodan**, **Censys**, **Fofa**, **Shodan-InternetDB**)
 - Automatic key/credential randomization
 - **stdin** / **stdout** support for input and output
 
@@ -181,40 +181,25 @@ uncover -q dorks.txt
 138.197.147.213:8086
 ```
 
-**uncover** supports `field` flag to specify fields to return, currently `ip`, `port`, `host` are supported.
+### Multiple Search Engine API (Shodan,Censys,Fofa)
 
-```console
-uncover -q jira -f host -silent
-
-ec2-44-198-22-253.compute-1.amazonaws.com
-ec2-18-246-31-139.us-west-2.compute.amazonaws.com
-tasks.devrtb.com
-leased-line-91-149-128-229.telecom.by
-74.242.203.213.static.inetbone.net
-ec2-52-211-7-108.eu-west-1.compute.amazonaws.com
-ec2-54-187-161-180.us-west-2.compute.amazonaws.com
-185-2-52-226.static.nucleus.be
-ec2-34-241-80-255.eu-west-1.compute.amazonaws.com
-```
-
-
-**uncover** supports `field` flag which can be also used to customize the format of the output, for example in case of  `uncover -f https://ip:port/version`, `ip:port` will be replaced with results in the output maintaining the defined format.
-
-```console
-echo kubernetes | uncover -f https://ip:port/version -silent
-
-https://35.222.229.38:443/version
-https://52.11.181.228:443/version
-https://35.239.255.1:443/version
-https://34.71.48.11:443/version
-https://130.211.54.173:443/version
-https://54.184.250.232:443/version
-```
 
 **uncover** supports multiple search engine, as default **shodan** is used, `engine` flag can be used to specify any available search engines.
 
 ```console
-echo jira | uncover -e shodan,censys -silent
+echo jira | uncover -e shodan,censys,fofa
+
+  __  ______  _________ _   _____  _____
+ / / / / __ \/ ___/ __ \ | / / _ \/ ___/
+/ /_/ / / / / /__/ /_/ / |/ /  __/ /    
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.3  
+                                        
+
+    projectdiscovery.io
+
+[WRN] Use with caution. You are responsible for your actions
+[WRN] Developers assume no liability and are not responsible for any misuse or damage.
+[WRN] By using uncover, you also agree to the terms of the APIs used.
 
 176.31.249.189:5001
 13.211.116.80:443
@@ -230,11 +215,79 @@ echo jira | uncover -e shodan,censys -silent
 42.194.226.30:2626
 ```
 
-Output of **uncover** can be further piped to other projects in workflow accepting **stdin** as input.
+### Shodan-InternetDB API
+
+**uncover** supports [shodan-internetdb](https://internetdb.shodan.io) API to pull available ports for given IP/CIDR input.
+
+`shodan-idb` used as **default** engine when **IP/CIDR** is provided as input, otherwise `shodan` search engine is used.
+
+```console
+echo 51.83.59.99/24 | uncover
+
+  __  ______  _________ _   _____  _____
+ / / / / __ \/ ___/ __ \ | / / _ \/ ___/
+/ /_/ / / / / /__/ /_/ / |/ /  __/ /    
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.3  
+                                        
+
+    projectdiscovery.io
+
+[WRN] Use with caution. You are responsible for your actions
+[WRN] Developers assume no liability and are not responsible for any misuse or damage.
+[WRN] By using uncover, you also agree to the terms of the APIs used.
+
+51.83.59.1:53
+51.83.59.1:10000
+51.83.59.2:53
+51.83.59.3:25
+51.83.59.3:80
+51.83.59.3:389
+51.83.59.3:443
+51.83.59.3:465
+51.83.59.3:587
+51.83.59.3:993
+```
+
+### Field Filters
+
+`-f, -field` flag can be used to indicate which fields to return, currently, `ip`, `port`, and `host` are supported and can be used to return desired fields.
+
+```console
+uncover -q jira -f host -silent
+
+ec2-44-198-22-253.compute-1.amazonaws.com
+ec2-18-246-31-139.us-west-2.compute.amazonaws.com
+tasks.devrtb.com
+leased-line-91-149-128-229.telecom.by
+74.242.203.213.static.inetbone.net
+ec2-52-211-7-108.eu-west-1.compute.amazonaws.com
+ec2-54-187-161-180.us-west-2.compute.amazonaws.com
+185-2-52-226.static.nucleus.be
+ec2-34-241-80-255.eu-west-1.compute.amazonaws.com
+```
+
+### Field Formatting
+
+**uncover** has a `-f, -field` flag that can be used to customize the output format. For example, in the case of `uncover -f https://ip:port/version`, ip:port will be replaced with results in the output while keeping the format defined, It can also be used to specify a known scheme/path/file in order to prepare the output so that it can be immediately passed as input to other tools in the pipeline.
+
+
+```console
+echo kubernetes | uncover -f https://ip:port/version -silent
+
+https://35.222.229.38:443/version
+https://52.11.181.228:443/version
+https://35.239.255.1:443/version
+https://34.71.48.11:443/version
+https://130.211.54.173:443/version
+https://54.184.250.232:443/version
+```
+
+Output of **uncover** can be further piped to other projects in workflow accepting **stdin** as input, for example:
 
 
 - `uncover -q example -f ip | naabu` - Runs [naabu](https://github.com/projectdiscovery/naabu) for port scanning on the found host.
 - `uncover -q title:GitLab | httpx` - Runs [httpx](https://github.com/projectdiscovery/httpx) for web server probing the found result.
+- `uncover -q 51.83.59.99/24 | httpx` - Runs [httpx](https://github.com/projectdiscovery/naabu) on host/ports obtained from shodan-internetdb.
 
 
 ```console
@@ -260,6 +313,8 @@ https://129.206.117.248
 - `query` flag supports all the filters supported by underlying API in use.
 - `query` flag input needs be compatible with search engine in use.
 - results are limited to `100` as default and can be increased with `limit` flag.
+- `shodan-idb` API doesn't requires an API key and works out of the box.
+- `shodan-idb` API is used as **default** engine when **IP/CIDR** is provided as input.
 
 -----
 
