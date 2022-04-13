@@ -54,6 +54,12 @@ github.com/projectdiscovery/folderutil v0.0.0-20220212074351-38f1c1d2fdd4 h1:rPA
 github.com/projectdiscovery/folderutil v0.0.0-20220212074351-38f1c1d2fdd4/go.mod h1:BMqXH4jNGByVdE2iLtKvc/6XStaiZRuCIaKv1vw9PnI=
 github.com/projectdiscovery/goflags v0.0.8-0.20220304165250-2530b305a4a9 h1:J05G/rKDM/MSWI3FrXbnCFM7PtZeV+gRic6wzS8eLqI=
 github.com/projectdiscovery/goflags v0.0.8-0.20220304165250-2530b305a4a9/go.mod h1:37KhVbVLllyuIAgpXGqcvE/hsFEwJ+ctEUSHawjhsBY=
+github.com/projectdiscovery/goflags v0.0.8-0.20220406105918-cad9d7c55eec h1:JlekWGL5EwhhbR2zyoL8yhzdJ9zIjM4IXkmBIvo/4XA=
+github.com/projectdiscovery/goflags v0.0.8-0.20220406105918-cad9d7c55eec/go.mod h1:uN+pHMLsWQoiZHUg/l0tqf/VdbX3+ecKfYz/H7b/+NA=
+github.com/projectdiscovery/goflags v0.0.8-0.20220411122653-4f7127a41268 h1:Y1lK/BRa58vy/3rsYjGD3+BIo4Z3hw+9eRqCNEOsvXM=
+github.com/projectdiscovery/goflags v0.0.8-0.20220411122653-4f7127a41268/go.mod h1:uN+pHMLsWQoiZHUg/l0tqf/VdbX3+ecKfYz/H7b/+NA=
+github.com/projectdiscovery/goflags v0.0.8-0.20220412061559-5119d6086323 h1:M9DJMe3zMnvHkt5McU1IpoTQbBYc2aB1nsOBLqWlQOs=
+github.com/projectdiscovery/goflags v0.0.8-0.20220412061559-5119d6086323/go.mod h1:uN+pHMLsWQoiZHUg/l0tqf/VdbX3+ecKfYz/H7b/+NA=
 github.com/projectdiscovery/gologger v1.0.1/go.mod h1:Ok+axMqK53bWNwDSU1nTNwITLYMXMdZtRc8/y1c7sWE=
 github.com/projectdiscovery/gologger v1.1.4 h1:qWxGUq7ukHWT849uGPkagPKF3yBPYAsTtMKunQ8O2VI=
 github.com/projectdiscovery/gologger v1.1.4/go.mod h1:Bhb6Bdx2PV1nMaFLoXNBmHIU85iROS9y1tBuv7T5pMY=

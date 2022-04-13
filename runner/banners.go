@@ -8,11 +8,11 @@ const banner = `
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
 / /_/ / / / / /__/ /_/ / |/ /  __/ /    
-\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.4
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.5
 `
 
 // Version is the current version of uncover
-const Version = `v0.0.4`
+const Version = `v0.0.5`
 
 // showBanner is used to show the banner to the user
 func showBanner() {
