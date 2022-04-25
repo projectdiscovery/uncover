@@ -52,14 +52,9 @@ github.com/projectdiscovery/fileutil v0.0.0-20220214145203-ee3ead95c0b9 h1:jcRFb
 github.com/projectdiscovery/fileutil v0.0.0-20220214145203-ee3ead95c0b9/go.mod h1:Pm0f+MWgDFMSSI9NBedNh48LyYPs8gD3Jd8DXGmp4aQ=
 github.com/projectdiscovery/folderutil v0.0.0-20220212074351-38f1c1d2fdd4 h1:rPA+enZtrHCBO0XVGsvoGzBKv9TlqZyqZguh1AOT+gs=
 github.com/projectdiscovery/folderutil v0.0.0-20220212074351-38f1c1d2fdd4/go.mod h1:BMqXH4jNGByVdE2iLtKvc/6XStaiZRuCIaKv1vw9PnI=
-github.com/projectdiscovery/goflags v0.0.8-0.20220304165250-2530b305a4a9 h1:J05G/rKDM/MSWI3FrXbnCFM7PtZeV+gRic6wzS8eLqI=
-github.com/projectdiscovery/goflags v0.0.8-0.20220304165250-2530b305a4a9/go.mod h1:37KhVbVLllyuIAgpXGqcvE/hsFEwJ+ctEUSHawjhsBY=
-github.com/projectdiscovery/goflags v0.0.8-0.20220406105918-cad9d7c55eec h1:JlekWGL5EwhhbR2zyoL8yhzdJ9zIjM4IXkmBIvo/4XA=
-github.com/projectdiscovery/goflags v0.0.8-0.20220406105918-cad9d7c55eec/go.mod h1:uN+pHMLsWQoiZHUg/l0tqf/VdbX3+ecKfYz/H7b/+NA=
+github.com/projectdiscovery/goflags v0.0.7/go.mod h1:Jjwsf4eEBPXDSQI2Y+6fd3dBumJv/J1U0nmpM+hy2YY=
 github.com/projectdiscovery/goflags v0.0.8-0.20220411122653-4f7127a41268 h1:Y1lK/BRa58vy/3rsYjGD3+BIo4Z3hw+9eRqCNEOsvXM=
 github.com/projectdiscovery/goflags v0.0.8-0.20220411122653-4f7127a41268/go.mod h1:uN+pHMLsWQoiZHUg/l0tqf/VdbX3+ecKfYz/H7b/+NA=
-github.com/projectdiscovery/goflags v0.0.8-0.20220412061559-5119d6086323 h1:M9DJMe3zMnvHkt5McU1IpoTQbBYc2aB1nsOBLqWlQOs=
-github.com/projectdiscovery/goflags v0.0.8-0.20220412061559-5119d6086323/go.mod h1:uN+pHMLsWQoiZHUg/l0tqf/VdbX3+ecKfYz/H7b/+NA=
 github.com/projectdiscovery/gologger v1.0.1/go.mod h1:Ok+axMqK53bWNwDSU1nTNwITLYMXMdZtRc8/y1c7sWE=
 github.com/projectdiscovery/gologger v1.1.4 h1:qWxGUq7ukHWT849uGPkagPKF3yBPYAsTtMKunQ8O2VI=
 github.com/projectdiscovery/gologger v1.1.4/go.mod h1:Bhb6Bdx2PV1nMaFLoXNBmHIU85iROS9y1tBuv7T5pMY=
@@ -69,8 +64,8 @@ github.com/projectdiscovery/iputil v0.0.0-20210804143329-3a30fcde43f3 h1:VZ9H51A
 github.com/projectdiscovery/iputil v0.0.0-20210804143329-3a30fcde43f3/go.mod h1:blmYJkS8lSrrx3QcmcgS2tZIxlojeVmoGeA9twslCBU=
 github.com/projectdiscovery/mapcidr v0.0.4/go.mod h1:ALOIj6ptkWujNoX8RdQwB2mZ+kAmKuLJBq9T5gR5wG0=
 github.com/projectdiscovery/mapcidr v0.0.7/go.mod h1:7CzdUdjuLVI0s33dQ33lWgjg3vPuLFw2rQzZ0RxkT00=
-github.com/projectdiscovery/mapcidr v0.0.8 h1:16U05F2x3o/jSTsxSCY2hCuCs9xOSwVxjo2zlsL4L4E=
-github.com/projectdiscovery/mapcidr v0.0.8/go.mod h1:7CzdUdjuLVI0s33dQ33lWgjg3vPuLFw2rQzZ0RxkT00=
+github.com/projectdiscovery/mapcidr v0.0.9 h1:PIa09fMHdghlmkUeTgHP9bwYnb3k2wXXM2f6LMj26zg=
+github.com/projectdiscovery/mapcidr v0.0.9/go.mod h1:zgsrc+UXwcLcBopUNboiI4tpTICbfdTyJZiBi2tx+NI=
 github.com/projectdiscovery/stringsutil v0.0.0-20210804142656-fd3c28dbaafe h1:tQTgf5XLBgZbkJDPtnV3SfdP9tzz5ZWeDBwv8WhnH9Q=
 github.com/projectdiscovery/stringsutil v0.0.0-20210804142656-fd3c28dbaafe/go.mod h1:oTRc18WBv9t6BpaN9XBY+QmG28PUpsyDzRht56Qf49I=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
@@ -78,8 +73,9 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
+github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/syndtr/goleveldb v1.0.0/go.mod h1:ZVVdQEZoIme9iO1Ch2Jdy24qqXrMMOU6lpPAyBWyWuQ=
 github.com/yl2chen/cidranger v1.0.2/go.mod h1:9U1yz7WPYDwf0vpNWFaeRh0bjwz5RVgRy/9UEQfHl0g=
 go.uber.org/atomic v1.7.0 h1:ADUqmZGgLDDfbSL9ZmPxKTybcoEYHgpYfELNoN+7hsw=
