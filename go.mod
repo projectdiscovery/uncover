@@ -6,13 +6,13 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/fdmax v0.0.3
-	github.com/projectdiscovery/fileutil v0.0.0-20220214145203-ee3ead95c0b9
+	github.com/projectdiscovery/fileutil v0.0.0-20220506114156-c4ab20801483
 	github.com/projectdiscovery/folderutil v0.0.0-20220212074351-38f1c1d2fdd4
-	github.com/projectdiscovery/goflags v0.0.8-0.20220411122653-4f7127a41268
+	github.com/projectdiscovery/goflags v0.0.8-0.20220426153734-2ffbfbff923c
 	github.com/projectdiscovery/gologger v1.1.4
 	github.com/projectdiscovery/iputil v0.0.0-20210804143329-3a30fcde43f3
-	github.com/projectdiscovery/mapcidr v0.0.9
-	github.com/projectdiscovery/stringsutil v0.0.0-20210804142656-fd3c28dbaafe
+	github.com/projectdiscovery/mapcidr v1.0.0
+	github.com/projectdiscovery/stringsutil v0.0.0-20220422150559-b54fb5dc6833
 	go.uber.org/ratelimit v0.2.0
 )
 
@@ -28,5 +28,5 @@ require (
 	github.com/projectdiscovery/blackrock v0.0.0-20210415162320-b38689ae3a2e // indirect
 	golang.org/x/sys v0.0.0-20210419170143-37df388d1f33 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
