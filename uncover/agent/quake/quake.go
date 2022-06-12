@@ -2,11 +2,9 @@ package quake
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/projectdiscovery/uncover/uncover"
 )
@@ -17,38 +15,15 @@ const (
 )
 
 type Agent struct {
-	options    *uncover.AgentOptions
-	httpClient *http.Client
+	options *uncover.AgentOptions
 }
 
 func New() (uncover.Agent, error) {
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			MaxIdleConnsPerHost: 100,
-			MaxIdleConns:        100,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
-			},
-		},
-		Timeout: time.Duration(600) * time.Second,
-	}
-
-	return &Agent{httpClient: httpClient}, nil
+	return &Agent{}, nil
 }
 
 func NewWithOptions(options *uncover.AgentOptions) (uncover.Agent, error) {
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			MaxIdleConnsPerHost: 100,
-			MaxIdleConns:        100,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
-			},
-		},
-		Timeout: time.Duration(600) * time.Second,
-	}
-
-	return &Agent{options: options, httpClient: httpClient}, nil
+	return &Agent{options: options}, nil
 }
 
 func (agent *Agent) Name() string {
