@@ -51,7 +51,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.FileStringSliceVarP(&options.Query, "query", "q", []string{}, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')"),
-		flagSet.FileNormalizedStringSliceVarP(&options.Engine, "engine", "e", []string{}, "search engine to query (shodan,shodan-idb,fofa,censys) (default shodan)"),
+		flagSet.FileNormalizedStringSliceVarP(&options.Engine, "engine", "e", []string{}, "search engine to query (shodan,shodan-idb,fofa,censys,quake) (default shodan)"),
 	)
 
 	flagSet.CreateGroup("config", "Config",
