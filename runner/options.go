@@ -40,6 +40,7 @@ type Options struct {
 	Delay        int
 	delay        time.Duration
 	Provider     *Provider
+	Retries      int
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -59,6 +60,7 @@ func ParseOptions() *Options {
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
 		flagSet.IntVar(&options.Delay, "delay", 1, "delay between requests in seconds (0 to disable)"),
+		flagSet.IntVar(&options.Retries, "retries", 1, "number of retries"),
 	)
 
 	flagSet.CreateGroup("output", "Output",

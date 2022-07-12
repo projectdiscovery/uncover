@@ -2,6 +2,7 @@ package uncover
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -10,11 +11,13 @@ import (
 )
 
 type Session struct {
-	Keys   *Keys
-	Client *http.Client
+	Keys       *Keys
+	Client     *http.Client
+	CheckRetry CheckRetry
+	RetryMax   int
 }
 
-func NewSession(keys *Keys, timeout int) (*Session, error) {
+func NewSession(keys *Keys, retryMax, timeout int) (*Session, error) {
 	Transport := &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 100,
@@ -31,40 +34,41 @@ func NewSession(keys *Keys, timeout int) (*Session, error) {
 	}
 
 	session := &Session{
-		Client: client,
-		Keys:   keys,
+		Client:     client,
+		Keys:       keys,
+		CheckRetry: DefaultRetryPolicy(),
+		RetryMax:   retryMax,
 	}
 
 	return session, nil
 }
 
 func (s *Session) Do(request *http.Request) (*http.Response, error) {
-	request.Header.Set("Connection", "close")
-	resp, err := s.Client.Do(request)
-	if err != nil {
-		return nil, err
+	var resp *http.Response
+	var err error
+	for i := 0; ; i++ {
+		request.Header.Set("Connection", "close")
+		resp, err = s.Client.Do(request)
+		// Check if we should continue with retries.
+		checkOK, checkErr := s.CheckRetry(request.Context(), resp, err)
+		// Now decide if we should continue.
+		if !checkOK {
+			if checkErr != nil {
+				err = checkErr
+			} else {
+				if resp.StatusCode != http.StatusOK {
+					requestURL, _ := url.QueryUnescape(request.URL.String())
+					return resp, errors.Errorf("unexpected status code %d received from %s", resp.StatusCode, requestURL)
+				}
+			}
+			return resp, err
+		}
+		// We do this before drainBody beause there's no need for the I/O if
+		// we're breaking out
+		remain := s.RetryMax - i
+		if remain <= 1 {
+			break
+		}
 	}
-
-	if resp.StatusCode != http.StatusOK {
-		requestURL, _ := url.QueryUnescape(request.URL.String())
-		return resp, errors.Errorf("unexpected status code %d received from %s", resp.StatusCode, requestURL)
-	}
-	// var f *os.File
-	// var err error
-	// if _, _, ok := request.BasicAuth(); ok {
-	// 	f, err = os.Open("/Users/marcornvh/go/src/github.com/projectdiscovery/uncover/uncover/agent/censys/example.json")
-	// } else {
-	// 	f, err = os.Open("/Users/marcornvh/go/src/github.com/projectdiscovery/uncover/uncover/agent/shodan/example.json")
-	// }
-
-	if err != nil {
-		return nil, err
-	}
-
-	// resp := &http.Response{
-	// 	StatusCode: 200,
-	// 	Body:       f,
-	// }
-
-	return resp, nil
+	return nil, fmt.Errorf("%s %s giving up after %d attempts: %w", request.Method, request.URL, s.RetryMax+1, err)
 }
