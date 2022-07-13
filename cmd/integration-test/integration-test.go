@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	debug      = os.Getenv("DEBUG") == "true"
 	customTest = os.Getenv("TEST")
 	protocol   = os.Getenv("PROTO")
 
