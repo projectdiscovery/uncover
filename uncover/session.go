@@ -70,5 +70,5 @@ func (s *Session) Do(request *http.Request) (*http.Response, error) {
 			break
 		}
 	}
-	return nil, fmt.Errorf("%s %s giving up after %d attempts: %w", request.Method, request.URL, s.RetryMax+1, err)
+	return nil, fmt.Errorf("%s %s giving up after %d attempts: %w", request.Method, request.URL, s.RetryMax, err)
 }
