@@ -13,5 +13,6 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-uncover
+cmd/uncover
+integration-tests/uncover
 integration-test
