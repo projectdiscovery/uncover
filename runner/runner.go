@@ -125,7 +125,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 					gologger.Error().Label(agent.Name()).Msgf("empty keys\n")
 					return
 				}
-				session, err := uncover.NewSession(&keys, r.options.Timeout)
+				session, err := uncover.NewSession(&keys, r.options.Retries, r.options.Timeout)
 				if err != nil {
 					gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
 				}

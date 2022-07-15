@@ -98,7 +98,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, quakeRequest 
 		return nil, err
 	}
 
-	request, err := http.NewRequest(
+	request, err := uncover.NewHTTPRequest(
 		http.MethodPost,
 		URL,
 		bytes.NewReader(body),
