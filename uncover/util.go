@@ -2,11 +2,12 @@ package uncover
 
 import (
 	"io"
-	"net/http"
+
+	"github.com/projectdiscovery/retryablehttp-go"
 )
 
-func NewHTTPRequest(method, url string, body io.Reader) (*http.Request, error) {
-	request, err := http.NewRequest(method, url, body)
+func NewHTTPRequest(method, url string, body io.Reader) (*retryablehttp.Request, error) {
+	request, err := retryablehttp.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}

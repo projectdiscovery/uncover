@@ -69,6 +69,7 @@ CONFIG:
    -config string         flag configuration file (default "$HOME/.config/uncover/config.yaml")
    -timeout int           timeout in seconds (default 30)
    -delay int             delay between requests in seconds (0 to disable) (default 1)
+   -retries int           number of times to retry a failed request
 
 OUTPUT:
    -o, -output string  output file to write found results

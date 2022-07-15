@@ -60,7 +60,7 @@ func ParseOptions() *Options {
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
 		flagSet.IntVar(&options.Delay, "delay", 1, "delay between requests in seconds (0 to disable)"),
-		flagSet.IntVar(&options.Retries, "retries", 1, "number of retries"),
+		flagSet.IntVar(&options.Retries, "retries", 1, "number of times to retry a failed request"),
 	)
 
 	flagSet.CreateGroup("output", "Output",
