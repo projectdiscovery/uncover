@@ -9,7 +9,7 @@ require (
 	github.com/projectdiscovery/fdmax v0.0.3
 	github.com/projectdiscovery/fileutil v0.0.0-20220609150212-453ac591c36c
 	github.com/projectdiscovery/folderutil v0.0.0-20220212074351-38f1c1d2fdd4
-	github.com/projectdiscovery/goflags v0.0.8
+	github.com/projectdiscovery/goflags v0.0.9
 	github.com/projectdiscovery/gologger v1.1.4
 	github.com/projectdiscovery/iputil v0.0.0-20220613112553-9b6873b2c619
 	github.com/projectdiscovery/mapcidr v1.0.1
