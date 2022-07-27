@@ -73,7 +73,7 @@ CONFIG:
 
 OUTPUT:
    -o, -output string  output file to write found results
-   -f, -field string   field to display in output (ip,port,host) (default "ip:port")
+   -f, -field string   field to display in output ({{ip}},{{port}},{{host}}) (default "{{ip}}:{{port}}")
    -j, -json           write output in JSONL(ines) format
    -r, -raw            write raw output as received by the remote api
    -l, -limit int      limit the number of results to return (default 100)
@@ -251,10 +251,10 @@ echo 51.83.59.99/24 | uncover
 
 ### Field Filters
 
-`-f, -field` flag can be used to indicate which fields to return, currently, `ip`, `port`, and `host` are supported and can be used to return desired fields.
+`-f, -field` flag can be used to indicate which fields to return, currently, `{{ip}}`, `{{port}}`, and `{{host}}` are supported and can be used to return desired fields.
 
 ```console
-uncover -q jira -f host -silent
+uncover -q jira -f {{host}} -silent
 
 ec2-44-198-22-253.compute-1.amazonaws.com
 ec2-18-246-31-139.us-west-2.compute.amazonaws.com
@@ -269,11 +269,11 @@ ec2-34-241-80-255.eu-west-1.compute.amazonaws.com
 
 ### Field Formatting
 
-**uncover** has a `-f, -field` flag that can be used to customize the output format. For example, in the case of `uncover -f https://ip:port/version`, ip:port will be replaced with results in the output while keeping the format defined, It can also be used to specify a known scheme/path/file in order to prepare the output so that it can be immediately passed as input to other tools in the pipeline.
+**uncover** has a `-f, -field` flag that can be used to customize the output format. For example, in the case of `uncover -f https://{{ip}}:{{port}}/version`, {{ip}}:{{port}} will be replaced with results in the output while keeping the format defined, It can also be used to specify a known scheme/path/file in order to prepare the output so that it can be immediately passed as input to other tools in the pipeline.
 
 
 ```console
-echo kubernetes | uncover -f https://ip:port/version -silent
+echo kubernetes | uncover -f https://{{ip}}:{{port}}/version -silent
 
 https://35.222.229.38:443/version
 https://52.11.181.228:443/version

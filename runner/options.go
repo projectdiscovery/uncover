@@ -65,7 +65,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("output", "Output",
 		flagSet.StringVarP(&options.OutputFile, "output", "o", "", "output file to write found results"),
-		flagSet.StringVarP(&options.OutputFields, "field", "f", "ip:port", "field to display in output (ip,port,host)"),
+		flagSet.StringVarP(&options.OutputFields, "field", "f", "{{ip}}:{{port}}", "field to display in output ({{ip}},{{port}},{{host}})"),
 		flagSet.BoolVarP(&options.JSON, "json", "j", false, "write output in JSONL(ines) format"),
 		flagSet.BoolVarP(&options.Raw, "raw", "r", false, "write raw output as received by the remote api"),
 		flagSet.IntVarP(&options.Limit, "limit", "l", 100, "limit the number of results to return"),
