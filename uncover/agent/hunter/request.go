@@ -1,8 +1,8 @@
 package hunter
 
 type Request struct {
-	USERNAME   string `json:"username"`
-	APIKEY     string `json:"api-key"`
+	Username   string `json:"username"`
+	ApiKey     string `json:"api-key"`
 	Search     string `json:"search"`
 	StartTime  string `json:"start_time"`
 	EndTime    string `json:"end_time"`

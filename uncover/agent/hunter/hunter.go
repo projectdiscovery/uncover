@@ -45,7 +45,7 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 		page := 1
 		for {
 			hunterRequest := &Request{
-				APIKEY:   session.Keys.HunterToken,
+				ApiKey:   session.Keys.HunterToken,
 				Search:   query.Query,
 				Page:     page,
 				PageSize: Size,
@@ -98,7 +98,7 @@ func (agent *Agent) query(URL string, session *uncover.Session, hunterRequest *R
 
 func (agent *Agent) queryURL(session *uncover.Session, URL string, hunterRequest *Request) (*http.Response, error) {
 	base64Query := base64.URLEncoding.EncodeToString([]byte(hunterRequest.Search))
-	hunterURL := fmt.Sprintf(URL, hunterRequest.APIKEY, base64Query, hunterRequest.Page, hunterRequest.PageSize)
+	hunterURL := fmt.Sprintf(URL, hunterRequest.ApiKey, base64Query, hunterRequest.Page, hunterRequest.PageSize)
 	request, err := uncover.NewHTTPRequest(http.MethodGet, hunterURL, nil)
 	if err != nil {
 		return nil, err
