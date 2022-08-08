@@ -17,6 +17,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
+	"github.com/projectdiscovery/uncover/uncover/agent/hunter"
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
@@ -80,6 +81,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			agent, err = shodanidb.NewWithOptions(&uncover.AgentOptions{RateLimiter: shodanIdbRateLimiter})
 		case "quake":
 			agent, err = quake.NewWithOptions(&uncover.AgentOptions{RateLimiter: quakeRatelimiter})
+		case "hunter":
+			agent, err = hunter.NewWithOptions(&uncover.AgentOptions{RateLimiter: shodanRateLimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
@@ -152,9 +155,9 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 					default:
 						port := fmt.Sprint(result.Port)
 						replacer := strings.NewReplacer(
-							"{{ip}}", result.IP,
-							"{{host}}", result.Host,
-							"{{port}}", port,
+							"ip", result.IP,
+							"host", result.Host,
+							"port", port,
 						)
 						outData := replacer.Replace(r.options.OutputFields)
 						searchFor := []string{result.IP, port}
