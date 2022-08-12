@@ -114,7 +114,7 @@ export FOFA_KEY=xxx
 export HUNTER_API_KEY=xxx
 ```
 
-Required keys can be obtained by signing up on [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin).
+Required API keys can be obtained by signing up on [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin) and [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1) .
 
 ## Running Uncover
 
