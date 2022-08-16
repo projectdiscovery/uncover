@@ -12,6 +12,7 @@ type Provider struct {
 	Censys []string `yaml:"censys"`
 	Fofa   []string `yaml:"fofa"`
 	Quake  []string `yaml:"quake"`
+	Hunter []string `yaml:"hunter"`
 }
 
 func (provider *Provider) GetKeys() uncover.Keys {
@@ -43,9 +44,13 @@ func (provider *Provider) GetKeys() uncover.Keys {
 		keys.QuakeToken = provider.Quake[rand.Intn(len(provider.Quake))]
 	}
 
+	if len(provider.Hunter) > 0 {
+		keys.HunterToken = provider.Hunter[rand.Intn(len(provider.Hunter))]
+	}
+
 	return keys
 }
 
 func (provider *Provider) HasKeys() bool {
-	return len(provider.Censys) > 0 || len(provider.Shodan) > 0 || len(provider.Fofa) > 0 || len(provider.Quake) > 0
+	return len(provider.Censys) > 0 || len(provider.Shodan) > 0 || len(provider.Fofa) > 0 || len(provider.Quake) > 0 || len(provider.Hunter) > 0
 }
