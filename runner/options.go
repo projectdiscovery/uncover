@@ -52,7 +52,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -174,6 +174,9 @@ func (options *Options) loadProvidersFromEnv() error {
 		} else {
 			return errors.New("missing fofa key")
 		}
+	}
+	if key, exists := os.LookupEnv("HUNTER_API_KEY"); exists {
+		options.Provider.Hunter = append(options.Provider.Hunter, key)
 	}
 	return nil
 }

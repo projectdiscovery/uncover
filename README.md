@@ -62,7 +62,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query or list (file or comma separated or stdin)
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,hunter) (default shodan)
 
 CONFIG:
    -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
@@ -97,6 +97,8 @@ censys:
   - CENSYS_API_ID:CENSYS_API_SECRET
 fofa:
   - FOFA_EMAIL:FOFA_KEY
+hunter:
+  - HUNTER_API_KEY
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -109,9 +111,10 @@ export CENSYS_API_ID=xxx
 export CENSYS_API_SECRET=xxx
 export FOFA_EMAIL=xxx
 export FOFA_KEY=xxx
+export HUNTER_API_KEY=xxx
 ```
 
-Required keys can be obtained by signing up on [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin).
+Required API keys can be obtained by signing up on [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin) and [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1) .
 
 ## Running Uncover
 

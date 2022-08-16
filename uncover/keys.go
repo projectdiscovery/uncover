@@ -7,8 +7,9 @@ type Keys struct {
 	FofaEmail    string
 	FofaKey      string
 	QuakeToken   string
+	HunterToken  string
 }
 
 func (keys Keys) Empty() bool {
-	return keys.CensysSecret == "" && keys.CensysToken == "" && keys.Shodan == "" && keys.FofaEmail == "" && keys.FofaKey == "" && keys.QuakeToken == ""
+	return keys.CensysSecret == "" && keys.CensysToken == "" && keys.Shodan == "" && keys.FofaEmail == "" && keys.FofaKey == "" && keys.QuakeToken == "" && keys.HunterToken == ""
 }
