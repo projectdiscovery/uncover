@@ -80,8 +80,7 @@ func (agent *Agent) query(URL string, session *uncover.Session, hunterRequest *R
 		results <- uncover.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
-	if hunterResponse.Code == 200 && hunterResponse.Data.Total > 0 {
-
+	if hunterResponse.Code == http.StatusOK && hunterResponse.Data.Total > 0 {
 		for _, hunterResult := range hunterResponse.Data.Arr {
 			result := uncover.Result{Source: agent.Name()}
 			result.IP = hunterResult.IP
