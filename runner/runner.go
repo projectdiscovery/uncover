@@ -53,7 +53,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		censysRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		fofaRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		shodanRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		shodanIdbRateLimiter = ratelimit.New(1024) // seems a reasonable upper limit
+		shodanIdbRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		quakeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		hunterRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 	} else {
