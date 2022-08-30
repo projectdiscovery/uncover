@@ -41,6 +41,11 @@ type Options struct {
 	delay        time.Duration
 	Provider     *Provider
 	Retries      int
+	Shodan      goflags.StringSlice
+	ShodanIdb	goflags.StringSlice
+	Fofa		goflags.StringSlice
+	Censys		goflags.StringSlice
+	Quake 	    goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -61,6 +66,14 @@ func ParseOptions() *Options {
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
 		flagSet.IntVar(&options.Delay, "delay", 1, "delay between requests in seconds (0 to disable)"),
 		flagSet.IntVar(&options.Retries, "retries", 1, "number of times to retry a failed request"),
+	)
+
+	flagSet.CreateGroup("provider query", "Provider Query",
+		flagSet.StringSliceVarP(&options.Shodan, "shodan", "", nil, "provider with query", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.ShodanIdb, "shodan-idb", "", nil, "provider with query", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Fofa, "fofa", "", nil, "provider with query", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Censys, "censys", "", nil, "provider with query", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Quake, "quake", "", nil, "provider with query", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("output", "Output",
@@ -185,7 +198,7 @@ func (options *Options) loadProvidersFromEnv() error {
 func (options *Options) validateOptions() error {
 	// Check if domain, list of domains, or stdin info was provided.
 	// If none was provided, then return.
-	if len(options.Query) == 0 {
+	if len(options.Query) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 {
 		return errors.New("no query provided")
 	}
 

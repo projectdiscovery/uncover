@@ -66,6 +66,27 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 	}
 
 	var agents []uncover.Agent
+	if len(r.options.Shodan) > 0 {
+		r.options.Engine = append(r.options.Engine, "shodan")
+		query = append(query, r.options.Shodan...)
+	}
+	if len(r.options.ShodanIdb) > 0 {
+		r.options.Engine = append(r.options.Engine, "shodanidb")
+		query = append(query, r.options.ShodanIdb...)
+	}
+	if len(r.options.Fofa) > 0 {
+		r.options.Engine = append(r.options.Engine, "fofa")
+		query = append(query, r.options.Fofa...)
+	}
+	if len(r.options.Censys) > 0 {
+		r.options.Engine = append(r.options.Engine, "censys")
+		query = append(query, r.options.Censys...)
+	}
+	if len(r.options.Quake) > 0 {
+		r.options.Engine = append(r.options.Engine, "quake")
+		query = append(query, r.options.Quake...)
+	}
+
 	// declare clients
 	for _, engine := range r.options.Engine {
 		var (
