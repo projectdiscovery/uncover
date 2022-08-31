@@ -41,11 +41,11 @@ type Options struct {
 	delay        time.Duration
 	Provider     *Provider
 	Retries      int
-	Shodan      goflags.StringSlice
-	ShodanIdb	goflags.StringSlice
-	Fofa		goflags.StringSlice
-	Censys		goflags.StringSlice
-	Quake 	    goflags.StringSlice
+	Shodan       goflags.StringSlice
+	ShodanIdb    goflags.StringSlice
+	Fofa         goflags.StringSlice
+	Censys       goflags.StringSlice
+	Quake        goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -69,11 +69,11 @@ func ParseOptions() *Options {
 	)
 
 	flagSet.CreateGroup("provider query", "Provider Query",
-		flagSet.StringSliceVarP(&options.Shodan, "shodan", "", nil, "provider with query", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.ShodanIdb, "shodan-idb", "", nil, "provider with query", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Fofa, "fofa", "", nil, "provider with query", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Censys, "censys", "", nil, "provider with query", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Quake, "quake", "", nil, "provider with query", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Shodan, "shodan", "", nil, "search query for shodan(example: -shodan 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.ShodanIdb, "shodan-idb", "", nil, "search query for shodan-idb(example: -shodan-idb 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Fofa, "fofa", "", nil, "search query for fofa(example: -fofa 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Censys, "censys", "", nil, "search query for censys(example: -censys 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Quake, "quake", "", nil, "search query for quake(example: -quake 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("output", "Output",
