@@ -70,6 +70,7 @@ SEARCH-ENGINE:
    -ff, -fofa string[]        search query for fofa (example: -fofa 'query.txt')
    -cs, -censys string[]      search query for censys (example: -censys 'query.txt')
    -qk, -quake string[]       search query for quake (example: -quake 'query.txt')
+   -ht, -hunter string[]      search query for hunter (example: -hunter 'query.txt')
 
 CONFIG:
    -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
