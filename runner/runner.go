@@ -70,7 +70,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		query = append(query, r.options.Shodan...)
 	}
 	if len(r.options.ShodanIdb) > 0 {
-		r.options.Engine = append(r.options.Engine, "shodanidb")
+		r.options.Engine = append(r.options.Engine, "shodan-idb")
 		query = append(query, r.options.ShodanIdb...)
 	}
 	if len(r.options.Fofa) > 0 {
