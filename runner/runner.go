@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -166,12 +165,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 					case result.Error != nil:
 						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
 					case r.options.JSON:
-						data, err := json.Marshal(result)
-						if err != nil {
-							continue
-						}
-						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", string(data))
-						outputWriter.Write(data)
+						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
+						outputWriter.WriteJsonData(result)
 					case r.options.Raw:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
 						outputWriter.WriteString(result.RawData())
