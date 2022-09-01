@@ -46,6 +46,7 @@ type Options struct {
 	Fofa         goflags.StringSlice
 	Censys       goflags.StringSlice
 	Quake        goflags.StringSlice
+	Hunter       goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -66,6 +67,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.Fofa, "fofa", "ff", nil, "search query for fofa (example: -fofa 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Censys, "censys", "cs", nil, "search query for censys (example: -censys 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Quake, "quake", "qk", nil, "search query for quake (example: -quake 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Hunter, "hunter", "ht", nil, "search query for hunter (example: -hunter 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -198,7 +200,7 @@ func (options *Options) loadProvidersFromEnv() error {
 func (options *Options) validateOptions() error {
 	// Check if domain, list of domains, or stdin info was provided.
 	// If none was provided, then return.
-	if len(options.Query) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 {
+	if len(options.Query) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 && len(options.Hunter) == 0 {
 		return errors.New("no query provided")
 	}
 

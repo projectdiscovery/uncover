@@ -85,6 +85,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		r.options.Engine = append(r.options.Engine, "quake")
 		query = append(query, r.options.Quake...)
 	}
+	if len(r.options.Hunter) > 0 {
+		r.options.Engine = append(r.options.Engine, "hunter")
+		query = append(query, r.options.Hunter...)
+	}
 
 	// declare clients
 	for _, engine := range r.options.Engine {
