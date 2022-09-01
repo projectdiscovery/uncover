@@ -60,20 +60,20 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 	)
 
+	flagSet.CreateGroup("search-engine", "Search-Engine",
+		flagSet.StringSliceVarP(&options.Shodan, "shodan", "s", nil, "search query for shodan (example: -shodan 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.ShodanIdb, "shodan-idb", "sd", nil, "search query for shodan-idb (example: -shodan-idb 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Fofa, "fofa", "ff", nil, "search query for fofa (example: -fofa 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Censys, "censys", "cs", nil, "search query for censys (example: -censys 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Quake, "quake", "qk", nil, "search query for quake (example: -quake 'query.txt')", goflags.FileStringSliceOptions),
+	)
+
 	flagSet.CreateGroup("config", "Config",
 		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", defaultProviderConfigLocation, "provider configuration file"),
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
 		flagSet.IntVar(&options.Delay, "delay", 1, "delay between requests in seconds (0 to disable)"),
-		flagSet.IntVar(&options.Retries, "retries", 1, "number of times to retry a failed request"),
-	)
-
-	flagSet.CreateGroup("provider query", "Provider Query",
-		flagSet.StringSliceVarP(&options.Shodan, "shodan", "", nil, "search query for shodan(example: -shodan 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.ShodanIdb, "shodan-idb", "", nil, "search query for shodan-idb(example: -shodan-idb 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Fofa, "fofa", "", nil, "search query for fofa(example: -fofa 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Censys, "censys", "", nil, "search query for censys(example: -censys 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Quake, "quake", "", nil, "search query for quake(example: -quake 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.IntVar(&options.Retries, "retry", 2, "number of times to retry a failed request"),
 	)
 
 	flagSet.CreateGroup("output", "Output",

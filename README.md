@@ -61,15 +61,22 @@ Usage:
 
 Flags:
 INPUT:
-   -q, -query string[]   search query or list (file or comma separated or stdin)
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,hunter) (default shodan)
+   -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter) (default shodan)
+
+SEARCH-ENGINE:
+   -s, -shodan string[]       search query for shodan (example: -shodan 'query.txt')
+   -sd, -shodan-idb string[]  search query for shodan-idb (example: -shodan-idb 'query.txt')
+   -ff, -fofa string[]        search query for fofa (example: -fofa 'query.txt')
+   -cs, -censys string[]      search query for censys (example: -censys 'query.txt')
+   -qk, -quake string[]       search query for quake (example: -quake 'query.txt')
 
 CONFIG:
    -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
    -config string         flag configuration file (default "$HOME/.config/uncover/config.yaml")
    -timeout int           timeout in seconds (default 30)
    -delay int             delay between requests in seconds (0 to disable) (default 1)
-   -retries int           number of times to retry a failed request
+   -retry int             number of times to retry a failed request (default 2)
 
 OUTPUT:
    -o, -output string  output file to write found results
