@@ -177,9 +177,9 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 					default:
 						port := fmt.Sprint(result.Port)
 						replacer := strings.NewReplacer(
-							"{{ip}}", result.IP,
-							"{{host}}", result.Host,
-							"{{port}}", port,
+							"ip", result.IP,
+							"host", result.Host,
+							"port", port,
 						)
 						outData := replacer.Replace(r.options.OutputFields)
 						searchFor := []string{result.IP, port}
