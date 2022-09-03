@@ -41,6 +41,12 @@ type Options struct {
 	delay        time.Duration
 	Provider     *Provider
 	Retries      int
+	Shodan       goflags.StringSlice
+	ShodanIdb    goflags.StringSlice
+	Fofa         goflags.StringSlice
+	Censys       goflags.StringSlice
+	Quake        goflags.StringSlice
+	Hunter       goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -52,7 +58,16 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+	)
+
+	flagSet.CreateGroup("search-engine", "Search-Engine",
+		flagSet.StringSliceVarP(&options.Shodan, "shodan", "s", nil, "search query for shodan (example: -shodan 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.ShodanIdb, "shodan-idb", "sd", nil, "search query for shodan-idb (example: -shodan-idb 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Fofa, "fofa", "ff", nil, "search query for fofa (example: -fofa 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Censys, "censys", "cs", nil, "search query for censys (example: -censys 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Quake, "quake", "qk", nil, "search query for quake (example: -quake 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Hunter, "hunter", "ht", nil, "search query for hunter (example: -hunter 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -60,7 +75,7 @@ func ParseOptions() *Options {
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
 		flagSet.IntVar(&options.Delay, "delay", 1, "delay between requests in seconds (0 to disable)"),
-		flagSet.IntVar(&options.Retries, "retries", 1, "number of times to retry a failed request"),
+		flagSet.IntVar(&options.Retries, "retry", 2, "number of times to retry a failed request"),
 	)
 
 	flagSet.CreateGroup("output", "Output",
@@ -175,6 +190,9 @@ func (options *Options) loadProvidersFromEnv() error {
 			return errors.New("missing fofa key")
 		}
 	}
+	if key, exists := os.LookupEnv("HUNTER_API_KEY"); exists {
+		options.Provider.Hunter = append(options.Provider.Hunter, key)
+	}
 	return nil
 }
 
@@ -182,7 +200,7 @@ func (options *Options) loadProvidersFromEnv() error {
 func (options *Options) validateOptions() error {
 	// Check if domain, list of domains, or stdin info was provided.
 	// If none was provided, then return.
-	if len(options.Query) == 0 {
+	if len(options.Query) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 && len(options.Hunter) == 0 {
 		return errors.New("no query provided")
 	}
 

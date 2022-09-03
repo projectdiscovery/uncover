@@ -1,0 +1,41 @@
+{
+    "code": 200,
+    "msg": "success",
+    "data": {
+        "total": 1,
+        "time": 1,
+        "arr": [
+            {
+                "web_title": "web_title",
+                "ip": "127.0.0.1",
+                "port": 80,
+                "base_protocol": "tcp", 
+                "protocol": "http",
+                "domain": "123456.cn",
+                "component": [
+                    {
+                        "name": "nginx",
+                        "version": "1.6"
+                    }
+                ],
+                "url": "http://123456.cn",
+                "os": "linux",
+                "country": "中国",
+                "province": "北京",
+                "city": "北京",
+                "updated_at": "2021-01-01 00:00:00",
+                "status_code": 200,
+                "number": "",
+                "company": "北京xxx公司",
+                "is_web": "是",
+                "is_risk": "",
+                "is_risk_protocol": "",
+                "as_org": "PDR",
+                "isp": "运营商信息",
+                "banner": "banner"
+            }
+        ],
+        "consume_quota": "消耗积分：20",
+        "rest_quota": "今日剩余积分：77"
+    }
+}
