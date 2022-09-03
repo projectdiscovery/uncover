@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -17,6 +16,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
+	"github.com/projectdiscovery/uncover/uncover/agent/hunter"
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
@@ -47,22 +47,49 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return errors.New("no keys provided")
 	}
 
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter ratelimit.Limiter
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter ratelimit.Limiter
 	if r.options.Delay > 0 {
 		censysRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		fofaRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		shodanRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		shodanIdbRateLimiter = ratelimit.New(1024) // seems a reasonable upper limit
+		shodanIdbRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		quakeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
+		hunterRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 	} else {
 		censysRateLimiter = ratelimit.NewUnlimited()
 		fofaRateLimiter = ratelimit.NewUnlimited()
 		shodanRateLimiter = ratelimit.NewUnlimited()
 		shodanIdbRateLimiter = ratelimit.NewUnlimited()
 		quakeRatelimiter = ratelimit.NewUnlimited()
+		hunterRatelimiter = ratelimit.NewUnlimited()
 	}
 
 	var agents []uncover.Agent
+	if len(r.options.Shodan) > 0 {
+		r.options.Engine = append(r.options.Engine, "shodan")
+		query = append(query, r.options.Shodan...)
+	}
+	if len(r.options.ShodanIdb) > 0 {
+		r.options.Engine = append(r.options.Engine, "shodan-idb")
+		query = append(query, r.options.ShodanIdb...)
+	}
+	if len(r.options.Fofa) > 0 {
+		r.options.Engine = append(r.options.Engine, "fofa")
+		query = append(query, r.options.Fofa...)
+	}
+	if len(r.options.Censys) > 0 {
+		r.options.Engine = append(r.options.Engine, "censys")
+		query = append(query, r.options.Censys...)
+	}
+	if len(r.options.Quake) > 0 {
+		r.options.Engine = append(r.options.Engine, "quake")
+		query = append(query, r.options.Quake...)
+	}
+	if len(r.options.Hunter) > 0 {
+		r.options.Engine = append(r.options.Engine, "hunter")
+		query = append(query, r.options.Hunter...)
+	}
+
 	// declare clients
 	for _, engine := range r.options.Engine {
 		var (
@@ -80,6 +107,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			agent, err = shodanidb.NewWithOptions(&uncover.AgentOptions{RateLimiter: shodanIdbRateLimiter})
 		case "quake":
 			agent, err = quake.NewWithOptions(&uncover.AgentOptions{RateLimiter: quakeRatelimiter})
+		case "hunter":
+			agent, err = hunter.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterRatelimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
@@ -140,12 +169,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 					case result.Error != nil:
 						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
 					case r.options.JSON:
-						data, err := json.Marshal(result)
-						if err != nil {
-							continue
-						}
-						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", string(data))
-						outputWriter.Write(data)
+						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
+						outputWriter.WriteJsonData(result)
 					case r.options.Raw:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
 						outputWriter.WriteString(result.RawData())
