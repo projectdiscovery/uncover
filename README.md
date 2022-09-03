@@ -25,7 +25,7 @@
 
 ---
 
-**uncover** is a go wrapper using APIs of well known search engines to quickly discover exposed hosts on the internet. It is built with automation in mind, so you can query it and utilize the results with your current pipeline tools. Currently, it supports **shodan**,**shodan-internetdb**, **censys**, and **fofa** search API.
+**uncover** is a go wrapper using APIs of well known search engines to quickly discover exposed hosts on the internet. It is built with automation in mind, so you can query it and utilize the results with your current pipeline tools.
 
 # Features
 
@@ -34,12 +34,18 @@
   <br>
 </h1>
 
-- Simple and Handy utility to query multiple search engine
-- Multiple Search engine support (**Shodan**, **Censys**, **Fofa**, **Shodan-InternetDB**)
-- Automatic key/credential randomization
-- **stdin** / **stdout** support for input and output
+- Query multiple search engine at once
+- Available Search engine support
+  - **[Shodan](https://www.shodan.io)**
+  - **[Censys](https://search.censys.io)**
+  - **[FOFA](https://fofa.info)**
+  - **[Hunter](https://hunter.qianxin.com)**
+  - **[Quake](https://quake.360.net/quake/#/index)**
+- Multiple API key input support
+- Automatic API key randomization
+- **stdin** / **stdout** support for input
 
-# Installation Instructions
+## Installation Instructions
 
 uncover requires **go1.17** to install successfully. Run the following command to get the repo -
 
@@ -47,7 +53,7 @@ uncover requires **go1.17** to install successfully. Run the following command t
 go install -v github.com/projectdiscovery/uncover/cmd/uncover@latest
 ```
 
-# Usage
+## Usage
 
 ```sh
 uncover -h
@@ -93,20 +99,29 @@ DEBUG:
    -v        show verbose output
 ```
 
-# Provider Configuration
+## Provider Configuration
 
-The default provider configuration file should be located at `$HOME/.config/uncover/provider-config.yaml` and has the following contents as an example. **In order to run this tool, the API keys / credentials needs to be added in this config file or set as environment variable.**
+The default provider configuration file should be located at `$HOME/.config/uncover/provider-config.yaml` and has the following contents as an example.
+
+
+> **Note**: API keys are required needs to be configured before running uncover.
 
 ```yaml
 shodan:
-  - SHODAN_API_KEY1
-  - SHODAN_API_KEY2
+  - SHODAN_API_KEY_1
+  - SHODAN_API_KEY_2
 censys:
-  - CENSYS_API_ID:CENSYS_API_SECRET
+  - CENSYS_API_ID_1:CENSYS_API_SECRET_1
+  - CENSYS_API_ID_2:CENSYS_API_SECRET_2
 fofa:
-  - FOFA_EMAIL:FOFA_KEY
+  - FOFA_EMAIL_1:FOFA_KEY_2
+  - FOFA_EMAIL_2:FOFA_KEY_2
+quake:
+  - QUAKE_TOKEN_1
+  - QUAKE_TOKEN_2
 hunter:
-  - HUNTER_API_KEY
+  - HUNTER_API_KEY_1
+  - HUNTER_API_KEY_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -122,11 +137,13 @@ export FOFA_KEY=xxx
 export HUNTER_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin) and [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1) .
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index) and [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1) .
 
 ## Running Uncover
 
-**uncover** supports multiple ways to make the query including **stdin** or `q` flag
+### Default run:
+
+**uncover** supports multiple ways to make the query including **stdin** or `q` flag, as default `shodan` engine is used for search if no engine is specified.
 
 ```console
 echo 'ssl:"Uber Technologies, Inc."' | uncover 
@@ -193,13 +210,13 @@ uncover -q dorks.txt
 138.197.147.213:8086
 ```
 
-### Multiple Search Engine API (Shodan,Censys,Fofa)
+### Single query against multiple search engine
 
 
-**uncover** supports multiple search engine, as default **shodan** is used, `engine` flag can be used to specify any available search engines.
+**uncover** supports multiple search engine, as default **shodan** is used, `-e` flag can be used to run same query against any or all search engines.
 
 ```console
-echo jira | uncover -e shodan,censys,fofa
+echo jira | uncover -e shodan,censys,fofa,quake,hunter
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
@@ -226,6 +243,43 @@ echo jira | uncover -e shodan,censys,fofa
 101.36.105.97:21379
 42.194.226.30:2626
 ```
+
+### Multiple query against multiple search engine
+
+
+```console
+uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira'
+
+  __  ______  _________ _   _____  _____
+ / / / / __ \/ ___/ __ \ | / / _ \/ ___/
+/ /_/ / / / / /__/ /_/ / |/ /  __/ /    
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.7
+                                        
+
+    projectdiscovery.io
+
+[WRN] Use with caution. You are responsible for your actions
+[WRN] Developers assume no liability and are not responsible for any misuse or damage.
+[WRN] By using uncover, you also agree to the terms of the APIs used.
+
+104.68.37.129:443
+162.222.160.42:443
+34.255.84.133:443
+52.204.121.166:443
+23.198.29.120:443
+136.156.180.95:443
+54.194.233.15:443
+104.117.55.155:443
+149.81.4.6:443
+54.255.218.95:443
+3.223.137.57:443
+83.228.124.171:443
+23.202.195.82:443
+52.16.59.25:443
+18.159.145.227:443
+104.105.53.236:443
+```
+
 
 ### Shodan-InternetDB API
 
@@ -260,7 +314,7 @@ echo 51.83.59.99/24 | uncover
 51.83.59.3:993
 ```
 
-### Field Filters
+### Field Format
 
 `-f, -field` flag can be used to indicate which fields to return, currently, `ip`, `port`, and `host` are supported and can be used to return desired fields.
 
@@ -322,8 +376,7 @@ https://129.206.117.248
 ## Notes:
 
 -  **keys/ credentials** are required to configure before running or using this project.
-- `query` flag supports all the filters supported by underlying API in use.
-- `query` flag input needs be compatible with search engine in use.
+- `query` flag supports **all and only filters supported by search engine.**
 - results are limited to `100` as default and can be increased with `limit` flag.
 - `shodan-idb` API doesn't requires an API key and works out of the box.
 - `shodan-idb` API is used as **default** engine when **IP/CIDR** is provided as input.
