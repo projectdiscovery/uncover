@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -66,6 +65,31 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 	}
 
 	var agents []uncover.Agent
+	if len(r.options.Shodan) > 0 {
+		r.options.Engine = append(r.options.Engine, "shodan")
+		query = append(query, r.options.Shodan...)
+	}
+	if len(r.options.ShodanIdb) > 0 {
+		r.options.Engine = append(r.options.Engine, "shodan-idb")
+		query = append(query, r.options.ShodanIdb...)
+	}
+	if len(r.options.Fofa) > 0 {
+		r.options.Engine = append(r.options.Engine, "fofa")
+		query = append(query, r.options.Fofa...)
+	}
+	if len(r.options.Censys) > 0 {
+		r.options.Engine = append(r.options.Engine, "censys")
+		query = append(query, r.options.Censys...)
+	}
+	if len(r.options.Quake) > 0 {
+		r.options.Engine = append(r.options.Engine, "quake")
+		query = append(query, r.options.Quake...)
+	}
+	if len(r.options.Hunter) > 0 {
+		r.options.Engine = append(r.options.Engine, "hunter")
+		query = append(query, r.options.Hunter...)
+	}
+
 	// declare clients
 	for _, engine := range r.options.Engine {
 		var (
@@ -145,12 +169,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 					case result.Error != nil:
 						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
 					case r.options.JSON:
-						data, err := json.Marshal(result)
-						if err != nil {
-							continue
-						}
-						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", string(data))
-						outputWriter.Write(data)
+						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
+						outputWriter.WriteJsonData(result)
 					case r.options.Raw:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
 						outputWriter.WriteString(result.RawData())
