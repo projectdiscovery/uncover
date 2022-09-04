@@ -40,8 +40,8 @@ func (o *OutputWriter) WriteAll(data []byte) {
 	defer o.Unlock()
 
 	for _, w := range o.namedWriters {
-		w.Writer.Write(data)
-		w.Writer.Write([]byte("\n"))
+		_, _ = w.Writer.Write(data)
+		_, _ = w.Writer.Write([]byte("\n"))
 	}
 }
 
@@ -53,8 +53,8 @@ func (o *OutputWriter) Write(data []byte, name string) {
 
 	for _, w := range o.namedWriters {
 		if w.Name == name {
-			w.Writer.Write(data)
-			w.Writer.Write([]byte("\n"))
+			_, _ = w.Writer.Write(data)
+			_, _ = w.Writer.Write([]byte("\n"))
 		}
 	}
 }
