@@ -68,7 +68,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye) (default shodan)
 
 SEARCH-ENGINE:
    -s, -shodan string[]       search query for shodan (example: -shodan 'query.txt')
@@ -77,6 +77,7 @@ SEARCH-ENGINE:
    -cs, -censys string[]      search query for censys (example: -censys 'query.txt')
    -qk, -quake string[]       search query for quake (example: -quake 'query.txt')
    -ht, -hunter string[]      search query for hunter (example: -hunter 'query.txt')
+   -ze, -zoomeye string[]     search query for zoomeye (example: -zoomeye 'query.txt')
 
 CONFIG:
    -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
@@ -122,6 +123,9 @@ quake:
 hunter:
   - HUNTER_API_KEY_1
   - HUNTER_API_KEY_2
+zoomeye:
+  - ZOOMEYE_API_KEY_1
+  - ZOOMEYE_API_KEY_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -135,9 +139,10 @@ export CENSYS_API_SECRET=xxx
 export FOFA_EMAIL=xxx
 export FOFA_KEY=xxx
 export HUNTER_API_KEY=xxx
+export ZOOMEYE_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index) and [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1) .
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1) and [ZoomEye](https://www.zoomeye.org/login) .
 
 ## Running Uncover
 

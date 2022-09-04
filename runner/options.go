@@ -47,6 +47,7 @@ type Options struct {
 	Censys       goflags.StringSlice
 	Quake        goflags.StringSlice
 	Hunter       goflags.StringSlice
+	ZoomEye      goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -58,7 +59,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("search-engine", "Search-Engine",
@@ -68,6 +69,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.Censys, "censys", "cs", nil, "search query for censys (example: -censys 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Quake, "quake", "qk", nil, "search query for quake (example: -quake 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Hunter, "hunter", "ht", nil, "search query for hunter (example: -hunter 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.ZoomEye, "zoomeye", "ze", nil, "search query for zoomeye (example: -zoomeye 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -192,6 +194,9 @@ func (options *Options) loadProvidersFromEnv() error {
 	}
 	if key, exists := os.LookupEnv("HUNTER_API_KEY"); exists {
 		options.Provider.Hunter = append(options.Provider.Hunter, key)
+	}
+	if key, exists := os.LookupEnv("ZOOMEYE_API_KEY"); exists {
+		options.Provider.ZoomEye = append(options.Provider.ZoomEye, key)
 	}
 	return nil
 }
