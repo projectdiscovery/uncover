@@ -193,6 +193,9 @@ func (options *Options) loadProvidersFromEnv() error {
 	if key, exists := os.LookupEnv("HUNTER_API_KEY"); exists {
 		options.Provider.Hunter = append(options.Provider.Hunter, key)
 	}
+	if key, exists := os.LookupEnv("QUAKE_TOKEN"); exists {
+		options.Provider.Quake = append(options.Provider.Quake, key)
+	}
 	return nil
 }
 
