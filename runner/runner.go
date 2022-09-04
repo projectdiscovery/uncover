@@ -3,7 +3,6 @@ package runner
 import (
 	"context"
 	"fmt"
-	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
 	"math/rand"
 	"os"
 	"strings"
@@ -21,6 +20,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
+	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
 	"go.uber.org/ratelimit"
 )
 
