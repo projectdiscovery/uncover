@@ -123,14 +123,19 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 	if err != nil {
 		return err
 	}
-	outputWriter.AddWriters(os.Stdout)
+
+	writerName := "stdout"
+	outputWriter.AddWriters(NamedWriter{os.Stdout, "stdout"})
 	if r.options.OutputFile != "" {
 		outputFile, err := os.Create(r.options.OutputFile)
 		if err != nil {
 			return err
 		}
 		defer outputFile.Close()
-		outputWriter.AddWriters(outputFile)
+		outputWriter.AddWriters(NamedWriter{outputFile, "file"})
+	}
+	if r.options.Verbose {
+		writerName = "file"
 	}
 
 	// enumerate
@@ -170,14 +175,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
 					case r.options.JSON:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
-						if !r.options.Verbose {
-							outputWriter.WriteJsonData(result)
-						}
+						outputWriter.WriteJsonData(result, writerName)
 					case r.options.Raw:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
-						if !r.options.Verbose {
-							outputWriter.WriteString(result.RawData())
-						}
+						outputWriter.WriteString(result.RawData(), writerName)
 					default:
 						port := fmt.Sprint(result.Port)
 						replacer := strings.NewReplacer(
@@ -187,15 +188,13 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						)
 						outData := replacer.Replace(r.options.OutputFields)
 						searchFor := []string{result.IP, port}
-						if result.Host != "" {
+						if result.Host != "" || r.options.OutputFile != "" {
 							searchFor = append(searchFor, result.Host)
 						}
 						// send to output if any of the field got replaced
 						if stringsutil.ContainsAny(outData, searchFor...) {
 							gologger.Verbose().Label(agent.Name()).Msgf("%s\n", outData)
-							if !r.options.Verbose {
-								outputWriter.WriteString(outData)
-							}
+							outputWriter.WriteString(outData, writerName)
 						}
 					}
 
