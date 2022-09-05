@@ -41,6 +41,7 @@
   - **[FOFA](https://fofa.info)**
   - **[Hunter](https://hunter.qianxin.com)**
   - **[Quake](https://quake.360.net/quake/#/index)**
+  - **[Zoomeye](https://www.zoomeye.org)**
 - Multiple API key input support
 - Automatic API key randomization
 - **stdin** / **stdout** support for input
