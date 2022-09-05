@@ -221,7 +221,7 @@ uncover -q dorks.txt
 **uncover** supports multiple search engine, as default **shodan** is used, `-e` flag can be used to run same query against any or all search engines.
 
 ```console
-echo jira | uncover -e shodan,censys,fofa,quake,hunter
+echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
@@ -253,7 +253,7 @@ echo jira | uncover -e shodan,censys,fofa,quake,hunter
 
 
 ```console
-uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira'
+uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira' -zoomeye 'app:"Atlassian JIRA"'
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/

@@ -126,7 +126,7 @@ func ParseOptions() *Options {
 		gologger.Warning().Msgf("couldn't parse env vars: %s\n", err)
 	}
 
-	if len(options.Engine) == 0 {
+	if len(options.Engine) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 && len(options.Hunter) == 0 && len(options.ZoomEye) == 0 {
 		options.Engine = append(options.Engine, "shodan")
 		options.Engine = append(options.Engine, "shodan-idb")
 	}
@@ -215,7 +215,7 @@ func (options *Options) validateOptions() error {
 	}
 
 	// Validate threads and options
-	if len(options.Engine) == 0 {
+	if len(options.Engine) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 && len(options.Hunter) == 0 && len(options.ZoomEye) == 0 {
 		return errors.New("no engine specified")
 	}
 
