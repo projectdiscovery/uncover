@@ -92,6 +92,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		r.options.Engine = append(r.options.Engine, "hunter")
 		query = append(query, r.options.Hunter...)
 	}
+	if len(r.options.ZoomEye) > 0 {
+		r.options.Engine = append(r.options.Engine, "zoomeye")
+		query = append(query, r.options.ZoomEye...)
+	}
 
 	// declare clients
 	for _, engine := range r.options.Engine {
