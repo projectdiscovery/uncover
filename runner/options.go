@@ -47,6 +47,7 @@ type Options struct {
 	Censys       goflags.StringSlice
 	Quake        goflags.StringSlice
 	Hunter       goflags.StringSlice
+	ZoomEye      goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -58,7 +59,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("search-engine", "Search-Engine",
@@ -68,6 +69,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.Censys, "censys", "cs", nil, "search query for censys (example: -censys 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Quake, "quake", "qk", nil, "search query for quake (example: -quake 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Hunter, "hunter", "ht", nil, "search query for hunter (example: -hunter 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.ZoomEye, "zoomeye", "ze", nil, "search query for zoomeye (example: -zoomeye 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -124,7 +126,7 @@ func ParseOptions() *Options {
 		gologger.Warning().Msgf("couldn't parse env vars: %s\n", err)
 	}
 
-	if len(options.Engine) == 0 {
+	if len(options.Engine) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 && len(options.Hunter) == 0 && len(options.ZoomEye) == 0 {
 		options.Engine = append(options.Engine, "shodan")
 		options.Engine = append(options.Engine, "shodan-idb")
 	}
@@ -196,6 +198,9 @@ func (options *Options) loadProvidersFromEnv() error {
 	if key, exists := os.LookupEnv("QUAKE_TOKEN"); exists {
 		options.Provider.Quake = append(options.Provider.Quake, key)
 	}
+	if key, exists := os.LookupEnv("ZOOMEYE_API_KEY"); exists {
+		options.Provider.ZoomEye = append(options.Provider.ZoomEye, key)
+	}
 	return nil
 }
 
@@ -203,7 +208,7 @@ func (options *Options) loadProvidersFromEnv() error {
 func (options *Options) validateOptions() error {
 	// Check if domain, list of domains, or stdin info was provided.
 	// If none was provided, then return.
-	if len(options.Query) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 && len(options.Hunter) == 0 {
+	if len(options.Query) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 && len(options.Hunter) == 0 && len(options.ZoomEye) == 0 {
 		return errors.New("no query provided")
 	}
 
@@ -213,7 +218,7 @@ func (options *Options) validateOptions() error {
 	}
 
 	// Validate threads and options
-	if len(options.Engine) == 0 {
+	if len(options.Engine) == 0 && len(options.Shodan) == 0 && len(options.Censys) == 0 && len(options.Quake) == 0 && len(options.Fofa) == 0 && len(options.ShodanIdb) == 0 && len(options.Hunter) == 0 && len(options.ZoomEye) == 0 {
 		return errors.New("no engine specified")
 	}
 

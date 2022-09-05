@@ -20,6 +20,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
+	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
 	"go.uber.org/ratelimit"
 )
 
@@ -47,7 +48,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return errors.New("no keys provided")
 	}
 
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter ratelimit.Limiter
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter ratelimit.Limiter
 	if r.options.Delay > 0 {
 		censysRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		fofaRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
@@ -55,6 +56,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		shodanIdbRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		quakeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		hunterRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
+		zoomeyeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 	} else {
 		censysRateLimiter = ratelimit.NewUnlimited()
 		fofaRateLimiter = ratelimit.NewUnlimited()
@@ -62,6 +64,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		shodanIdbRateLimiter = ratelimit.NewUnlimited()
 		quakeRatelimiter = ratelimit.NewUnlimited()
 		hunterRatelimiter = ratelimit.NewUnlimited()
+		zoomeyeRatelimiter = ratelimit.NewUnlimited()
 	}
 
 	var agents []uncover.Agent
@@ -89,6 +92,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		r.options.Engine = append(r.options.Engine, "hunter")
 		query = append(query, r.options.Hunter...)
 	}
+	if len(r.options.ZoomEye) > 0 {
+		r.options.Engine = append(r.options.Engine, "zoomeye")
+		query = append(query, r.options.ZoomEye...)
+	}
 
 	// declare clients
 	for _, engine := range r.options.Engine {
@@ -109,6 +116,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			agent, err = quake.NewWithOptions(&uncover.AgentOptions{RateLimiter: quakeRatelimiter})
 		case "hunter":
 			agent, err = hunter.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterRatelimiter})
+		case "zoomeye":
+			agent, err = zoomeye.NewWithOptions(&uncover.AgentOptions{RateLimiter: zoomeyeRatelimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
