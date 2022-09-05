@@ -47,7 +47,7 @@ func (o *OutputWriter) WriteAll(data []byte) {
 
 // Write writes the data taken as input using only
 // the writer(s) with that name.
-func (o *OutputWriter) Write(data []byte, name string) {
+func (o *OutputWriter) Write(name string, data []byte) {
 	o.Lock()
 	defer o.Unlock()
 
@@ -72,12 +72,12 @@ func (o *OutputWriter) findDuplicate(data string) bool {
 // WriteString writes the string taken as input using only
 // the writer(s) with that name.
 // If name is empty it writes using all the writers.
-func (o *OutputWriter) WriteString(data string, name string) {
+func (o *OutputWriter) WriteString(name string, data string) {
 	if o.findDuplicate(data) {
 		return
 	}
 	if name != "" {
-		o.Write([]byte(data), name)
+		o.Write(name, []byte(data))
 		return
 	}
 	o.WriteAll([]byte(data))
@@ -86,12 +86,12 @@ func (o *OutputWriter) WriteString(data string, name string) {
 // WriteJsonData writes the result taken as input in JSON format
 // using only the writer(s) with that name.
 // If name is empty it writes using all the writers.
-func (o *OutputWriter) WriteJsonData(data uncover.Result, name string) {
+func (o *OutputWriter) WriteJsonData(name string, data uncover.Result) {
 	if o.findDuplicate(fmt.Sprintf("%s:%d", data.IP, data.Port)) {
 		return
 	}
 	if name != "" {
-		o.Write([]byte(data.JSON()), name)
+		o.Write(name, []byte(data.JSON()))
 		return
 	}
 	o.WriteAll([]byte(data.JSON()))

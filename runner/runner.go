@@ -118,24 +118,29 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		agents = append(agents, agent)
 	}
 
+	const (
+		stdoutWriterName = "stdout"
+		fileWriterName   = "file"
+	)
+
 	// open the output file - always overwrite
 	outputWriter, err := NewOutputWriter()
 	if err != nil {
 		return err
 	}
 
-	writerName := "stdout"
-	outputWriter.AddWriters(NamedWriter{os.Stdout, "stdout"})
+	writerName := stdoutWriterName
+	outputWriter.AddWriters(NamedWriter{os.Stdout, stdoutWriterName})
 	if r.options.OutputFile != "" {
 		outputFile, err := os.Create(r.options.OutputFile)
 		if err != nil {
 			return err
 		}
 		defer outputFile.Close()
-		outputWriter.AddWriters(NamedWriter{outputFile, "file"})
+		outputWriter.AddWriters(NamedWriter{outputFile, fileWriterName})
 	}
 	if r.options.Verbose {
-		writerName = "file"
+		writerName = fileWriterName
 	}
 
 	// enumerate
@@ -175,10 +180,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
 					case r.options.JSON:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
-						outputWriter.WriteJsonData(result, writerName)
+						outputWriter.WriteJsonData(writerName, result)
 					case r.options.Raw:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
-						outputWriter.WriteString(result.RawData(), writerName)
+						outputWriter.WriteString(writerName, result.RawData())
 					default:
 						port := fmt.Sprint(result.Port)
 						replacer := strings.NewReplacer(
@@ -194,7 +199,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						// send to output if any of the field got replaced
 						if stringsutil.ContainsAny(outData, searchFor...) {
 							gologger.Verbose().Label(agent.Name()).Msgf("%s\n", outData)
-							outputWriter.WriteString(outData, writerName)
+							outputWriter.WriteString(writerName, outData)
 						}
 					}
 
