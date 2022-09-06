@@ -127,19 +127,29 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		agents = append(agents, agent)
 	}
 
+	const (
+		stdoutWriterName = "stdout"
+		fileWriterName   = "file"
+	)
+
 	// open the output file - always overwrite
 	outputWriter, err := NewOutputWriter()
 	if err != nil {
 		return err
 	}
-	outputWriter.AddWriters(os.Stdout)
+
+	writerName := stdoutWriterName
+	outputWriter.AddWriters(NamedWriter{os.Stdout, stdoutWriterName})
 	if r.options.OutputFile != "" {
 		outputFile, err := os.Create(r.options.OutputFile)
 		if err != nil {
 			return err
 		}
 		defer outputFile.Close()
-		outputWriter.AddWriters(outputFile)
+		outputWriter.AddWriters(NamedWriter{outputFile, fileWriterName})
+	}
+	if r.options.Verbose {
+		writerName = fileWriterName
 	}
 
 	// enumerate
@@ -179,10 +189,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
 					case r.options.JSON:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
-						outputWriter.WriteJsonData(result)
+						outputWriter.WriteJsonData(writerName, result)
 					case r.options.Raw:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
-						outputWriter.WriteString(result.RawData())
+						outputWriter.WriteString(writerName, result.RawData())
 					default:
 						port := fmt.Sprint(result.Port)
 						replacer := strings.NewReplacer(
@@ -192,13 +202,13 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						)
 						outData := replacer.Replace(r.options.OutputFields)
 						searchFor := []string{result.IP, port}
-						if result.Host != "" {
+						if result.Host != "" || r.options.OutputFile != "" {
 							searchFor = append(searchFor, result.Host)
 						}
 						// send to output if any of the field got replaced
 						if stringsutil.ContainsAny(outData, searchFor...) {
 							gologger.Verbose().Label(agent.Name()).Msgf("%s\n", outData)
-							outputWriter.WriteString(outData)
+							outputWriter.WriteString(writerName, outData)
 						}
 					}
 
