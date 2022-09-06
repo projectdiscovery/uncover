@@ -8,11 +8,12 @@ import (
 )
 
 type Provider struct {
-	Shodan []string `yaml:"shodan"`
-	Censys []string `yaml:"censys"`
-	Fofa   []string `yaml:"fofa"`
-	Quake  []string `yaml:"quake"`
-	Hunter []string `yaml:"hunter"`
+	Shodan  []string `yaml:"shodan"`
+	Censys  []string `yaml:"censys"`
+	Fofa    []string `yaml:"fofa"`
+	Quake   []string `yaml:"quake"`
+	Hunter  []string `yaml:"hunter"`
+	ZoomEye []string `yaml:"zoomeye"`
 }
 
 func (provider *Provider) GetKeys() uncover.Keys {
@@ -48,9 +49,13 @@ func (provider *Provider) GetKeys() uncover.Keys {
 		keys.HunterToken = provider.Hunter[rand.Intn(len(provider.Hunter))]
 	}
 
+	if len(provider.ZoomEye) > 0 {
+		keys.ZoomEyeToken = provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
+	}
+
 	return keys
 }
 
 func (provider *Provider) HasKeys() bool {
-	return len(provider.Censys) > 0 || len(provider.Shodan) > 0 || len(provider.Fofa) > 0 || len(provider.Quake) > 0 || len(provider.Hunter) > 0
+	return len(provider.Censys) > 0 || len(provider.Shodan) > 0 || len(provider.Fofa) > 0 || len(provider.Quake) > 0 || len(provider.Hunter) > 0 || len(provider.ZoomEye) > 0
 }

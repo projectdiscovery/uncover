@@ -20,6 +20,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
+	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
 	"go.uber.org/ratelimit"
 )
 
@@ -47,7 +48,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return errors.New("no keys provided")
 	}
 
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter ratelimit.Limiter
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter ratelimit.Limiter
 	if r.options.Delay > 0 {
 		censysRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		fofaRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
@@ -55,6 +56,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		shodanIdbRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		quakeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 		hunterRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
+		zoomeyeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
 	} else {
 		censysRateLimiter = ratelimit.NewUnlimited()
 		fofaRateLimiter = ratelimit.NewUnlimited()
@@ -62,6 +64,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		shodanIdbRateLimiter = ratelimit.NewUnlimited()
 		quakeRatelimiter = ratelimit.NewUnlimited()
 		hunterRatelimiter = ratelimit.NewUnlimited()
+		zoomeyeRatelimiter = ratelimit.NewUnlimited()
 	}
 
 	var agents []uncover.Agent
@@ -89,6 +92,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		r.options.Engine = append(r.options.Engine, "hunter")
 		query = append(query, r.options.Hunter...)
 	}
+	if len(r.options.ZoomEye) > 0 {
+		r.options.Engine = append(r.options.Engine, "zoomeye")
+		query = append(query, r.options.ZoomEye...)
+	}
 
 	// declare clients
 	for _, engine := range r.options.Engine {
@@ -109,6 +116,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			agent, err = quake.NewWithOptions(&uncover.AgentOptions{RateLimiter: quakeRatelimiter})
 		case "hunter":
 			agent, err = hunter.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterRatelimiter})
+		case "zoomeye":
+			agent, err = zoomeye.NewWithOptions(&uncover.AgentOptions{RateLimiter: zoomeyeRatelimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
@@ -118,19 +127,29 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		agents = append(agents, agent)
 	}
 
+	const (
+		stdoutWriterName = "stdout"
+		fileWriterName   = "file"
+	)
+
 	// open the output file - always overwrite
 	outputWriter, err := NewOutputWriter()
 	if err != nil {
 		return err
 	}
-	outputWriter.AddWriters(os.Stdout)
+
+	writerName := stdoutWriterName
+	outputWriter.AddWriters(NamedWriter{os.Stdout, stdoutWriterName})
 	if r.options.OutputFile != "" {
 		outputFile, err := os.Create(r.options.OutputFile)
 		if err != nil {
 			return err
 		}
 		defer outputFile.Close()
-		outputWriter.AddWriters(outputFile)
+		outputWriter.AddWriters(NamedWriter{outputFile, fileWriterName})
+	}
+	if r.options.Verbose {
+		writerName = fileWriterName
 	}
 
 	// enumerate
@@ -170,10 +189,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
 					case r.options.JSON:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
-						outputWriter.WriteJsonData(result)
+						outputWriter.WriteJsonData(writerName, result)
 					case r.options.Raw:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
-						outputWriter.WriteString(result.RawData())
+						outputWriter.WriteString(writerName, result.RawData())
 					default:
 						port := fmt.Sprint(result.Port)
 						replacer := strings.NewReplacer(
@@ -183,13 +202,13 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						)
 						outData := replacer.Replace(r.options.OutputFields)
 						searchFor := []string{result.IP, port}
-						if result.Host != "" {
+						if result.Host != "" || r.options.OutputFile != "" {
 							searchFor = append(searchFor, result.Host)
 						}
 						// send to output if any of the field got replaced
 						if stringsutil.ContainsAny(outData, searchFor...) {
 							gologger.Verbose().Label(agent.Name()).Msgf("%s\n", outData)
-							outputWriter.WriteString(outData)
+							outputWriter.WriteString(writerName, outData)
 						}
 					}
 
