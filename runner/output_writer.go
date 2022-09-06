@@ -11,9 +11,14 @@ import (
 )
 
 type OutputWriter struct {
-	cache   *lru.Cache
-	writers []io.Writer
+	cache        *lru.Cache
+	namedWriters []NamedWriter
 	sync.RWMutex
+}
+
+type NamedWriter struct {
+	Writer io.Writer
+	Name   string
 }
 
 func NewOutputWriter() (*OutputWriter, error) {
@@ -24,19 +29,36 @@ func NewOutputWriter() (*OutputWriter, error) {
 	return &OutputWriter{cache: lastPrintedCache}, nil
 }
 
-func (o *OutputWriter) AddWriters(writers ...io.Writer) {
-	o.writers = append(o.writers, writers...)
+func (o *OutputWriter) AddWriters(named ...NamedWriter) {
+	o.namedWriters = append(o.namedWriters, named...)
 }
 
-func (o *OutputWriter) Write(data []byte) {
+// WriteAll writes the data taken as input using
+// all the writers.
+func (o *OutputWriter) WriteAll(data []byte) {
 	o.Lock()
 	defer o.Unlock()
 
-	for _, writer := range o.writers {
-		_, _ = writer.Write(data)
-		_, _ = writer.Write([]byte("\n"))
+	for _, w := range o.namedWriters {
+		_, _ = w.Writer.Write(data)
+		_, _ = w.Writer.Write([]byte("\n"))
 	}
 }
+
+// Write writes the data taken as input using only
+// the writer(s) with that name.
+func (o *OutputWriter) Write(name string, data []byte) {
+	o.Lock()
+	defer o.Unlock()
+
+	for _, w := range o.namedWriters {
+		if w.Name == name {
+			_, _ = w.Writer.Write(data)
+			_, _ = w.Writer.Write([]byte("\n"))
+		}
+	}
+}
+
 func (o *OutputWriter) findDuplicate(data string) bool {
 	// check if we've already printed this data
 	itemHash := sha1.Sum([]byte(data))
@@ -47,15 +69,30 @@ func (o *OutputWriter) findDuplicate(data string) bool {
 	return false
 }
 
-func (o *OutputWriter) WriteString(data string) {
+// WriteString writes the string taken as input using only
+// the writer(s) with that name.
+// If name is empty it writes using all the writers.
+func (o *OutputWriter) WriteString(name string, data string) {
 	if o.findDuplicate(data) {
 		return
 	}
-	o.Write([]byte(data))
+	if name != "" {
+		o.Write(name, []byte(data))
+		return
+	}
+	o.WriteAll([]byte(data))
 }
-func (o *OutputWriter) WriteJsonData(data uncover.Result) {
+
+// WriteJsonData writes the result taken as input in JSON format
+// using only the writer(s) with that name.
+// If name is empty it writes using all the writers.
+func (o *OutputWriter) WriteJsonData(name string, data uncover.Result) {
 	if o.findDuplicate(fmt.Sprintf("%s:%d", data.IP, data.Port)) {
 		return
 	}
-	o.Write([]byte(data.JSON()))
+	if name != "" {
+		o.Write(name, []byte(data.JSON()))
+		return
+	}
+	o.WriteAll([]byte(data.JSON()))
 }
