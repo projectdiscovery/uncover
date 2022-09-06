@@ -139,6 +139,7 @@ export CENSYS_API_ID=xxx
 export CENSYS_API_SECRET=xxx
 export FOFA_EMAIL=xxx
 export FOFA_KEY=xxx
+export QUAKE_TOKEN=xxx
 export HUNTER_API_KEY=xxx
 export ZOOMEYE_API_KEY=xxx
 ```
