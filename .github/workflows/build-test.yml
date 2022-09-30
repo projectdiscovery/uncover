@@ -32,6 +32,7 @@ jobs:
         env:
           GH_ACTION: true
           CENSYS_API_KEY: ${{secrets.CENSYS_API_SECRET}}
+          FOFA_API_KEY: ${{secrets.FOFA_KEY}}
         run: bash run.sh
         working-directory: integration-tests/
        
