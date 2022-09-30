@@ -56,7 +56,21 @@ func (h zoomeyeTestcases) Execute() error {
 type fofaTestcases struct{}
 
 func (h fofaTestcases) Execute() error {
-	results, err := testutils.RunUncoverAndGetResults(debug, "-fofa", "'app=Grafana'")
+	token := os.Getenv("FOFA_API_KEY")
+	if token == "" {
+		return errors.New("missing fofa api key")
+	}
+	fofaToken := fmt.Sprintf(`fofa: [%s]`, token)
+	file, err := os.CreateTemp("", "provider-config.yaml")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(file.Name())
+	_, err = file.WriteString(fofaToken)
+	if err != nil {
+		return err
+	}
+	results, err := testutils.RunUncoverAndGetResults(debug, "-fofa", "'app=Grafana'", "-pc", file.Name())
 	if err != nil {
 		return err
 	}
