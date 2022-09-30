@@ -16,7 +16,7 @@ func (h censysTestcases) Execute() error {
 		return errors.New("missing censys api key")
 	}
 	censysToken := fmt.Sprintf(`censys: [%s]`, token)
-	file, err := os.CreateTemp("", "provider.yaml")
+	file, err := os.CreateTemp("", "provider-config.yaml")
 	if err != nil {
 		return err
 	}
