@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"os"
 
 	"github.com/projectdiscovery/uncover/testutils"
 )
@@ -9,21 +11,21 @@ import (
 type censysTestcases struct{}
 
 func (h censysTestcases) Execute() error {
-	// token := os.Getenv("DNSREPO_API_KEY")
-	// if token == "" {
-	// 	return errors.New("missing dns repo api key")
-	// }
-	// dnsToken := fmt.Sprintf(`dnsrepo: [%s]`, token)
-	// file, err := os.CreateTemp("", "provider.yaml")
-	// if err != nil {
-	// 	return err
-	// }
-	// defer os.RemoveAll(file.Name())
-	// _, err = file.WriteString(dnsToken)
-	// if err != nil {
-	// 	return err
-	// }
-	results, err := testutils.RunUncoverAndGetResults(debug, "-censys", "'services.software.vendor=Grafana'")
+	token := os.Getenv("CENSYS_API_SECRET")
+	if token == "" {
+		return errors.New("missing censys api key")
+	}
+	censysToken := fmt.Sprintf(`censys: [%s]`, token)
+	file, err := os.CreateTemp("", "provider.yaml")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(file.Name())
+	_, err = file.WriteString(censysToken)
+	if err != nil {
+		return err
+	}
+	results, err := testutils.RunUncoverAndGetResults(debug, "-censys", "'services.software.vendor=Grafana'", "-pc", file.Name())
 	if err != nil {
 		return err
 	}
