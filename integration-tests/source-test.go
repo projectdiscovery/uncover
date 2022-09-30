@@ -11,7 +11,7 @@ import (
 type censysTestcases struct{}
 
 func (h censysTestcases) Execute() error {
-	token := os.Getenv("CENSYS_API_SECRET")
+	token := os.Getenv("CENSYS_API_KEY")
 	if token == "" {
 		return errors.New("missing censys api key")
 	}

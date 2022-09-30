@@ -31,7 +31,7 @@ jobs:
       - name: Integration Tests
         env:
           GH_ACTION: true
-          CENSYS_API_SECRET: ${{secrets.CENSYS_API_SECRET}}
+          CENSYS_API_KEY: ${{secrets.CENSYS_API_SECRET}}
         run: bash run.sh
         working-directory: integration-tests/
        
