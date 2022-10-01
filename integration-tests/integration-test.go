@@ -19,13 +19,12 @@ var (
 	failed  = aurora.Red("[✘]").String()
 
 	sourceTests = map[string]testutils.TestCase{
-		"censys": censysTestcases{},
+		"censys":  censysTestcases{},
 		"shodan":  shodanTestcases{},
 		"zoomeye": zoomeyeTestcases{},
-		"fofa": fofaTestcases{},
-		"hunter":  hunterTestcases{},
-		"quake":   quakeTestcases{},
-
+		"fofa":    fofaTestcases{},
+		//"hunter":  hunterTestcases{},
+		"quake": quakeTestcases{},
 	}
 )
 
