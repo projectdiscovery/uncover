@@ -3,11 +3,16 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/projectdiscovery/folderutil"
 	"github.com/projectdiscovery/uncover/testutils"
+)
+
+var (
+	ConfigFile = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/provider-config.yaml")
 )
 
 type censysTestcases struct{}
@@ -18,16 +23,9 @@ func (h censysTestcases) Execute() error {
 		return errors.New("missing censys api key")
 	}
 	censysToken := fmt.Sprintf(`censys: [%s]`, token)
-	file, err := os.Create(filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/provider-config.yaml"))
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(file.Name())
-	_, err = file.WriteString(censysToken)
-	if err != nil {
-		return err
-	}
-	file.Close()
+	fmt.Println(censysToken)
+	ioutil.WriteFile(ConfigFile, []byte(censysToken), 0644)
+	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-censys", "'services.software.vendor=Grafana'")
 	if err != nil {
 		return err
@@ -38,6 +36,13 @@ func (h censysTestcases) Execute() error {
 type shodanTestcases struct{}
 
 func (h shodanTestcases) Execute() error {
+	token := os.Getenv("SHODAN_API_KEY")
+	if token == "" {
+		return errors.New("missing shodan api key")
+	}
+	shodanToken := fmt.Sprintf(`shodan: [%s]`, token)
+	ioutil.WriteFile(ConfigFile, []byte(shodanToken), 0644)
+	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-shodan", "'title:\"Grafana\"'")
 	if err != nil {
 		return err
@@ -64,16 +69,8 @@ func (h fofaTestcases) Execute() error {
 		return errors.New("missing fofa api key")
 	}
 	fofaToken := fmt.Sprintf(`fofa: [%s]`, token)
-	file, err := os.Create(filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/provider-config.yaml"))
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(file.Name())
-	_, err = file.WriteString(fofaToken)
-	if err != nil {
-		return err
-	}
-	file.Close()
+	ioutil.WriteFile(ConfigFile, []byte(fofaToken), 0644)
+	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-fofa", "'app=Grafana'")
 	if err != nil {
 		return err
