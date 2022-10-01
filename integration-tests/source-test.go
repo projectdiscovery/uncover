@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
+	"github.com/projectdiscovery/folderutil"
 	"github.com/projectdiscovery/uncover/testutils"
 )
 
@@ -16,7 +18,7 @@ func (h censysTestcases) Execute() error {
 		return errors.New("missing censys api key")
 	}
 	censysToken := fmt.Sprintf(`censys: [%s]`, token)
-	file, err := os.CreateTemp("", "provider-config.yaml")
+	file, err := os.Create(filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/provider-config.yaml"))
 	if err != nil {
 		return err
 	}
@@ -25,7 +27,8 @@ func (h censysTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	results, err := testutils.RunUncoverAndGetResults(debug, "-censys", "'services.software.vendor=Grafana'", "-pc", file.Name())
+	file.Close()
+	results, err := testutils.RunUncoverAndGetResults(debug, "-censys", "'services.software.vendor=Grafana'")
 	if err != nil {
 		return err
 	}
@@ -61,7 +64,7 @@ func (h fofaTestcases) Execute() error {
 		return errors.New("missing fofa api key")
 	}
 	fofaToken := fmt.Sprintf(`fofa: [%s]`, token)
-	file, err := os.CreateTemp("", "provider-config.yaml")
+	file, err := os.Create(filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/provider-config.yaml"))
 	if err != nil {
 		return err
 	}
@@ -70,7 +73,8 @@ func (h fofaTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	results, err := testutils.RunUncoverAndGetResults(debug, "-fofa", "'app=Grafana'", "-pc", file.Name())
+	file.Close()
+	results, err := testutils.RunUncoverAndGetResults(debug, "-fofa", "'app=Grafana'")
 	if err != nil {
 		return err
 	}
