@@ -59,7 +59,7 @@ func (h zoomeyeTestcases) Execute() error {
 	zoomeyeToken := fmt.Sprintf(`zoomeye: [%s]`, token)
 	_ =ioutil.WriteFile(ConfigFile, []byte(zoomeyeToken), 0644)
 	defer os.RemoveAll(ConfigFile)
-	results, err := testutils.RunUncoverAndGetResults(debug, "-zoomeye", "'title:\"gogs\"'")
+	results, err := testutils.RunUncoverAndGetResults(debug, "-zoomeye", "'app:\"Atlassian JIRA\"'")
 	if err != nil {
 		return err
 	}
