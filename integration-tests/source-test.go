@@ -23,14 +23,13 @@ func (h censysTestcases) Execute() error {
 		return errors.New("missing censys api key")
 	}
 	censysToken := fmt.Sprintf(`censys: [%s]`, token)
-	fmt.Println(censysToken)
 	_ =ioutil.WriteFile(ConfigFile, []byte(censysToken), 0644)
 	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-censys", "'services.software.vendor=Grafana'")
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterThanCount(results, 0)
+	return expectResultsGreaterOrEqualToCount(results, 0)
 }
 
 type shodanTestcases struct{}
@@ -47,7 +46,7 @@ func (h shodanTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterThanCount(results, 0)
+	return expectResultsGreaterOrEqualToCount(results, 0)
 }
 
 type zoomeyeTestcases struct{}
@@ -55,7 +54,7 @@ type zoomeyeTestcases struct{}
 func (h zoomeyeTestcases) Execute() error {
 	token := os.Getenv("ZOOMEYE_API_KEY")
 	if token == "" {
-		return errors.New("missing shodan api key")
+		return errors.New("missing zoomeye api key")
 	}
 	zoomeyeToken := fmt.Sprintf(`zoomeye: [%s]`, token)
 	_ =ioutil.WriteFile(ConfigFile, []byte(zoomeyeToken), 0644)
@@ -64,8 +63,7 @@ func (h zoomeyeTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(results)
-	return expectResultsGreaterThanCount(results, 0)
+	return expectResultsGreaterOrEqualToCount(results, 0)
 }
 
 type fofaTestcases struct{}
@@ -82,7 +80,7 @@ func (h fofaTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterThanCount(results, 0)
+	return expectResultsGreaterOrEqualToCount(results, 0)
 }
 
 // type hunterTestcases struct{}
@@ -92,7 +90,7 @@ func (h fofaTestcases) Execute() error {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	return expectResultsGreaterThanCount(results, 0)
+// 	return expectResultsGreaterOrEqualToCount(results, 0)
 // }
 
 type quakeTestcases struct{}
@@ -109,5 +107,5 @@ func (h quakeTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterThanCount(results, 0)
+	return expectResultsGreaterOrEqualToCount(results, 0)
 }
