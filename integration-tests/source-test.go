@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -23,7 +22,7 @@ func (h censysTestcases) Execute() error {
 		return errors.New("missing censys api key")
 	}
 	censysToken := fmt.Sprintf(`censys: [%s]`, token)
-	_ =ioutil.WriteFile(ConfigFile, []byte(censysToken), 0644)
+	_ = os.WriteFile(ConfigFile, []byte(censysToken), 0644)
 	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-censys", "'services.software.vendor=Grafana'")
 	if err != nil {
@@ -40,7 +39,7 @@ func (h shodanTestcases) Execute() error {
 		return errors.New("missing shodan api key")
 	}
 	shodanToken := fmt.Sprintf(`shodan: [%s]`, token)
-	_ =ioutil.WriteFile(ConfigFile, []byte(shodanToken), 0644)
+	_ = os.WriteFile(ConfigFile, []byte(shodanToken), 0644)
 	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-shodan", "'title:\"Grafana\"'")
 	if err != nil {
@@ -57,7 +56,7 @@ func (h zoomeyeTestcases) Execute() error {
 		return errors.New("missing zoomeye api key")
 	}
 	zoomeyeToken := fmt.Sprintf(`zoomeye: [%s]`, token)
-	_ =ioutil.WriteFile(ConfigFile, []byte(zoomeyeToken), 0644)
+	_ = os.WriteFile(ConfigFile, []byte(zoomeyeToken), 0644)
 	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-zoomeye", "'app:\"Atlassian JIRA\"'")
 	if err != nil {
@@ -74,7 +73,7 @@ func (h fofaTestcases) Execute() error {
 		return errors.New("missing fofa api key")
 	}
 	fofaToken := fmt.Sprintf(`fofa: [%s]`, token)
-	_ =ioutil.WriteFile(ConfigFile, []byte(fofaToken), 0644)
+	_ = os.WriteFile(ConfigFile, []byte(fofaToken), 0644)
 	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-fofa", "'app=Grafana'")
 	if err != nil {
@@ -101,7 +100,7 @@ func (h quakeTestcases) Execute() error {
 		return errors.New("missing quake api key")
 	}
 	quakeToken := fmt.Sprintf(`quake: [%s]`, token)
-	_ =ioutil.WriteFile(ConfigFile, []byte(quakeToken), 0644)
+	_ = os.WriteFile(ConfigFile, []byte(quakeToken), 0644)
 	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-quake", "'Grafana'")
 	if err != nil {
