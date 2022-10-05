@@ -27,17 +27,6 @@ jobs:
       - name: Test
         run: go test ./...
         working-directory: .
-
-      - name: Integration Tests
-        env:
-          GH_ACTION: true
-          CENSYS_API_KEY: ${{secrets.CENSYS_API_SECRET}}
-          FOFA_API_KEY: ${{secrets.FOFA_KEY}}
-          SHODAN_API_KEY: ${{secrets.SHODAN_API_KEY}}
-          ZOOMEYE_API_KEY: ${{secrets.ZOOMEYE_API_KEY}}
-          QUAKE_API_KEY: ${{secrets.QUAKE_TOKEN}}
-        run: bash run.sh
-        working-directory: integration-tests/
        
       - name: Race Condition Tests
         run: go build -race .
