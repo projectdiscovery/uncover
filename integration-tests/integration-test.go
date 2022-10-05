@@ -66,7 +66,7 @@ func execute(source string, testCase testutils.TestCase) (error, string) {
 	return nil, ""
 }
 
-func expectResultsGreaterOrEqualToCount(results []string, expectedNumber int) error {
+func expectResultsGreaterThanCount(results []string, expectedNumber int) error {
 	if len(results) > expectedNumber {
 		return nil
 	}

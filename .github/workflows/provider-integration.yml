@@ -1,7 +1,7 @@
 name: 🔨 Build Test
 on:
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '00 12 * * 1'
   
 jobs:
   build:

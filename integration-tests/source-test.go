@@ -28,7 +28,7 @@ func (h censysTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterOrEqualToCount(results, 0)
+	return expectResultsGreaterThanCount(results, 0)
 }
 
 type shodanTestcases struct{}
@@ -45,7 +45,7 @@ func (h shodanTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterOrEqualToCount(results, 0)
+	return expectResultsGreaterThanCount(results, 0)
 }
 
 type zoomeyeTestcases struct{}
@@ -62,7 +62,7 @@ func (h zoomeyeTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterOrEqualToCount(results, 0)
+	return expectResultsGreaterThanCount(results, 0)
 }
 
 type fofaTestcases struct{}
@@ -79,7 +79,7 @@ func (h fofaTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterOrEqualToCount(results, 0)
+	return expectResultsGreaterThanCount(results, 0)
 }
 
 // type hunterTestcases struct{}
@@ -106,5 +106,5 @@ func (h quakeTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterOrEqualToCount(results, 0)
+	return expectResultsGreaterThanCount(results, 0)
 }
