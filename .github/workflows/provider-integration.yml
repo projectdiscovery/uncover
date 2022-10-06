@@ -2,7 +2,8 @@ name: 🔨 Build Test
 on:
   schedule:
     - cron: '00 12 * * 1'
-  
+  workflow_dispatch:
+
 jobs:
   build:
     name: Test Builds
