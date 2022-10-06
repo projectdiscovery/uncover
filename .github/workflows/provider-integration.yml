@@ -1,4 +1,4 @@
-name: 🔨 Build Test
+name: 🔨 Provider Test
 on:
   schedule:
     - cron: '00 12 * * 1'
