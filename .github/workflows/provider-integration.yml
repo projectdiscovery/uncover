@@ -1,0 +1,30 @@
+name: 🔨 Build Test
+on:
+  schedule:
+    - cron: '00 12 * * 1'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Test Builds
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.17
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Integration Tests
+        env:
+          GH_ACTION: true
+          CENSYS_API_KEY: ${{secrets.CENSYS_API_SECRET}}
+          FOFA_API_KEY: ${{secrets.FOFA_KEY}}
+          SHODAN_API_KEY: ${{secrets.SHODAN_API_KEY}}
+          ZOOMEYE_API_KEY: ${{secrets.ZOOMEYE_API_KEY}}
+          QUAKE_API_KEY: ${{secrets.QUAKE_TOKEN}}
+        run: bash run.sh
+        working-directory: integration-tests/
+
+      
