@@ -138,8 +138,13 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return err
 	}
 
-	writerName := stdoutWriterName
-	outputWriter.AddWriters(NamedWriter{os.Stdout, stdoutWriterName})
+	var writerName string
+	// don't write to stdout if we're using verbose mode
+	if !r.options.Verbose {
+		writerName = stdoutWriterName
+		outputWriter.AddWriters(NamedWriter{os.Stdout, stdoutWriterName})
+	}
+
 	if r.options.OutputFile != "" {
 		outputFile, err := os.Create(r.options.OutputFile)
 		if err != nil {
@@ -147,11 +152,9 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		}
 		defer outputFile.Close()
 		outputWriter.AddWriters(NamedWriter{outputFile, fileWriterName})
+		//keep it empty to write to file and stdout if configured
+		writerName = ""
 	}
-	if r.options.Verbose {
-		writerName = fileWriterName
-	}
-
 	// enumerate
 	var wg sync.WaitGroup
 
