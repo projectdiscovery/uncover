@@ -127,11 +127,6 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		agents = append(agents, agent)
 	}
 
-	const (
-		stdoutWriterName = "stdout"
-		fileWriterName   = "file"
-	)
-
 	// open the output file - always overwrite
 	outputWriter, err := NewOutputWriter()
 	if err != nil {
