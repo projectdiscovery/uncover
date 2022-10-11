@@ -24,8 +24,8 @@ func NewOutputWriter() (*OutputWriter, error) {
 	return &OutputWriter{cache: lastPrintedCache}, nil
 }
 
-func (o *OutputWriter) AddWriters(named ...io.Writer) {
-	o.writers = append(o.writers, named...)
+func (o *OutputWriter) AddWriters(writers ...io.Writer) {
+	o.writers = append(o.writers, writers...)
 }
 
 // Write writes the data taken as input using only
