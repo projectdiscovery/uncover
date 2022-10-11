@@ -138,11 +138,9 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return err
 	}
 
-	var writerName string
 	// don't write to stdout if we're using verbose mode
 	if !r.options.Verbose {
-		writerName = stdoutWriterName
-		outputWriter.AddWriters(NamedWriter{os.Stdout, stdoutWriterName})
+		outputWriter.AddWriters(os.Stdout)
 	}
 
 	if r.options.OutputFile != "" {
@@ -151,9 +149,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			return err
 		}
 		defer outputFile.Close()
-		outputWriter.AddWriters(NamedWriter{outputFile, fileWriterName})
-		//keep it empty to write to file and stdout if configured
-		writerName = ""
+		outputWriter.AddWriters(outputFile)
 	}
 	// enumerate
 	var wg sync.WaitGroup
@@ -192,10 +188,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
 					case r.options.JSON:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
-						outputWriter.WriteJsonData(writerName, result)
+						outputWriter.WriteJsonData(result)
 					case r.options.Raw:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
-						outputWriter.WriteString(writerName, result.RawData())
+						outputWriter.WriteString(result.RawData())
 					default:
 						port := fmt.Sprint(result.Port)
 						replacer := strings.NewReplacer(
@@ -211,7 +207,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						// send to output if any of the field got replaced
 						if stringsutil.ContainsAny(outData, searchFor...) {
 							gologger.Verbose().Label(agent.Name()).Msgf("%s\n", outData)
-							outputWriter.WriteString(writerName, outData)
+							outputWriter.WriteString(outData)
 						}
 					}
 
