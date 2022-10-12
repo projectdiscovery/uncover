@@ -21,7 +21,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
-	"go.uber.org/ratelimit"
+	"github.com/projectdiscovery/ratelimit"
 )
 
 func init() {
@@ -48,23 +48,23 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return errors.New("no keys provided")
 	}
 
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter ratelimit.Limiter
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter *ratelimit.Limiter
 	if r.options.Delay > 0 {
-		censysRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		fofaRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		shodanRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		shodanIdbRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		quakeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		hunterRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		zoomeyeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
+		censysRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		fofaRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		shodanRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		shodanIdbRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		quakeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		hunterRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		zoomeyeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 	} else {
-		censysRateLimiter = ratelimit.NewUnlimited()
-		fofaRateLimiter = ratelimit.NewUnlimited()
-		shodanRateLimiter = ratelimit.NewUnlimited()
-		shodanIdbRateLimiter = ratelimit.NewUnlimited()
-		quakeRatelimiter = ratelimit.NewUnlimited()
-		hunterRatelimiter = ratelimit.NewUnlimited()
-		zoomeyeRatelimiter = ratelimit.NewUnlimited()
+		censysRateLimiter = ratelimit.NewUnlimited(context.Background())
+		fofaRateLimiter = ratelimit.NewUnlimited(context.Background())
+		shodanRateLimiter = ratelimit.NewUnlimited(context.Background())
+		shodanIdbRateLimiter = ratelimit.NewUnlimited(context.Background())
+		quakeRatelimiter = ratelimit.NewUnlimited(context.Background())
+		hunterRatelimiter = ratelimit.NewUnlimited(context.Background())
+		zoomeyeRatelimiter = ratelimit.NewUnlimited(context.Background())
 	}
 
 	var agents []uncover.Agent
