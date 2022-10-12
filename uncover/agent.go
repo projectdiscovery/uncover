@@ -1,9 +1,9 @@
 package uncover
 
-import "go.uber.org/ratelimit"
+import "github.com/projectdiscovery/ratelimit"
 
 type AgentOptions struct {
-	RateLimiter ratelimit.Limiter
+	RateLimiter *ratelimit.Limiter
 }
 
 type Query struct {
