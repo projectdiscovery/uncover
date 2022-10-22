@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -101,7 +102,10 @@ func (agent *Agent) query(URL string, session *uncover.Session, zoomeyeRequest *
 		}
 		if portinfo, ok := zoomeyeResult["portinfo"]; ok {
 			if port, ok := portinfo.(map[string]interface{}); ok {
-				result.Port = int(port["port"].(float64))
+				result.Port = convertPortFromValue(port["port"].(float64))
+				if result.Port == 0 {
+					continue
+				}
 				result.Host = port["hostname"].(string)
 				raw, _ := json.Marshal(zoomeyeResult)
 				result.Raw = raw
@@ -120,4 +124,16 @@ func (agent *Agent) query(URL string, session *uncover.Session, zoomeyeRequest *
 type ZoomEyeRequest struct {
 	Query string
 	Page  int
+}
+
+func convertPortFromValue(value interface{}) int {
+	switch v := value.(type) {
+	case float64:
+		return int(v)
+	case string:
+		parsed, _ := strconv.Atoi(v)
+		return parsed
+	default:
+		return 0
+	}
 }
