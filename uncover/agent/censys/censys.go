@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	URL        = "https://search.censys.io/api/v2/hosts/search?q=%s&per_page=%d&virtual_hosts=EXCLUDE"
+	URL        = "https://search.censys.io/api/v2/hosts/search?q=%s&per_page=%d&virtual_hosts=INCLUDE"
 	MaxPerPage = 100
 )
 

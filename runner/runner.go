@@ -21,7 +21,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
-	"go.uber.org/ratelimit"
+	"github.com/projectdiscovery/ratelimit"
 )
 
 func init() {
@@ -48,23 +48,23 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return errors.New("no keys provided")
 	}
 
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter ratelimit.Limiter
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter *ratelimit.Limiter
 	if r.options.Delay > 0 {
-		censysRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		fofaRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		shodanRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		shodanIdbRateLimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		quakeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		hunterRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
-		zoomeyeRatelimiter = ratelimit.New(1, ratelimit.Per(r.options.delay))
+		censysRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		fofaRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		shodanRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		shodanIdbRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		quakeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		hunterRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		zoomeyeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 	} else {
-		censysRateLimiter = ratelimit.NewUnlimited()
-		fofaRateLimiter = ratelimit.NewUnlimited()
-		shodanRateLimiter = ratelimit.NewUnlimited()
-		shodanIdbRateLimiter = ratelimit.NewUnlimited()
-		quakeRatelimiter = ratelimit.NewUnlimited()
-		hunterRatelimiter = ratelimit.NewUnlimited()
-		zoomeyeRatelimiter = ratelimit.NewUnlimited()
+		censysRateLimiter = ratelimit.NewUnlimited(context.Background())
+		fofaRateLimiter = ratelimit.NewUnlimited(context.Background())
+		shodanRateLimiter = ratelimit.NewUnlimited(context.Background())
+		shodanIdbRateLimiter = ratelimit.NewUnlimited(context.Background())
+		quakeRatelimiter = ratelimit.NewUnlimited(context.Background())
+		hunterRatelimiter = ratelimit.NewUnlimited(context.Background())
+		zoomeyeRatelimiter = ratelimit.NewUnlimited(context.Background())
 	}
 
 	var agents []uncover.Agent
@@ -127,31 +127,25 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		agents = append(agents, agent)
 	}
 
-	const (
-		stdoutWriterName = "stdout"
-		fileWriterName   = "file"
-	)
-
 	// open the output file - always overwrite
 	outputWriter, err := NewOutputWriter()
 	if err != nil {
 		return err
 	}
 
-	writerName := stdoutWriterName
-	outputWriter.AddWriters(NamedWriter{os.Stdout, stdoutWriterName})
+	// don't write to stdout if we're using verbose mode
+	if !r.options.Verbose {
+		outputWriter.AddWriters(os.Stdout)
+	}
+
 	if r.options.OutputFile != "" {
 		outputFile, err := os.Create(r.options.OutputFile)
 		if err != nil {
 			return err
 		}
 		defer outputFile.Close()
-		outputWriter.AddWriters(NamedWriter{outputFile, fileWriterName})
+		outputWriter.AddWriters(outputFile)
 	}
-	if r.options.Verbose {
-		writerName = fileWriterName
-	}
-
 	// enumerate
 	var wg sync.WaitGroup
 
@@ -189,10 +183,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
 					case r.options.JSON:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
-						outputWriter.WriteJsonData(writerName, result)
+						outputWriter.WriteJsonData(result)
 					case r.options.Raw:
 						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
-						outputWriter.WriteString(writerName, result.RawData())
+						outputWriter.WriteString(result.RawData())
 					default:
 						port := fmt.Sprint(result.Port)
 						replacer := strings.NewReplacer(
@@ -208,7 +202,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						// send to output if any of the field got replaced
 						if stringsutil.ContainsAny(outData, searchFor...) {
 							gologger.Verbose().Label(agent.Name()).Msgf("%s\n", outData)
-							outputWriter.WriteString(writerName, outData)
+							outputWriter.WriteString(outData)
 						}
 					}
 
