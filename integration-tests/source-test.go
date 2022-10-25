@@ -108,3 +108,20 @@ func (h quakeTestcases) Execute() error {
 	}
 	return expectResultsGreaterThanCount(results, 0)
 }
+
+type netlasTestcases struct{}
+
+func (h netlasTestcases) Execute() error {
+	token := os.Getenv("NETLAS_API_KEY")
+	if token == "" {
+		return errors.New("missing netlas api key")
+	}
+	netlasToken := fmt.Sprintf(`netlas: [%s]`, token)
+	_ = os.WriteFile(ConfigFile, []byte(netlasToken), 0644)
+	defer os.RemoveAll(ConfigFile)
+	results, err := testutils.RunUncoverAndGetResults(debug, "-netlas", "'Grafana'")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}
