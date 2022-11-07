@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/projectdiscovery/folderutil"
 	"github.com/projectdiscovery/uncover/testutils"
+	folderutil "github.com/projectdiscovery/utils/folder"
 )
 
 var (

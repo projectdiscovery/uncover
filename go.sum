@@ -109,6 +109,8 @@ github.com/projectdiscovery/stringsutil v0.0.0-20220731064040-4b67f194751e/go.mo
 github.com/projectdiscovery/stringsutil v0.0.1/go.mod h1:TDi2LEqR3OML0BxGoMbbfAHSk5AdfHX762Oc302sgmM=
 github.com/projectdiscovery/stringsutil v0.0.2 h1:uzmw3IVLJSMW1kEg8eCStG/cGbYYZAja8BH3LqqJXMA=
 github.com/projectdiscovery/stringsutil v0.0.2/go.mod h1:EJ3w6bC5fBYjVou6ryzodQq37D5c6qbAYQpGmAy+DC0=
+github.com/projectdiscovery/utils v0.0.2 h1:lif4OYBqd8jCf0glRBfSs2lT4nMtNjHjeysRw8HIW8M=
+github.com/projectdiscovery/utils v0.0.2/go.mod h1:PEYYkpCedmtydQRUvfWLPw0VRWpaFms4GFqNAziBANI=
 github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca h1:NugYot0LIVPxTvN8n+Kvkn6TrbMyxQiuvKdEwFdR9vI=
 github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca/go.mod h1:uugorj2VCxiV1x+LzaIdVa9b4S4qGAcH6cbhh4qVxOU=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
