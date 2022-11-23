@@ -110,6 +110,8 @@ github.com/projectdiscovery/ipranger v0.0.3/go.mod h1:pb7qOZyXI6n9Z5izLZmkTiunaB
 github.com/projectdiscovery/iputil v0.0.0-20210414194613-4b4d2517acf0/go.mod h1:PQAqn5h5NXsQTF4ZA00ZTYLRzGCjOtcCq8llAqrsd1A=
 github.com/projectdiscovery/iputil v0.0.0-20220625072148-037479960416/go.mod h1:bst7imnXn0ckAw4sToXLHLm62HisFGnS4QlxOkE4mYQ=
 github.com/projectdiscovery/iputil v0.0.0-20220712175312-b9406f31cdd8/go.mod h1:vHRC+9exsfSbEngMKDl0xiWqkxlLk3lHQZpbS2yFT8U=
+github.com/projectdiscovery/iputil v0.0.2 h1:f6IGnZF4RImJLysPSPG3D84jyTH34q3lihCFeP+eZzI=
+github.com/projectdiscovery/iputil v0.0.2/go.mod h1:J3Pcz1q51pi4/JL871mQztg0KOzyWDPxnPLOYJm2pVQ=
 github.com/projectdiscovery/mapcidr v0.0.4/go.mod h1:ALOIj6ptkWujNoX8RdQwB2mZ+kAmKuLJBq9T5gR5wG0=
 github.com/projectdiscovery/mapcidr v0.0.6/go.mod h1:ZEBhMmBU3laUl3g9QGTrzJku1VJOzjdFwW01f/zVVzM=
 github.com/projectdiscovery/mapcidr v1.0.0/go.mod h1:5QkKrV6rNQQurCZI3nNedFsAOYp04mRDkC5yht+znYA=
