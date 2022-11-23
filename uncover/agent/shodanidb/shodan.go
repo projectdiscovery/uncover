@@ -7,9 +7,9 @@ import (
 	"net/url"
 
 	"github.com/pkg/errors"
-	"github.com/projectdiscovery/iputil"
 	"github.com/projectdiscovery/mapcidr"
 	"github.com/projectdiscovery/uncover/uncover"
+	iputil "github.com/projectdiscovery/utils/ip"
 )
 
 const (
