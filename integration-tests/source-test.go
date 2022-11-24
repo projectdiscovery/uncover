@@ -45,7 +45,15 @@ func (h shodanTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterThanCount(results, 0)
+	err = expectResultsGreaterThanCount(results, 0)
+	if err != nil {
+		return err
+	}
+	results, err = testutils.RunUncoverAndGetResults(debug, "-shodan", "'org:\"Something, Inc.\"'")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 1)
 }
 
 type zoomeyeTestcases struct{}
