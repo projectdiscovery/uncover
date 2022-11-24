@@ -1,4 +1,5 @@
 name: 🔨 Provider Test
+
 on:
   schedule:
     - cron: '00 12 * * 1'
@@ -7,6 +8,7 @@ on:
 jobs:
   build:
     name: Test Builds
+    runs-on: ubuntu-latest
     steps:
       - name: Set up Go
         uses: actions/setup-go@v3
