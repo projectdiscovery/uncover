@@ -11,7 +11,7 @@ require (
 	github.com/projectdiscovery/goflags v0.1.5
 	github.com/projectdiscovery/gologger v1.1.5
 	github.com/projectdiscovery/mapcidr v1.0.3
-	github.com/projectdiscovery/ratelimit v0.0.1
+	github.com/projectdiscovery/ratelimit v0.0.2
 	github.com/projectdiscovery/retryablehttp-go v1.0.2
 	github.com/projectdiscovery/stringsutil v0.0.2 // indirect
 	github.com/stretchr/testify v1.8.1
