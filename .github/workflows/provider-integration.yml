@@ -25,6 +25,7 @@ jobs:
           SHODAN_API_KEY: ${{secrets.SHODAN_API_KEY}}
           ZOOMEYE_API_KEY: ${{secrets.ZOOMEYE_API_KEY}}
           QUAKE_API_KEY: ${{secrets.QUAKE_TOKEN}}
+          NETLAS_API_KEY: ${{secrets.NETLAS_API_KEY}}
         run: bash run.sh
         working-directory: integration-tests/
 

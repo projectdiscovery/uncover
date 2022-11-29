@@ -24,7 +24,8 @@ var (
 		"zoomeye": zoomeyeTestcases{},
 		"fofa":    fofaTestcases{},
 		//"hunter":  hunterTestcases{},
-		"quake": quakeTestcases{},
+		"quake":  quakeTestcases{},
+		"netlas": netlasTestcases{},
 	}
 )
 
