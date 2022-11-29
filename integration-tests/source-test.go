@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/projectdiscovery/folderutil"
 	"github.com/projectdiscovery/uncover/testutils"
+	folderutil "github.com/projectdiscovery/utils/folder"
 )
 
 var (
@@ -45,7 +45,15 @@ func (h shodanTestcases) Execute() error {
 	if err != nil {
 		return err
 	}
-	return expectResultsGreaterThanCount(results, 0)
+	err = expectResultsGreaterThanCount(results, 0)
+	if err != nil {
+		return err
+	}
+	results, err = testutils.RunUncoverAndGetResults(debug, "-shodan", "'org:\"Something, Inc.\"'")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 1)
 }
 
 type zoomeyeTestcases struct{}
@@ -103,6 +111,23 @@ func (h quakeTestcases) Execute() error {
 	_ = os.WriteFile(ConfigFile, []byte(quakeToken), 0644)
 	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-quake", "'Grafana'")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}
+
+type netlasTestcases struct{}
+
+func (h netlasTestcases) Execute() error {
+	token := os.Getenv("NETLAS_API_KEY")
+	if token == "" {
+		return errors.New("missing netlas api key")
+	}
+	netlasToken := fmt.Sprintf(`netlas: [%s]`, token)
+	_ = os.WriteFile(ConfigFile, []byte(netlasToken), 0644)
+	defer os.RemoveAll(ConfigFile)
+	results, err := testutils.RunUncoverAndGetResults(debug, "-netlas", "'Grafana'")
 	if err != nil {
 		return err
 	}
