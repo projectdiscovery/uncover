@@ -11,17 +11,18 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/gologger"
+	"github.com/projectdiscovery/iputil"
 	"github.com/projectdiscovery/ratelimit"
+	"github.com/projectdiscovery/stringsutil"
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
 	"github.com/projectdiscovery/uncover/uncover/agent/hunter"
+	"github.com/projectdiscovery/uncover/uncover/agent/netlas"
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
-	iputil "github.com/projectdiscovery/utils/ip"
-	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
 func init() {
@@ -48,7 +49,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return errors.New("no keys provided")
 	}
 
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter *ratelimit.Limiter
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter, netlasRatelimiter *ratelimit.Limiter
 	if r.options.Delay > 0 {
 		censysRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 		fofaRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
@@ -57,6 +58,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		quakeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 		hunterRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 		zoomeyeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		netlasRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 	} else {
 		censysRateLimiter = ratelimit.NewUnlimited(context.Background())
 		fofaRateLimiter = ratelimit.NewUnlimited(context.Background())
@@ -65,6 +67,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		quakeRatelimiter = ratelimit.NewUnlimited(context.Background())
 		hunterRatelimiter = ratelimit.NewUnlimited(context.Background())
 		zoomeyeRatelimiter = ratelimit.NewUnlimited(context.Background())
+		netlasRatelimiter = ratelimit.NewUnlimited(context.Background())
 	}
 
 	var agents []uncover.Agent
@@ -96,6 +99,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		r.options.Engine = append(r.options.Engine, "zoomeye")
 		query = append(query, r.options.ZoomEye...)
 	}
+	if len(r.options.Netlas) > 0 {
+		r.options.Engine = append(r.options.Engine, "netlas")
+		query = append(query, r.options.Netlas...)
+	}
 
 	// declare clients
 	for _, engine := range r.options.Engine {
@@ -118,6 +125,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			agent, err = hunter.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterRatelimiter})
 		case "zoomeye":
 			agent, err = zoomeye.NewWithOptions(&uncover.AgentOptions{RateLimiter: zoomeyeRatelimiter})
+		case "netlas":
+			agent, err = netlas.NewWithOptions(&uncover.AgentOptions{RateLimiter: netlasRatelimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}

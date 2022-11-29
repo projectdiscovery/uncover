@@ -1,3 +1,7 @@
+# Uncover
+cmd/uncover/uncover
+integration-tests/integration-test
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
