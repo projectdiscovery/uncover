@@ -42,6 +42,7 @@
   - **[Hunter](https://hunter.qianxin.com)**
   - **[Quake](https://quake.360.net/quake/#/index)**
   - **[Zoomeye](https://www.zoomeye.org)**
+  - **[Netlas](https://netlas.io/)**
 - Multiple API key input support
 - Automatic API key randomization
 - **stdin** / **stdout** support for input
@@ -69,7 +70,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas) (default shodan)
 
 SEARCH-ENGINE:
    -s, -shodan string[]       search query for shodan (example: -shodan 'query.txt')
@@ -79,6 +80,7 @@ SEARCH-ENGINE:
    -qk, -quake string[]       search query for quake (example: -quake 'query.txt')
    -ht, -hunter string[]      search query for hunter (example: -hunter 'query.txt')
    -ze, -zoomeye string[]     search query for zoomeye (example: -zoomeye 'query.txt')
+   -ne, -netlas string[]      search query for netlas (example: -netlas 'query.txt')
 
 CONFIG:
    -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
@@ -127,6 +129,9 @@ hunter:
 zoomeye:
   - ZOOMEYE_API_KEY_1
   - ZOOMEYE_API_KEY_2
+netlas:
+  - NETLAS_API_KEY_1
+  - NETLAS_API_KEY_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -142,9 +147,10 @@ export FOFA_KEY=xxx
 export QUAKE_TOKEN=xxx
 export HUNTER_API_KEY=xxx
 export ZOOMEYE_API_KEY=xxx
+export NETLAS_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1) and [ZoomEye](https://www.zoomeye.org/login) .
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.org/login) and [Netlas](https://app.netlas.io/registration/).
 
 ## Running Uncover
 
@@ -158,7 +164,7 @@ echo 'ssl:"Uber Technologies, Inc."' | uncover
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
 / /_/ / / / / /__/ /_/ / |/ /  __/ /    
-\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.1    
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.9    
                                         
 
 		projectdiscovery.io
@@ -195,7 +201,7 @@ uncover -q dorks.txt
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
 / /_/ / / / / /__/ /_/ / |/ /  __/ /    
-\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.1    
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.9    
                                         
 
     projectdiscovery.io
@@ -223,12 +229,12 @@ uncover -q dorks.txt
 **uncover** supports multiple search engine, as default **shodan** is used, `-e` flag can be used to run same query against any or all search engines.
 
 ```console
-echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye
+echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
 / /_/ / / / / /__/ /_/ / |/ /  __/ /    
-\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.3  
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.9  
                                         
 
     projectdiscovery.io
@@ -255,12 +261,12 @@ echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye
 
 
 ```console
-uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira' -zoomeye 'app:"Atlassian JIRA"'
+uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira' -zoomeye 'app:"Atlassian JIRA"' -netlas 'jira'
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
 / /_/ / / / / /__/ /_/ / |/ /  __/ /    
-\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.7
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.9
                                         
 
     projectdiscovery.io
@@ -300,7 +306,7 @@ echo 51.83.59.99/24 | uncover
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
 / /_/ / / / / /__/ /_/ / |/ /  __/ /    
-\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.3  
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.9  
                                         
 
     projectdiscovery.io
