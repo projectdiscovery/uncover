@@ -1,6 +1,6 @@
 module github.com/projectdiscovery/uncover
 
-go 1.17
+go 1.18
 
 require (
 	github.com/hashicorp/golang-lru v0.5.4
@@ -13,7 +13,7 @@ require (
 	github.com/projectdiscovery/mapcidr v1.0.3
 	github.com/projectdiscovery/ratelimit v0.0.2
 	github.com/projectdiscovery/retryablehttp-go v1.0.4
-	github.com/projectdiscovery/stringsutil v0.0.2 // indirect
+	github.com/projectdiscovery/stringsutil v0.0.2
 	github.com/stretchr/testify v1.8.1
 )
 
