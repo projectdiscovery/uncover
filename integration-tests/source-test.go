@@ -133,3 +133,20 @@ func (h netlasTestcases) Execute() error {
 	}
 	return expectResultsGreaterThanCount(results, 0)
 }
+
+type criminalipTestcases struct{}
+
+func (h criminalipTestcases) Execute() error {
+        token := os.Getenv("CRIMINALIP_API_KEY")
+        if token == "" {
+                return errors.New("missing criminalip api key")
+        }
+        criminalipToken := fmt.Sprintf(`criminalip: [%s]`, token)
+        _ = os.WriteFile(ConfigFile, []byte(criminalipToken), 0644)
+        defer os.RemoveAll(ConfigFile)
+        results, err := testutils.RunUncoverAndGetResults(debug, "-criminalip", "'Grafana'")
+        if err != nil {
+                return err
+        }
+        return expectResultsGreaterThanCount(results, 0)
+}
