@@ -225,5 +225,5 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 }
 
 func shouldSkipForAgent(agent uncover.Agent, uncoverQuery *uncover.Query) bool {
-	return (iputil.IsIP(uncoverQuery.Query) || iputil.IsCIDR(uncoverQuery.Query)) && agent.Name() != "shodan-idb"
+	return (iputil.IsIP(uncoverQuery.Query) || iputil.IsCIDR(uncoverQuery.Query)) && agent.Name() != "shodan-idb" && agent.Name() != "censys"
 }
