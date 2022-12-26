@@ -11,7 +11,7 @@ require (
 	github.com/projectdiscovery/goflags v0.1.6
 	github.com/projectdiscovery/gologger v1.1.5
 	github.com/projectdiscovery/mapcidr v1.0.3
-	github.com/projectdiscovery/ratelimit v0.0.2
+	github.com/projectdiscovery/ratelimit v0.0.4
 	github.com/projectdiscovery/retryablehttp-go v1.0.7
 	github.com/projectdiscovery/stringsutil v0.0.2
 	github.com/stretchr/testify v1.8.1
@@ -20,9 +20,9 @@ require (
 require (
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
-	golang.org/x/exp v0.0.0-20221019170559-20944726eadf // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/tools v0.1.12 // indirect
+	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15 // indirect
+	golang.org/x/mod v0.6.0 // indirect
+	golang.org/x/tools v0.2.0 // indirect
 )
 
 require (
