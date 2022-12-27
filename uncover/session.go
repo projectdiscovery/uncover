@@ -46,7 +46,8 @@ func NewSession(keys *Keys, retryMax, timeout int) (*Session, error) {
 }
 
 func (s *Session) Do(request *retryablehttp.Request) (*http.Response, error) {
-	request.Header.Set("Connection", "close")
+	// close request connection (does not reuse connections)
+	request.Close = true
 	resp, err := s.Client.Do(request)
 	if err != nil {
 		return nil, err
