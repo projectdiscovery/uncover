@@ -138,7 +138,6 @@ func ParseOptions() *Options {
 		len(options.ZoomEye) == 0 &&
 		len(options.Netlas) == 0 {
 		options.Engine = append(options.Engine, "shodan")
-		options.Engine = append(options.Engine, "shodan-idb")
 	}
 
 	// we make the assumption that input queries aren't that much
