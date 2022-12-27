@@ -11,7 +11,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/gologger"
-	"github.com/projectdiscovery/iputil"
 	"github.com/projectdiscovery/ratelimit"
 	"github.com/projectdiscovery/stringsutil"
 	"github.com/projectdiscovery/uncover/uncover"
@@ -173,10 +172,6 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			Limit: r.options.Limit,
 		}
 		for _, agent := range agents {
-			// skip all agents for pure ips/cidrs
-			if shouldSkipForAgent(agent, uncoverQuery) {
-				continue
-			}
 			wg.Add(1)
 			go func(agent uncover.Agent, uncoverQuery *uncover.Query) {
 				defer wg.Done()
@@ -231,8 +226,4 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 
 	wg.Wait()
 	return nil
-}
-
-func shouldSkipForAgent(agent uncover.Agent, uncoverQuery *uncover.Query) bool {
-	return (iputil.IsIP(uncoverQuery.Query) || iputil.IsCIDR(uncoverQuery.Query)) && agent.Name() != "shodan-idb"
 }

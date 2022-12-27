@@ -141,7 +141,6 @@ func ParseOptions() *Options {
 		len(options.Netlas) == 0 &&
 		len(options.CriminalIP) == 0 {
 		options.Engine = append(options.Engine, "shodan")
-		options.Engine = append(options.Engine, "shodan-idb")
 	}
 
 	// we make the assumption that input queries aren't that much
