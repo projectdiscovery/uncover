@@ -43,6 +43,7 @@
   - **[Quake](https://quake.360.net/quake/#/index)**
   - **[Zoomeye](https://www.zoomeye.org)**
   - **[Netlas](https://netlas.io/)**
+  - **[CriminalIP](https://www.criminalip.io)**
 - Multiple API key input support
 - Automatic API key randomization
 - **stdin** / **stdout** support for input
@@ -70,7 +71,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip) (default shodan)
 
 SEARCH-ENGINE:
    -s, -shodan string[]       search query for shodan (example: -shodan 'query.txt')
@@ -81,6 +82,7 @@ SEARCH-ENGINE:
    -ht, -hunter string[]      search query for hunter (example: -hunter 'query.txt')
    -ze, -zoomeye string[]     search query for zoomeye (example: -zoomeye 'query.txt')
    -ne, -netlas string[]      search query for netlas (example: -netlas 'query.txt')
+   -cl, -criminalip string[]  search query for criminalip (example: -criminalip 'query.txt')
 
 CONFIG:
    -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
@@ -132,6 +134,9 @@ zoomeye:
 netlas:
   - NETLAS_API_KEY_1
   - NETLAS_API_KEY_2
+criminalip:
+  - CRIMINALIP_API_KEY_1
+  - CRIMINALIP_API_KEY_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -148,9 +153,10 @@ export QUAKE_TOKEN=xxx
 export HUNTER_API_KEY=xxx
 export ZOOMEYE_API_KEY=xxx
 export NETLAS_API_KEY=xxx
+export CRIMINALIP_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.org/login) and [Netlas](https://app.netlas.io/registration/).
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.org/login), [Netlas](https://app.netlas.io/registration/) and [CriminalIP](https://www.criminalip.io/register).
 
 ## Running Uncover
 
@@ -229,7 +235,7 @@ uncover -q dorks.txt
 **uncover** supports multiple search engine, as default **shodan** is used, `-e` flag can be used to run same query against any or all search engines.
 
 ```console
-echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas
+echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas,criminalip
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
@@ -261,7 +267,7 @@ echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas
 
 
 ```console
-uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira' -zoomeye 'app:"Atlassian JIRA"' -netlas 'jira'
+uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira' -zoomeye 'app:"Atlassian JIRA"' -netlas 'jira' -criminalip 'Jira'
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
