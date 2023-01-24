@@ -15,6 +15,7 @@ import (
 	"github.com/projectdiscovery/stringsutil"
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
+	"github.com/projectdiscovery/uncover/uncover/agent/criminalip"
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
 	"github.com/projectdiscovery/uncover/uncover/agent/hunter"
 	"github.com/projectdiscovery/uncover/uncover/agent/netlas"
@@ -22,7 +23,6 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
-	"github.com/projectdiscovery/uncover/uncover/agent/criminalip"
 )
 
 func init() {
@@ -106,9 +106,9 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		query = append(query, r.options.Netlas...)
 	}
 	if len(r.options.CriminalIP) > 0 {
-                r.options.Engine = append(r.options.Engine, "criminalip")
-                query = append(query, r.options.CriminalIP...)
-        }
+		r.options.Engine = append(r.options.Engine, "criminalip")
+		query = append(query, r.options.CriminalIP...)
+	}
 
 	// declare clients
 	for _, engine := range r.options.Engine {
@@ -134,7 +134,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		case "netlas":
 			agent, err = netlas.NewWithOptions(&uncover.AgentOptions{RateLimiter: netlasRatelimiter})
 		case "criminalip":
-                        agent, err = criminalip.NewWithOptions(&uncover.AgentOptions{RateLimiter: criminalipRatelimiter})
+			agent, err = criminalip.NewWithOptions(&uncover.AgentOptions{RateLimiter: criminalipRatelimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
@@ -171,6 +171,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			Query: q,
 			Limit: r.options.Limit,
 		}
+		counterLimit := 0
+
 		for _, agent := range agents {
 			wg.Add(1)
 			go func(agent uncover.Agent, uncoverQuery *uncover.Query) {
@@ -219,6 +221,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						}
 					}
 
+					counterLimit += 1
+					if counterLimit >= uncoverQuery.Limit {
+						break
+					}
 				}
 			}(agent, uncoverQuery)
 		}
