@@ -15,14 +15,15 @@ import (
 	"github.com/projectdiscovery/stringsutil"
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
+	"github.com/projectdiscovery/uncover/uncover/agent/criminalip"
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
 	"github.com/projectdiscovery/uncover/uncover/agent/hunter"
 	"github.com/projectdiscovery/uncover/uncover/agent/netlas"
+	"github.com/projectdiscovery/uncover/uncover/agent/publicwww"
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
-	"github.com/projectdiscovery/uncover/uncover/agent/criminalip"
 )
 
 func init() {
@@ -49,7 +50,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return errors.New("no keys provided")
 	}
 
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter, netlasRatelimiter, criminalipRatelimiter *ratelimit.Limiter
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter, netlasRatelimiter, criminalipRatelimiter, publicwwwRatelimiter *ratelimit.Limiter
 	if r.options.Delay > 0 {
 		censysRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 		fofaRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
@@ -60,6 +61,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		zoomeyeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 		netlasRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 		criminalipRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		publicwwwRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 	} else {
 		censysRateLimiter = ratelimit.NewUnlimited(context.Background())
 		fofaRateLimiter = ratelimit.NewUnlimited(context.Background())
@@ -70,6 +72,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		zoomeyeRatelimiter = ratelimit.NewUnlimited(context.Background())
 		netlasRatelimiter = ratelimit.NewUnlimited(context.Background())
 		criminalipRatelimiter = ratelimit.NewUnlimited(context.Background())
+		publicwwwRatelimiter = ratelimit.NewUnlimited(context.Background())
 	}
 
 	var agents []uncover.Agent
@@ -106,9 +109,13 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		query = append(query, r.options.Netlas...)
 	}
 	if len(r.options.CriminalIP) > 0 {
-                r.options.Engine = append(r.options.Engine, "criminalip")
-                query = append(query, r.options.CriminalIP...)
-        }
+		r.options.Engine = append(r.options.Engine, "criminalip")
+		query = append(query, r.options.CriminalIP...)
+	}
+	if len(r.options.Publicwww) > 0 {
+		r.options.Engine = append(r.options.Engine, "publicwww")
+		query = append(query, r.options.Publicwww...)
+	}
 
 	// declare clients
 	for _, engine := range r.options.Engine {
@@ -134,7 +141,9 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		case "netlas":
 			agent, err = netlas.NewWithOptions(&uncover.AgentOptions{RateLimiter: netlasRatelimiter})
 		case "criminalip":
-                        agent, err = criminalip.NewWithOptions(&uncover.AgentOptions{RateLimiter: criminalipRatelimiter})
+			agent, err = criminalip.NewWithOptions(&uncover.AgentOptions{RateLimiter: criminalipRatelimiter})
+		case "publicwww":
+			agent, err = publicwww.NewWithOptions(&uncover.AgentOptions{RateLimiter: publicwwwRatelimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
