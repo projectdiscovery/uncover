@@ -24,5 +24,6 @@ func (keys Keys) Empty() bool {
 		keys.HunterToken == "" &&
 		keys.ZoomEyeToken == "" &&
 		keys.NetlasToken == "" &&
-		keys.CriminalIPToken == ""
+		keys.CriminalIPToken == "" &&
+		keys.PublicwwwToken == ""
 }

@@ -50,6 +50,7 @@ type Options struct {
 	Hunter       goflags.StringSlice
 	ZoomEye      goflags.StringSlice
 	CriminalIP   goflags.StringSlice
+	Publicwww    goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -74,6 +75,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.ZoomEye, "zoomeye", "ze", nil, "search query for zoomeye (example: -zoomeye 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Netlas, "netlas", "ne", nil, "search query for netlas (example: -netlas 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.CriminalIP, "criminalip", "cl", nil, "search query for criminalip (example: -criminalip 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Publicwww, "publicwww", "pw", nil, "search query for publicwww (example: -publicwww 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -217,8 +219,8 @@ func (options *Options) loadProvidersFromEnv() error {
 		options.Provider.Netlas = append(options.Provider.Netlas, key)
 	}
 	if key, exists := os.LookupEnv("CRIMINALIP_API_KEY"); exists {
-                options.Provider.CriminalIP = append(options.Provider.CriminalIP, key)
-        }
+		options.Provider.CriminalIP = append(options.Provider.CriminalIP, key)
+	}
 	return nil
 }
 
