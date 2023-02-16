@@ -49,7 +49,7 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 				Start: numberOfResults,
 			}
 
-			publicwwwResponse := agent.query(publicwwwRequest.buildURL(), session, results)
+			publicwwwResponse := agent.query(publicwwwRequest.buildURL(session.Keys.PublicwwwToken), session, results)
 			if publicwwwResponse == nil {
 				break
 			}
@@ -78,7 +78,6 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 		return nil
 	}
 	content := string(body)
-
 	var lines []string
 	for _, line := range strings.Split(content, "\n") {
 		result := uncover.Result{Source: agent.Name()}
