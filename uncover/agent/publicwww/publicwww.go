@@ -46,7 +46,6 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 		for {
 			publicwwwRequest := &Request{
 				Query: query.Query,
-				Start: numberOfResults,
 			}
 
 			publicwwwResponse := agent.query(publicwwwRequest.buildURL(session.Keys.PublicwwwToken), session, results)
@@ -66,11 +65,11 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 }
 
 func (agent *Agent) query(URL string, session *uncover.Session, results chan uncover.Result) []string {
-	resp, err := agent.queryURL(session, URL)
+	resp, err := http.Get(URL)
 	if err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -81,27 +80,13 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 	var lines []string
 	for _, line := range strings.Split(content, "\n") {
 		result := uncover.Result{Source: agent.Name()}
-		result.Host = line
-		results <- result
 		trimmedLine := strings.TrimRight(line, " \r\n\t")
 		if trimmedLine != "" {
+			result.Host = line
+			results <- result
 			lines = append(lines, trimmedLine)
 		}
 	}
 
 	return lines
-}
-
-func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Response, error) {
-	request, err := uncover.NewHTTPRequest(
-		http.MethodGet,
-		URL,
-		nil,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	agent.options.RateLimiter.Take()
-	return session.Do(request)
 }
