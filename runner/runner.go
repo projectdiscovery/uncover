@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -211,10 +212,16 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 						outputWriter.WriteString(result.RawData())
 					default:
 						port := fmt.Sprint(result.Port)
+						hostname, err := getHostname(result.Host)
+						if err != nil {
+							gologger.Warning().Msgf("%s\n", err)
+							return
+						}
 						replacer := strings.NewReplacer(
 							"ip", result.IP,
-							"host", result.Host,
+							"host", hostname,
 							"port", port,
+							"url", result.Host,
 						)
 						outData := replacer.Replace(r.options.OutputFields)
 						searchFor := []string{result.IP, port}
@@ -235,4 +242,12 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 
 	wg.Wait()
 	return nil
+}
+
+func getHostname(u string) (string, error) {
+	parsedURL, err := url.Parse(u)
+	if err != nil {
+		return "", err
+	}
+	return parsedURL.Hostname(), nil
 }
