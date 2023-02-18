@@ -2,7 +2,7 @@ package publicwww
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -31,7 +31,6 @@ func (agent *Agent) Name() string {
 }
 
 func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan uncover.Result, error) {
-
 	if session.Keys.PublicwwwToken == "" {
 		return nil, errors.New("empty publicwww keys")
 	}
@@ -71,7 +70,7 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		results <- uncover.Result{Source: agent.Name(), Error: err}
 		return nil
