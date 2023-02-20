@@ -1,6 +1,7 @@
 package publicwww
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"io"
@@ -81,12 +82,28 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 		return nil
 	}
 	content := string(body)
+	reader := csv.NewReader(strings.NewReader(content))
+	reader.Comma = ';'
+
 	var lines []string
-	for _, line := range strings.Split(content, "\n") {
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			results <- uncover.Result{Source: agent.Name(), Error: err}
+		}
+
 		result := uncover.Result{Source: agent.Name()}
-		trimmedLine := strings.TrimRight(line, " \r\n\t")
+		trimmedLine := strings.TrimRight(record[0], " \r\n\t")
 		if trimmedLine != "" {
-			result.Host = line
+			hostname, err := uncover.GetHostname(record[0])
+			if err != nil {
+				results <- uncover.Result{Source: agent.Name(), Error: err}
+			}
+			result.Host = hostname
+			result.Url = record[0]
 			raw, _ := json.Marshal(result)
 			result.Raw = raw
 			results <- result
