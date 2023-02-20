@@ -1,7 +1,5 @@
 package publicwww
 
-import "net/url"
-
 type Request struct {
 	Query string `json:"query"`
 	Start int    `json:"start"`
@@ -10,6 +8,6 @@ type Request struct {
 func (r *Request) buildURL(key string) string {
 	return baseURL +
 		baseEndpoint +
-		url.QueryEscape(`"`+r.Query+`"`) +
-		`/?export=urls&key=` + key
+		`"` + r.Query + `"` +
+		`/?export=csvu&key=` + key
 }
