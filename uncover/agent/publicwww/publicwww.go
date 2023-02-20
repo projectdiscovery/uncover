@@ -70,11 +70,11 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 }
 
 func (agent *Agent) query(URL string, session *uncover.Session, results chan uncover.Result) []string {
-	resp, err := agent.queryURL(session, URL)
+	resp, err := http.Get(URL)
 	if err != nil {
 		results <- uncover.Result{Source: agent.Name(), Error: err}
-		return nil
 	}
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -123,8 +123,6 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Respon
 	if err != nil {
 		return nil, err
 	}
-
-	request.Header.Set("Content-Type", "application/vnd.ms-excel")
 
 	agent.options.RateLimiter.Take()
 	return session.Do(request)
