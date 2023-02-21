@@ -113,17 +113,3 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 
 	return lines
 }
-
-// func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Response, error) {
-// 	request, err := uncover.NewHTTPRequest(
-// 		http.MethodGet,
-// 		URL,
-// 		nil,
-// 	)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	agent.options.RateLimiter.Take()
-// 	return session.Do(request)
-// }
