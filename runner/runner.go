@@ -12,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/ratelimit"
-	"github.com/projectdiscovery/stringsutil"
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
 	"github.com/projectdiscovery/uncover/uncover/agent/criminalip"
@@ -24,6 +23,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
+	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
 func init() {
@@ -183,12 +183,14 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		for _, agent := range agents {
 			wg.Add(1)
 			go func(agent uncover.Agent, uncoverQuery *uncover.Query) {
+				optionFields := r.options.OutputFields
 				defer wg.Done()
 				keys := r.options.Provider.GetKeys()
 				if keys.Empty() && agent.Name() != "shodan-idb" {
 					gologger.Error().Label(agent.Name()).Msgf("empty keys\n")
 					return
 				}
+
 				session, err := uncover.NewSession(&keys, r.options.Retries, r.options.Timeout)
 				if err != nil {
 					gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
@@ -217,7 +219,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 							"port", port,
 							"url", result.Url,
 						)
-						outData := replacer.Replace(r.options.OutputFields)
+						if (result.IP == "" || port == "0") && stringsutil.ContainsAny(r.options.OutputFields, "ip", "port") {
+							optionFields = "host"
+						}
+						outData := replacer.Replace(optionFields)
 						searchFor := []string{result.IP, port}
 						if result.Host != "" || r.options.OutputFile != "" {
 							searchFor = append(searchFor, result.Host)
