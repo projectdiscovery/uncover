@@ -70,11 +70,11 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 }
 
 func (agent *Agent) query(URL string, session *uncover.Session, results chan uncover.Result) []string {
-	resp, err := http.Get(URL)
+	resp, err := agent.queryURL(session, URL)
 	if err != nil {
 		results <- uncover.Result{Source: agent.Name(), Error: err}
+		return nil
 	}
-	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -96,20 +96,36 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 		}
 
 		result := uncover.Result{Source: agent.Name()}
-		trimmedLine := strings.TrimRight(record[0], " \r\n\t")
-		if trimmedLine != "" {
-			hostname, err := uncover.GetHostname(record[0])
-			if err != nil {
-				results <- uncover.Result{Source: agent.Name(), Error: err}
+		if len(record) > 0 {
+			trimmedLine := strings.TrimRight(record[0], " \r\n\t")
+			if trimmedLine != "" {
+				hostname, err := uncover.GetHostname(record[0])
+				if err != nil {
+					results <- uncover.Result{Source: agent.Name(), Error: err}
+				}
+				result.Host = hostname
+				result.Url = record[0]
+				raw, _ := json.Marshal(result)
+				result.Raw = raw
+				results <- result
+				lines = append(lines, trimmedLine)
 			}
-			result.Host = hostname
-			result.Url = record[0]
-			raw, _ := json.Marshal(result)
-			result.Raw = raw
-			results <- result
-			lines = append(lines, trimmedLine)
 		}
 	}
 
 	return lines
+}
+
+func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Response, error) {
+	request, err := uncover.NewHTTPRequest(
+		http.MethodGet,
+		URL,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	agent.options.RateLimiter.Take()
+	return session.Do(request)
 }
