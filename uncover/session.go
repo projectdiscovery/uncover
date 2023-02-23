@@ -63,7 +63,10 @@ func NewSession(keys *Keys, retryMax, timeout, delay int, engines []string) (*Se
 	for _, engine := range engines[1:] {
 		engineOpts := rateLimitOpts
 		engineOpts.Key = engine
-		session.RateLimits.Add(engineOpts)
+		err := session.RateLimits.Add(engineOpts)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return session, nil
