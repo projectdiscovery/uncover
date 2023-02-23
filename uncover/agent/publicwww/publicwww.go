@@ -120,6 +120,9 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Respon
 		return nil, err
 	}
 
-	session.RateLimits.Take(agent.Name())
+	err = session.RateLimits.Take(agent.Name())
+	if err != nil {
+		return nil, err
+	}
 	return session.Do(request)
 }
