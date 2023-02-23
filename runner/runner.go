@@ -99,25 +99,25 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		)
 		switch engine {
 		case "shodan":
-			agent, err = shodan.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = shodan.New()
 		case "censys":
-			agent, err = censys.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = censys.New()
 		case "fofa":
-			agent, err = fofa.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = fofa.New()
 		case "shodan-idb":
-			agent, err = shodanidb.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = shodanidb.New()
 		case "quake":
-			agent, err = quake.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = quake.New()
 		case "hunter":
-			agent, err = hunter.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = hunter.New()
 		case "zoomeye":
-			agent, err = zoomeye.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = zoomeye.New()
 		case "netlas":
-			agent, err = netlas.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = netlas.New()
 		case "criminalip":
-			agent, err = criminalip.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = criminalip.New()
 		case "publicwww":
-			agent, err = publicwww.NewWithOptions(&uncover.AgentOptions{})
+			agent, err = publicwww.New()
 		default:
 			err = errors.New("unknown agent type")
 		}
@@ -169,6 +169,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 				if err != nil {
 					gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
 				}
+
 				ch, err := agent.Query(session, uncoverQuery)
 				if err != nil {
 					gologger.Warning().Msgf("%s\n", err)

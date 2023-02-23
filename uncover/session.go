@@ -16,7 +16,7 @@ type Session struct {
 	Keys       *Keys
 	Client     *retryablehttp.Client
 	RetryMax   int
-	RateLimits map[string]*ratelimit.Limiter
+	RateLimits *ratelimit.MultiLimiter
 }
 
 func NewSession(keys *Keys, retryMax, timeout, delay int, engines []string) (*Session, error) {
@@ -43,15 +43,27 @@ func NewSession(keys *Keys, retryMax, timeout, delay int, engines []string) (*Se
 		Client:     client,
 		Keys:       keys,
 		RetryMax:   retryMax,
-		RateLimits: make(map[string]*ratelimit.Limiter),
+		RateLimits: &ratelimit.MultiLimiter{},
 	}
 
-	for _, engine := range engines {
-		if delay > 0 {
-			session.RateLimits[engine] = ratelimit.New(context.Background(), 1, time.Duration(delay))
-		} else {
-			session.RateLimits[engine] = ratelimit.NewUnlimited(context.Background())
-		}
+	var err error
+	rateLimitOpts := &ratelimit.Options{
+		MaxCount:    uint(retryMax),
+		Duration:    time.Duration(delay),
+		IsUnlimited: delay == 0,
+	}
+
+	rateLimitOpts.Key = engines[0]
+
+	session.RateLimits, err = ratelimit.NewMultiLimiter(context.Background(), rateLimitOpts)
+	if err != nil {
+		return &Session{}, nil
+	}
+
+	for _, engine := range engines[1:] {
+		engineOpts := rateLimitOpts
+		engineOpts.Key = engine
+		session.RateLimits.Add(engineOpts)
 	}
 
 	return session, nil
