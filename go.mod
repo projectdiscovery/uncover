@@ -13,7 +13,6 @@ require (
 	github.com/projectdiscovery/mapcidr v1.1.0
 	github.com/projectdiscovery/ratelimit v0.0.6
 	github.com/projectdiscovery/retryablehttp-go v1.0.11
-	github.com/projectdiscovery/stringsutil v0.0.2
 	github.com/stretchr/testify v1.8.1
 )
 
@@ -47,12 +46,12 @@ require (
 )
 
 require (
+	github.com/Mzack9999/go-http-digest-auth-client v0.6.1-0.20220414142836-eb8883508809 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
-	github.com/projectdiscovery/stringsutil v0.0.2 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	gopkg.in/djherbis/times.v1 v1.3.0 // indirect
