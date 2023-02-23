@@ -16,16 +16,10 @@ const (
 	URL = "https://api.zoomeye.org/host/search?query=%s&page=%d"
 )
 
-type Agent struct {
-	options *uncover.AgentOptions
-}
+type Agent struct{}
 
 func New() (uncover.Agent, error) {
 	return &Agent{}, nil
-}
-
-func NewWithOptions(options *uncover.AgentOptions) (uncover.Agent, error) {
-	return &Agent{options: options}, nil
 }
 
 func (agent *Agent) Name() string {
@@ -77,7 +71,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, zoomeyeReques
 		return nil, err
 	}
 	request.Header.Set("API-KEY", session.Keys.ZoomEyeToken)
-	agent.options.RateLimiter.Take()
+	session.RateLimits.Take(agent.Name())
 	return session.Do(request)
 }
 

@@ -14,16 +14,10 @@ const (
 	contentType  = "application/json"
 )
 
-type Agent struct {
-	options *uncover.AgentOptions
-}
+type Agent struct{}
 
 func New() (uncover.Agent, error) {
 	return &Agent{}, nil
-}
-
-func NewWithOptions(options *uncover.AgentOptions) (uncover.Agent, error) {
-	return &Agent{options: options}, nil
 }
 
 func (agent *Agent) Name() string {
@@ -103,6 +97,6 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Respon
 	request.Header.Set("Content-Type", contentType)
 	request.Header.Set("X-API-Key", session.Keys.NetlasToken)
 
-	agent.options.RateLimiter.Take()
+	session.RateLimits.Take(agent.Name())
 	return session.Do(request)
 }
