@@ -1,25 +1,22 @@
 package uncover
 
 import (
-	"context"
 	"crypto/tls"
 	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/projectdiscovery/ratelimit"
 	"github.com/projectdiscovery/retryablehttp-go"
 )
 
 type Session struct {
-	Keys       *Keys
-	Client     *retryablehttp.Client
-	RetryMax   int
-	RateLimits *ratelimit.MultiLimiter
+	Keys     *Keys
+	Client   *retryablehttp.Client
+	RetryMax int
 }
 
-func NewSession(keys *Keys, retryMax, timeout, delay int, engines []string) (*Session, error) {
+func NewSession(keys *Keys, retryMax, timeout int) (*Session, error) {
 	Transport := &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 100,
@@ -40,33 +37,9 @@ func NewSession(keys *Keys, retryMax, timeout, delay int, engines []string) (*Se
 	client := retryablehttp.NewWithHTTPClient(httpclient, options)
 
 	session := &Session{
-		Client:     client,
-		Keys:       keys,
-		RetryMax:   retryMax,
-		RateLimits: &ratelimit.MultiLimiter{},
-	}
-
-	var err error
-	rateLimitOpts := &ratelimit.Options{
-		MaxCount:    uint(retryMax),
-		Duration:    time.Duration(delay),
-		IsUnlimited: delay == 0,
-	}
-
-	rateLimitOpts.Key = engines[0]
-
-	session.RateLimits, err = ratelimit.NewMultiLimiter(context.Background(), rateLimitOpts)
-	if err != nil {
-		return &Session{}, nil
-	}
-
-	for _, engine := range engines[1:] {
-		engineOpts := rateLimitOpts
-		engineOpts.Key = engine
-		err := session.RateLimits.Add(engineOpts)
-		if err != nil {
-			return nil, err
-		}
+		Client:   client,
+		Keys:     keys,
+		RetryMax: retryMax,
 	}
 
 	return session, nil

@@ -18,10 +18,16 @@ const (
 	Size   = 100
 )
 
-type Agent struct{}
+type Agent struct {
+	options *uncover.AgentOptions
+}
 
 func New() (uncover.Agent, error) {
 	return &Agent{}, nil
+}
+
+func NewWithOptions(options *uncover.AgentOptions) (uncover.Agent, error) {
+	return &Agent{options: options}, nil
 }
 
 func (agent *Agent) Name() string {
@@ -71,10 +77,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, fofaRequest *
 		return nil, err
 	}
 	request.Header.Set("Accept", "application/json")
-	err = session.RateLimits.Take(agent.Name())
-	if err != nil {
-		return nil, err
-	}
+	agent.options.RateLimiter.Take()
 	return session.Do(request)
 }
 
