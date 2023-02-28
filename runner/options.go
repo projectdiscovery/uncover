@@ -51,6 +51,7 @@ type Options struct {
 	ZoomEye      goflags.StringSlice
 	CriminalIP   goflags.StringSlice
 	Publicwww    goflags.StringSlice
+	HunterHow    goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -62,7 +63,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,hunterhow) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("search-engine", "Search-Engine",
@@ -76,6 +77,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.Netlas, "netlas", "ne", nil, "search query for netlas (example: -netlas 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.CriminalIP, "criminalip", "cl", nil, "search query for criminalip (example: -criminalip 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Publicwww, "publicwww", "pw", nil, "search query for publicwww (example: -publicwww 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.HunterHow, "hunterhow", "hh", nil, "search query for hunterhow (example: -hunterhow 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -142,7 +144,8 @@ func ParseOptions() *Options {
 		len(options.ZoomEye) == 0 &&
 		len(options.Netlas) == 0 &&
 		len(options.CriminalIP) == 0 &&
-		len(options.Publicwww) == 0 {
+		len(options.Publicwww) == 0 &&
+		len(options.HunterHow) == 0 {
 		options.Engine = append(options.Engine, "shodan")
 	}
 
@@ -225,6 +228,9 @@ func (options *Options) loadProvidersFromEnv() error {
 	if key, exists := os.LookupEnv("PUBLICWWW_API_KEY"); exists {
 		options.Provider.Publicwww = append(options.Provider.Publicwww, key)
 	}
+	if key, exists := os.LookupEnv("HUNTERHOW_API_KEY"); exists {
+		options.Provider.HunterHow = append(options.Provider.HunterHow, key)
+	}
 	return nil
 }
 
@@ -242,7 +248,8 @@ func (options *Options) validateOptions() error {
 		len(options.ZoomEye) == 0 &&
 		len(options.Netlas) == 0 &&
 		len(options.CriminalIP) == 0 &&
-		len(options.Publicwww) == 0 {
+		len(options.Publicwww) == 0 &&
+		len(options.HunterHow) == 0 {
 		return errors.New("no query provided")
 	}
 
@@ -262,7 +269,8 @@ func (options *Options) validateOptions() error {
 		len(options.ZoomEye) == 0 &&
 		len(options.Netlas) == 0 &&
 		len(options.CriminalIP) == 0 &&
-		len(options.Publicwww) == 0 {
+		len(options.Publicwww) == 0 &&
+		len(options.HunterHow) == 0 {
 		return errors.New("no engine specified")
 	}
 

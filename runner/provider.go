@@ -17,6 +17,7 @@ type Provider struct {
 	Netlas     []string `yaml:"netlas"`
 	CriminalIP []string `yaml:"criminalip"`
 	Publicwww  []string `yaml:"publicwww"`
+	HunterHow  []string `yaml:"hunterhow"`
 }
 
 func (provider *Provider) GetKeys() uncover.Keys {
