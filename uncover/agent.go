@@ -1,5 +1,11 @@
 package uncover
 
+import "github.com/projectdiscovery/ratelimit"
+
+type AgentOptions struct {
+	RateLimiter *ratelimit.Limiter
+}
+
 type Query struct {
 	Query string
 	Limit int

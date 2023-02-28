@@ -11,6 +11,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/gologger"
+	"github.com/projectdiscovery/ratelimit"
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
 	"github.com/projectdiscovery/uncover/uncover/agent/criminalip"
@@ -47,6 +48,31 @@ func NewRunner(options *Options) (*Runner, error) {
 func (r *Runner) Run(ctx context.Context, query ...string) error {
 	if !r.options.Provider.HasKeys() && !r.options.hasAnyAnonymousProvider() {
 		return errors.New("no keys provided")
+	}
+
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter, netlasRatelimiter, criminalipRatelimiter, publicwwwRatelimiter *ratelimit.Limiter
+	if r.options.Delay > 0 {
+		censysRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		fofaRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		shodanRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		shodanIdbRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		quakeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		hunterRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		zoomeyeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		netlasRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		criminalipRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		publicwwwRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+	} else {
+		censysRateLimiter = ratelimit.NewUnlimited(context.Background())
+		fofaRateLimiter = ratelimit.NewUnlimited(context.Background())
+		shodanRateLimiter = ratelimit.NewUnlimited(context.Background())
+		shodanIdbRateLimiter = ratelimit.NewUnlimited(context.Background())
+		quakeRatelimiter = ratelimit.NewUnlimited(context.Background())
+		hunterRatelimiter = ratelimit.NewUnlimited(context.Background())
+		zoomeyeRatelimiter = ratelimit.NewUnlimited(context.Background())
+		netlasRatelimiter = ratelimit.NewUnlimited(context.Background())
+		criminalipRatelimiter = ratelimit.NewUnlimited(context.Background())
+		publicwwwRatelimiter = ratelimit.NewUnlimited(context.Background())
 	}
 
 	var agents []uncover.Agent
@@ -99,25 +125,25 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		)
 		switch engine {
 		case "shodan":
-			agent, err = shodan.New()
+			agent, err = shodan.NewWithOptions(&uncover.AgentOptions{RateLimiter: shodanRateLimiter})
 		case "censys":
-			agent, err = censys.New()
+			agent, err = censys.NewWithOptions(&uncover.AgentOptions{RateLimiter: censysRateLimiter})
 		case "fofa":
-			agent, err = fofa.New()
+			agent, err = fofa.NewWithOptions(&uncover.AgentOptions{RateLimiter: fofaRateLimiter})
 		case "shodan-idb":
-			agent, err = shodanidb.New()
+			agent, err = shodanidb.NewWithOptions(&uncover.AgentOptions{RateLimiter: shodanIdbRateLimiter})
 		case "quake":
-			agent, err = quake.New()
+			agent, err = quake.NewWithOptions(&uncover.AgentOptions{RateLimiter: quakeRatelimiter})
 		case "hunter":
-			agent, err = hunter.New()
+			agent, err = hunter.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterRatelimiter})
 		case "zoomeye":
-			agent, err = zoomeye.New()
+			agent, err = zoomeye.NewWithOptions(&uncover.AgentOptions{RateLimiter: zoomeyeRatelimiter})
 		case "netlas":
-			agent, err = netlas.New()
+			agent, err = netlas.NewWithOptions(&uncover.AgentOptions{RateLimiter: netlasRatelimiter})
 		case "criminalip":
-			agent, err = criminalip.New()
+			agent, err = criminalip.NewWithOptions(&uncover.AgentOptions{RateLimiter: criminalipRatelimiter})
 		case "publicwww":
-			agent, err = publicwww.New()
+			agent, err = publicwww.NewWithOptions(&uncover.AgentOptions{RateLimiter: publicwwwRatelimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
@@ -165,11 +191,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 					return
 				}
 
-				session, err := uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.Delay, r.options.Engine)
+				session, err := uncover.NewSession(&keys, r.options.Retries, r.options.Timeout)
 				if err != nil {
 					gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
 				}
-
 				ch, err := agent.Query(session, uncoverQuery)
 				if err != nil {
 					gologger.Warning().Msgf("%s\n", err)
