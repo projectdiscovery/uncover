@@ -68,6 +68,9 @@ func (provider *Provider) GetKeys() uncover.Keys {
 	if len(provider.Publicwww) > 0 {
 		keys.PublicwwwToken = provider.Publicwww[rand.Intn(len(provider.Publicwww))]
 	}
+	if len(provider.HunterHow) > 0 {
+		keys.HunterHowToken = provider.HunterHow[rand.Intn(len(provider.HunterHow))]
+	}
 
 	return keys
 }
@@ -80,5 +83,6 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Hunter) > 0 ||
 		len(provider.ZoomEye) > 0 ||
 		len(provider.Netlas) > 0 ||
-		len(provider.CriminalIP) > 0
+		len(provider.CriminalIP) > 0 ||
+		len(provider.HunterHow) > 0
 }

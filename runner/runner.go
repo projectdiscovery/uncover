@@ -17,6 +17,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/criminalip"
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
 	"github.com/projectdiscovery/uncover/uncover/agent/hunter"
+	"github.com/projectdiscovery/uncover/uncover/agent/hunterhow"
 	"github.com/projectdiscovery/uncover/uncover/agent/netlas"
 	"github.com/projectdiscovery/uncover/uncover/agent/publicwww"
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
@@ -50,7 +51,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		return errors.New("no keys provided")
 	}
 
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter, netlasRatelimiter, criminalipRatelimiter, publicwwwRatelimiter *ratelimit.Limiter
+	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter, netlasRatelimiter, criminalipRatelimiter, publicwwwRatelimiter, hunterhowRateLimiter *ratelimit.Limiter
 	if r.options.Delay > 0 {
 		censysRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 		fofaRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
@@ -62,6 +63,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		netlasRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 		criminalipRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 		publicwwwRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
+		hunterhowRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
 	} else {
 		censysRateLimiter = ratelimit.NewUnlimited(context.Background())
 		fofaRateLimiter = ratelimit.NewUnlimited(context.Background())
@@ -73,6 +75,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		netlasRatelimiter = ratelimit.NewUnlimited(context.Background())
 		criminalipRatelimiter = ratelimit.NewUnlimited(context.Background())
 		publicwwwRatelimiter = ratelimit.NewUnlimited(context.Background())
+		hunterhowRateLimiter = ratelimit.NewUnlimited(context.Background())
 	}
 
 	var agents []uncover.Agent
@@ -116,6 +119,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		r.options.Engine = append(r.options.Engine, "publicwww")
 		query = append(query, r.options.Publicwww...)
 	}
+	if len(r.options.HunterHow) > 0 {
+		r.options.Engine = append(r.options.Engine, "hunterhow")
+		query = append(query, r.options.HunterHow...)
+	}
 
 	// declare clients
 	for _, engine := range r.options.Engine {
@@ -144,6 +151,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 			agent, err = criminalip.NewWithOptions(&uncover.AgentOptions{RateLimiter: criminalipRatelimiter})
 		case "publicwww":
 			agent, err = publicwww.NewWithOptions(&uncover.AgentOptions{RateLimiter: publicwwwRatelimiter})
+		case "hunterhow":
+			agent, err = hunterhow.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterhowRateLimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}
