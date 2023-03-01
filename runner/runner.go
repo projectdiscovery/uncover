@@ -17,7 +17,6 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
 	"github.com/projectdiscovery/uncover/uncover/agent/hunter"
 	"github.com/projectdiscovery/uncover/uncover/agent/netlas"
-	"github.com/projectdiscovery/uncover/uncover/agent/publicwww"
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
@@ -94,37 +93,35 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 	// declare clients
 	for _, engine := range r.options.Engine {
 		var (
-			agent uncover.Agent
-			err   error
+			err error
 		)
 		switch engine {
 		case "shodan":
-			agent, err = shodan.New()
+			agents = append(agents, &shodan.Agent{})
 		case "censys":
-			agent, err = censys.New()
+			agents = append(agents, &censys.Agent{})
 		case "fofa":
-			agent, err = fofa.New()
+			agents = append(agents, &fofa.Agent{})
 		case "shodan-idb":
-			agent, err = shodanidb.New()
+			agents = append(agents, &shodanidb.Agent{})
 		case "quake":
-			agent, err = quake.New()
+			agents = append(agents, &quake.Agent{})
 		case "hunter":
-			agent, err = hunter.New()
+			agents = append(agents, &hunter.Agent{})
 		case "zoomeye":
-			agent, err = zoomeye.New()
+			agents = append(agents, &zoomeye.Agent{})
 		case "netlas":
-			agent, err = netlas.New()
+			agents = append(agents, &netlas.Agent{})
 		case "criminalip":
-			agent, err = criminalip.New()
+			agents = append(agents, &criminalip.Agent{})
 		case "publicwww":
-			agent, err = publicwww.New()
+			agents = append(agents, &criminalip.Agent{})
 		default:
 			err = errors.New("unknown agent type")
 		}
 		if err != nil {
 			return err
 		}
-		agents = append(agents, agent)
 	}
 
 	// open the output file - always overwrite

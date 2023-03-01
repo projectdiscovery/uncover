@@ -20,10 +20,6 @@ const (
 
 type Agent struct{}
 
-func New() (uncover.Agent, error) {
-	return &Agent{}, nil
-}
-
 func (agent *Agent) Name() string {
 	return "fofa"
 }
