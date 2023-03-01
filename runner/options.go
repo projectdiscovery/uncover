@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/goflags"
@@ -37,8 +36,7 @@ type Options struct {
 	Verbose      bool
 	NoColor      bool
 	Timeout      int
-	Delay        int
-	delay        time.Duration
+	RateLimit    int
 	Provider     *Provider
 	Retries      int
 	Shodan       goflags.StringSlice
@@ -82,7 +80,7 @@ func ParseOptions() *Options {
 		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", defaultProviderConfigLocation, "provider configuration file"),
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
-		flagSet.IntVar(&options.Delay, "delay", 1, "delay between requests in seconds (0 to disable)"),
+		flagSet.IntVarP(&options.RateLimit, "rate-limit", "rl", 0, "maximum number of http requests to send per second"),
 		flagSet.IntVar(&options.Retries, "retry", 2, "number of times to retry a failed request"),
 	)
 
@@ -264,12 +262,6 @@ func (options *Options) validateOptions() error {
 		len(options.CriminalIP) == 0 &&
 		len(options.Publicwww) == 0 {
 		return errors.New("no engine specified")
-	}
-
-	if options.Delay < 0 {
-		return errors.New("delay can't be negative")
-	} else {
-		options.delay = time.Duration(options.Delay) * time.Second
 	}
 
 	return nil

@@ -162,7 +162,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 					return
 				}
 
-				session, err := uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.Delay, r.options.Engine)
+				session, err := uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimit, r.options.Engine)
 				if err != nil {
 					gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
 				}

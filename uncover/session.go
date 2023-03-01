@@ -19,7 +19,7 @@ type Session struct {
 	RateLimits *ratelimit.MultiLimiter
 }
 
-func NewSession(keys *Keys, retryMax, timeout, delay int, engines []string) (*Session, error) {
+func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string) (*Session, error) {
 	Transport := &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 100,
@@ -49,8 +49,8 @@ func NewSession(keys *Keys, retryMax, timeout, delay int, engines []string) (*Se
 	var err error
 	rateLimitOpts := &ratelimit.Options{
 		MaxCount:    1,
-		Duration:    time.Duration(delay),
-		IsUnlimited: delay == 0,
+		Duration:    time.Duration(rateLimit),
+		IsUnlimited: rateLimit == 0,
 	}
 
 	rateLimitOpts.Key = engines[0]
