@@ -50,6 +50,7 @@ type Options struct {
 	Hunter       goflags.StringSlice
 	ZoomEye      goflags.StringSlice
 	CriminalIP   goflags.StringSlice
+	Publicwww    goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -74,6 +75,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.ZoomEye, "zoomeye", "ze", nil, "search query for zoomeye (example: -zoomeye 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Netlas, "netlas", "ne", nil, "search query for netlas (example: -netlas 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.CriminalIP, "criminalip", "cl", nil, "search query for criminalip (example: -criminalip 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Publicwww, "publicwww", "pw", nil, "search query for publicwww (example: -publicwww 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -139,7 +141,8 @@ func ParseOptions() *Options {
 		len(options.Hunter) == 0 &&
 		len(options.ZoomEye) == 0 &&
 		len(options.Netlas) == 0 &&
-		len(options.CriminalIP) == 0 {
+		len(options.CriminalIP) == 0 &&
+		len(options.Publicwww) == 0 {
 		options.Engine = append(options.Engine, "shodan")
 	}
 
@@ -217,8 +220,11 @@ func (options *Options) loadProvidersFromEnv() error {
 		options.Provider.Netlas = append(options.Provider.Netlas, key)
 	}
 	if key, exists := os.LookupEnv("CRIMINALIP_API_KEY"); exists {
-                options.Provider.CriminalIP = append(options.Provider.CriminalIP, key)
-        }
+		options.Provider.CriminalIP = append(options.Provider.CriminalIP, key)
+	}
+	if key, exists := os.LookupEnv("PUBLICWWW_API_KEY"); exists {
+		options.Provider.Publicwww = append(options.Provider.Publicwww, key)
+	}
 	return nil
 }
 
@@ -235,7 +241,8 @@ func (options *Options) validateOptions() error {
 		len(options.Hunter) == 0 &&
 		len(options.ZoomEye) == 0 &&
 		len(options.Netlas) == 0 &&
-		len(options.CriminalIP) == 0 {
+		len(options.CriminalIP) == 0 &&
+		len(options.Publicwww) == 0 {
 		return errors.New("no query provided")
 	}
 
@@ -254,7 +261,8 @@ func (options *Options) validateOptions() error {
 		len(options.Hunter) == 0 &&
 		len(options.ZoomEye) == 0 &&
 		len(options.Netlas) == 0 &&
-		len(options.CriminalIP) == 0 {
+		len(options.CriminalIP) == 0 &&
+		len(options.Publicwww) == 0 {
 		return errors.New("no engine specified")
 	}
 

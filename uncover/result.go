@@ -12,6 +12,7 @@ type Result struct {
 	IP        string `json:"ip"`
 	Port      int    `json:"port"`
 	Host      string `json:"host"`
+	Url       string `json:"url"`
 	Raw       []byte `json:"-"`
 	Error     error  `json:"-"`
 }

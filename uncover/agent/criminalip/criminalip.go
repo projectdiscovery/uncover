@@ -44,8 +44,8 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 		currentPage := 1
 		for {
 			criminalipRequest := &CriminalIPRequest{
-				Query: query.Query,
-				Offset:  currentPage,
+				Query:  query.Query,
+				Offset: currentPage,
 			}
 
 			criminalipResponse := agent.query(URL, session, criminalipRequest, results)
@@ -106,6 +106,6 @@ func (agent *Agent) query(URL string, session *uncover.Session, criminalipReques
 }
 
 type CriminalIPRequest struct {
-	Query string
-	Offset  int
+	Query  string
+	Offset int
 }

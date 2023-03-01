@@ -13,7 +13,6 @@ require (
 	github.com/projectdiscovery/mapcidr v1.1.0
 	github.com/projectdiscovery/ratelimit v0.0.6
 	github.com/projectdiscovery/retryablehttp-go v1.0.11
-	github.com/projectdiscovery/stringsutil v0.0.2
 	github.com/stretchr/testify v1.8.1
 )
 
