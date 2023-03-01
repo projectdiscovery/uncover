@@ -65,10 +65,6 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, censysRequest
 	}
 	request.Header.Set("Accept", "application/json")
 	request.SetBasicAuth(session.Keys.CensysToken, session.Keys.CensysSecret)
-	err = session.RateLimits.Take(agent.Name())
-	if err != nil {
-		return nil, err
-	}
 	return session.Do(request)
 }
 

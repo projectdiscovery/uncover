@@ -63,10 +63,6 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, criminalipReq
 		return nil, err
 	}
 	request.Header.Set("x-api-key", session.Keys.CriminalIPToken)
-	err = session.RateLimits.Take(agent.Name())
-	if err != nil {
-		return nil, err
-	}
 	return session.Do(request)
 }
 
