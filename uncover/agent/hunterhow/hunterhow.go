@@ -1,19 +1,16 @@
 package hunterhow
 
 import (
-	"encoding/csv"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
-	"strings"
 
 	"github.com/projectdiscovery/uncover/uncover"
 )
 
 const (
 	baseURL      = "https://api.hunter.how/"
-	baseEndpoint = "search/"
+	baseEndpoint = "search"
 	Size         = 100
 )
 
@@ -50,7 +47,7 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 		for {
 			hunterhowRequest := &Request{
 				Query:    query.Query,
-				PageSize: query.Limit,
+				PageSize: 100,
 				Page:     pageQuery,
 			}
 
@@ -82,41 +79,27 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 		return nil
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	var apiResponse Response
+	err = json.NewDecoder(resp.Body).Decode(&apiResponse)
 	if err != nil {
 		results <- uncover.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
-	content := string(body)
-	reader := csv.NewReader(strings.NewReader(content))
-	reader.Comma = ';'
+	if apiResponse.Code != 200 {
+		results <- uncover.Result{Source: agent.Name(), Error: errors.New(apiResponse.Message)}
+		return nil
+	}
 
 	var lines []string
-	for {
-		record, err := reader.Read()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			results <- uncover.Result{Source: agent.Name(), Error: err}
-		}
-
+	for _, data := range apiResponse.Data.List {
 		result := uncover.Result{Source: agent.Name()}
-		if len(record) > 0 {
-			trimmedLine := strings.TrimRight(record[0], " \r\n\t")
-			if trimmedLine != "" {
-				hostname, err := uncover.GetHostname(record[0])
-				if err != nil {
-					results <- uncover.Result{Source: agent.Name(), Error: err}
-				}
-				result.Host = hostname
-				result.Url = record[0]
-				raw, _ := json.Marshal(result)
-				result.Raw = raw
-				results <- result
-				lines = append(lines, trimmedLine)
-			}
-		}
+		result.Host = data.Domain
+		result.IP = data.IP
+		result.Port = data.Port
+		raw, _ := json.Marshal(result)
+		result.Raw = raw
+		results <- result
+		lines = append(lines, data.Domain)
 	}
 
 	return lines

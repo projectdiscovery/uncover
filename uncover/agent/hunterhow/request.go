@@ -2,8 +2,6 @@ package hunterhow
 
 import (
 	"encoding/base64"
-	"fmt"
-	"log"
 	"strconv"
 	"time"
 )
@@ -22,15 +20,12 @@ func (r *Request) buildURL(key string) string {
 	endTimeStr := now.Format(timeFormat)
 
 	queryStr := baseURL +
-		baseEndpoint + "/?api-key=" + key +
+		baseEndpoint + "?api-key=" + key +
 		"&query=" + base64.StdEncoding.EncodeToString([]byte(r.Query)) +
 		"&start_time=" + startTimeStr +
 		"&end_time=" + endTimeStr +
 		"&page_size=" + strconv.Itoa(r.PageSize) +
 		"&page=" + strconv.Itoa(r.Page)
-
-	fmt.Println(queryStr)
-	log.Fatal(1)
 
 	return queryStr
 }
