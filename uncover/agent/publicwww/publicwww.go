@@ -102,6 +102,7 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 				hostname, err := uncover.GetHostname(record[0])
 				if err != nil {
 					results <- uncover.Result{Source: agent.Name(), Error: err}
+					continue
 				}
 				result.Host = hostname
 				result.Url = record[0]
