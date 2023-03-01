@@ -47,7 +47,7 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 		for {
 			hunterhowRequest := &Request{
 				Query:    query.Query,
-				PageSize: 100,
+				PageSize: query.Limit,
 				Page:     pageQuery,
 			}
 
