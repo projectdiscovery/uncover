@@ -67,10 +67,6 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, zoomeyeReques
 		return nil, err
 	}
 	request.Header.Set("API-KEY", session.Keys.ZoomEyeToken)
-	err = session.RateLimits.Take(agent.Name())
-	if err != nil {
-		return nil, err
-	}
 	return session.Do(request)
 }
 

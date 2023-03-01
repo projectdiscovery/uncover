@@ -99,10 +99,5 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, quakeRequest 
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-QuakeToken", session.Keys.QuakeToken)
-
-	err = session.RateLimits.Take(agent.Name())
-	if err != nil {
-		return nil, err
-	}
 	return session.Do(request)
 }

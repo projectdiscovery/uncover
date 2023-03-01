@@ -93,9 +93,5 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, hunterRequest
 		return nil, err
 	}
 	request.Header.Set("Accept", "application/json")
-	err = session.RateLimits.Take(agent.Name())
-	if err != nil {
-		return nil, err
-	}
 	return session.Do(request)
 }

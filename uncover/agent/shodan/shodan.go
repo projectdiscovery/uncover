@@ -64,10 +64,6 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, shodanRequest
 	if err != nil {
 		return nil, err
 	}
-	err = session.RateLimits.Take(agent.Name())
-	if err != nil {
-		return nil, err
-	}
 	return session.Do(request)
 }
 

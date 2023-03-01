@@ -92,10 +92,5 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Respon
 
 	request.Header.Set("Content-Type", contentType)
 	request.Header.Set("X-API-Key", session.Keys.NetlasToken)
-
-	err = session.RateLimits.Take(agent.Name())
-	if err != nil {
-		return nil, err
-	}
 	return session.Do(request)
 }
