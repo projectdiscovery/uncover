@@ -63,7 +63,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,hunterhow) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("search-engine", "Search-Engine",
