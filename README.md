@@ -71,7 +71,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow) (default shodan)
 
 SEARCH-ENGINE:
    -s, -shodan string[]       search query for shodan (example: -shodan 'query.txt')
@@ -83,6 +83,8 @@ SEARCH-ENGINE:
    -ze, -zoomeye string[]     search query for zoomeye (example: -zoomeye 'query.txt')
    -ne, -netlas string[]      search query for netlas (example: -netlas 'query.txt')
    -cl, -criminalip string[]  search query for criminalip (example: -criminalip 'query.txt')
+   -pw, -publicwww string[]   search query for publicwww (example: -publicwww 'query.txt')
+   -hh, -hunterhow string[]   search query for hunterhow (example: -hunterhow 'query.txt')
 
 CONFIG:
    -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
