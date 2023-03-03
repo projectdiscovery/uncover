@@ -3,6 +3,7 @@ package uncover
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -39,6 +40,19 @@ func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, 
 	options.RetryWaitMax = time.Duration(timeout) * time.Second
 	client := retryablehttp.NewWithHTTPClient(httpclient, options)
 
+	var defaultRateLimits = map[string]*ratelimit.Options{
+		"shodan":     {Key: "shodan", MaxCount: 1, Duration: time.Second, IsUnlimited: true},
+		"shodan-idb": {Key: "shodan-idb", MaxCount: 1, Duration: time.Second, IsUnlimited: true},
+		"fofa":       {Key: "fofa", MaxCount: 1, Duration: time.Second, IsUnlimited: true},
+		"censys":     {Key: "censys", MaxCount: 1, Duration: 3 * time.Second, IsUnlimited: false},
+		"quake":      {Key: "quake", MaxCount: 1, Duration: time.Second, IsUnlimited: true},
+		"hunter":     {Key: "hunter", MaxCount: 15, Duration: time.Second, IsUnlimited: false},
+		"zoomeye":    {Key: "zoomeye", MaxCount: 1, Duration: time.Second, IsUnlimited: false},
+		"netlas":     {Key: "netlas", MaxCount: 1, Duration: time.Second, IsUnlimited: false},
+		"criminalip": {Key: "criminalip", MaxCount: 1, Duration: time.Second, IsUnlimited: true},
+		"publicwww":  {Key: "publicwww", MaxCount: 1, Duration: time.Minute, IsUnlimited: false},
+	}
+
 	session := &Session{
 		Client:     client,
 		Keys:       keys,
@@ -47,22 +61,23 @@ func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, 
 	}
 
 	var err error
-	rateLimitOpts := &ratelimit.Options{
-		MaxCount:    uint(rateLimit),
-		Duration:    duration,
-		IsUnlimited: rateLimit == 0,
-	}
-
-	rateLimitOpts.Key = engines[0]
-	session.RateLimits, err = ratelimit.NewMultiLimiter(context.Background(), rateLimitOpts)
+	session.RateLimits, err = ratelimit.NewMultiLimiter(context.Background(), defaultRateLimits[engines[0]])
 	if err != nil {
-		return &Session{}, nil
+		return &Session{}, err
 	}
 
 	for _, engine := range engines[1:] {
-		engineOpts := rateLimitOpts
-		engineOpts.Key = engine
-		err := session.RateLimits.Add(engineOpts)
+		rateLimitOpts := defaultRateLimits[engine]
+		if rateLimitOpts == nil {
+			return nil, fmt.Errorf("no default rate limit found for engine %s", engine)
+		}
+
+		if rateLimit > 0 {
+			rateLimitOpts.MaxCount = uint(rateLimit)
+			rateLimitOpts.Duration = duration
+		}
+		rateLimitOpts.IsUnlimited = rateLimit == 0
+		err := session.RateLimits.Add(rateLimitOpts)
 		if err != nil {
 			return nil, err
 		}
