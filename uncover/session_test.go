@@ -19,7 +19,7 @@ func TestSessionRetry(t *testing.T) {
 	}))
 	ts := httptest.NewServer(router)
 	engines := []string{"shoda,", "publicwww"}
-	session, err := NewSession(&Keys{}, 5, 3, 60, engines)
+	session, err := NewSession(&Keys{}, 5, 3, 60, engines, time.Second)
 	require.Nil(t, err)
 	req, err := retryablehttp.NewRequest(http.MethodGet, ts.URL, nil)
 	require.Nil(t, err)
