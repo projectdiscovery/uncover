@@ -17,6 +17,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
 	"github.com/projectdiscovery/uncover/uncover/agent/hunter"
 	"github.com/projectdiscovery/uncover/uncover/agent/netlas"
+	"github.com/projectdiscovery/uncover/uncover/agent/publicwww"
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodan"
 	"github.com/projectdiscovery/uncover/uncover/agent/shodanidb"
@@ -115,7 +116,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		case "criminalip":
 			agents = append(agents, &criminalip.Agent{})
 		case "publicwww":
-			agents = append(agents, &criminalip.Agent{})
+			agents = append(agents, &publicwww.Agent{})
 		default:
 			err = errors.New("unknown agent type")
 		}
@@ -164,8 +165,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 
 				var session *uncover.Session
 				if r.options.RateLimitMinute > 0 {
-					session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimit, r.options.Engine, time.Minute)
-				} else if r.options.RateLimit > 0 {
+					session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimitMinute, r.options.Engine, time.Minute)
+				} else {
 					session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimit, r.options.Engine, time.Second)
 				}
 				if err != nil {
