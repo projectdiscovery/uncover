@@ -23,7 +23,7 @@ func TestSessionRetry(t *testing.T) {
 	require.Nil(t, err)
 	req, err := retryablehttp.NewRequest(http.MethodGet, ts.URL, nil)
 	require.Nil(t, err)
-	resp, err := session.Do(req)
+	resp, err := session.Do(req, engines[0])
 	t.Log(resp, err)
 	require.ErrorContains(t, err, "giving up after 6 attempts")
 	require.Nil(t, resp)

@@ -64,7 +64,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, shodanRequest
 	if err != nil {
 		return nil, err
 	}
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }
 
 func (agent *Agent) query(URL string, session *uncover.Session, shodanRequest *ShodanRequest, results chan uncover.Result) *ShodanResponse {

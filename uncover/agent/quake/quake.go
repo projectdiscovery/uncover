@@ -99,5 +99,5 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, quakeRequest 
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-QuakeToken", session.Keys.QuakeToken)
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }

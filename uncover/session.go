@@ -88,12 +88,10 @@ func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, 
 	return session, nil
 }
 
-func (s *Session) Do(request *retryablehttp.Request, sources ...string) (*http.Response, error) {
-	for _, source := range sources {
-		err := s.RateLimits.Take(source)
-		if err != nil {
-			return nil, err
-		}
+func (s *Session) Do(request *retryablehttp.Request, source string) (*http.Response, error) {
+	err := s.RateLimits.Take(source)
+	if err != nil {
+		return nil, err
 	}
 	// close request connection (does not reuse connections)
 	request.Close = true
