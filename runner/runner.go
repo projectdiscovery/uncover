@@ -16,6 +16,7 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/criminalip"
 	"github.com/projectdiscovery/uncover/uncover/agent/fofa"
 	"github.com/projectdiscovery/uncover/uncover/agent/hunter"
+	"github.com/projectdiscovery/uncover/uncover/agent/hunterhow"
 	"github.com/projectdiscovery/uncover/uncover/agent/netlas"
 	"github.com/projectdiscovery/uncover/uncover/agent/publicwww"
 	"github.com/projectdiscovery/uncover/uncover/agent/quake"
@@ -90,6 +91,10 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		r.options.Engine = append(r.options.Engine, "publicwww")
 		query = append(query, r.options.Publicwww...)
 	}
+	if len(r.options.HunterHow) > 0 {
+		r.options.Engine = append(r.options.Engine, "hunterhow")
+		query = append(query, r.options.HunterHow...)
+	}
 
 	// declare clients
 	for _, engine := range r.options.Engine {
@@ -116,7 +121,9 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		case "criminalip":
 			agents = append(agents, &criminalip.Agent{})
 		case "publicwww":
-			agents = append(agents, &publicwww.Agent{})
+			agent, err = publicwww.NewWithOptions(&uncover.AgentOptions{RateLimiter: publicwwwRatelimiter})
+		case "hunterhow":
+			agent, err = hunterhow.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterhowRateLimiter})
 		default:
 			err = errors.New("unknown agent type")
 		}

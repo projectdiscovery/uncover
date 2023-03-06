@@ -13,6 +13,7 @@ import (
 	"github.com/projectdiscovery/gologger/levels"
 	fileutil "github.com/projectdiscovery/utils/file"
 	folderutil "github.com/projectdiscovery/utils/folder"
+	genericutil "github.com/projectdiscovery/utils/generic"
 )
 
 var (
@@ -22,34 +23,35 @@ var (
 
 // Options contains the configuration options for tuning the enumeration process.
 type Options struct {
-	Query           goflags.StringSlice
-	Engine          goflags.StringSlice
-	ConfigFile      string
-	ProviderFile    string
-	OutputFile      string
-	OutputFields    string
-	JSON            bool
-	Raw             bool
-	Limit           int
-	Silent          bool
-	Version         bool
-	Verbose         bool
-	NoColor         bool
-	Timeout         int
-	RateLimit       int
-	RateLimitMinute int
-	Provider        *Provider
-	Retries         int
-	Shodan          goflags.StringSlice
-	ShodanIdb       goflags.StringSlice
-	Fofa            goflags.StringSlice
-	Censys          goflags.StringSlice
-	Quake           goflags.StringSlice
-	Netlas          goflags.StringSlice
-	Hunter          goflags.StringSlice
-	ZoomEye         goflags.StringSlice
-	CriminalIP      goflags.StringSlice
-	Publicwww       goflags.StringSlice
+	Query        goflags.StringSlice
+	Engine       goflags.StringSlice
+	ConfigFile   string
+	ProviderFile string
+	OutputFile   string
+	OutputFields string
+	JSON         bool
+	Raw          bool
+	Limit        int
+	Silent       bool
+	Version      bool
+	Verbose      bool
+	NoColor      bool
+	Timeout      int
+	Delay        int
+	delay        time.Duration
+	Provider     *Provider
+	Retries      int
+	Shodan       goflags.StringSlice
+	ShodanIdb    goflags.StringSlice
+	Fofa         goflags.StringSlice
+	Censys       goflags.StringSlice
+	Quake        goflags.StringSlice
+	Netlas       goflags.StringSlice
+	Hunter       goflags.StringSlice
+	ZoomEye      goflags.StringSlice
+	CriminalIP   goflags.StringSlice
+	Publicwww    goflags.StringSlice
+	HunterHow    goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -61,7 +63,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("search-engine", "Search-Engine",
@@ -75,6 +77,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.Netlas, "netlas", "ne", nil, "search query for netlas (example: -netlas 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.CriminalIP, "criminalip", "cl", nil, "search query for criminalip (example: -criminalip 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Publicwww, "publicwww", "pw", nil, "search query for publicwww (example: -publicwww 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.HunterHow, "hunterhow", "hh", nil, "search query for hunterhow (example: -hunterhow 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -132,17 +135,19 @@ func ParseOptions() *Options {
 		gologger.Warning().Msgf("couldn't parse env vars: %s\n", err)
 	}
 
-	if len(options.Engine) == 0 &&
-		len(options.Shodan) == 0 &&
-		len(options.Censys) == 0 &&
-		len(options.Quake) == 0 &&
-		len(options.Fofa) == 0 &&
-		len(options.ShodanIdb) == 0 &&
-		len(options.Hunter) == 0 &&
-		len(options.ZoomEye) == 0 &&
-		len(options.Netlas) == 0 &&
-		len(options.CriminalIP) == 0 &&
-		len(options.Publicwww) == 0 {
+	if genericutil.EqualsAll(0,
+		len(options.Engine),
+		len(options.Shodan),
+		len(options.Censys),
+		len(options.Quake),
+		len(options.Fofa),
+		len(options.ShodanIdb),
+		len(options.Hunter),
+		len(options.ZoomEye),
+		len(options.Netlas),
+		len(options.CriminalIP),
+		len(options.Publicwww),
+		len(options.HunterHow)) {
 		options.Engine = append(options.Engine, "shodan")
 	}
 
@@ -225,6 +230,9 @@ func (options *Options) loadProvidersFromEnv() error {
 	if key, exists := os.LookupEnv("PUBLICWWW_API_KEY"); exists {
 		options.Provider.Publicwww = append(options.Provider.Publicwww, key)
 	}
+	if key, exists := os.LookupEnv("HUNTERHOW_API_KEY"); exists {
+		options.Provider.HunterHow = append(options.Provider.HunterHow, key)
+	}
 	return nil
 }
 
@@ -232,17 +240,19 @@ func (options *Options) loadProvidersFromEnv() error {
 func (options *Options) validateOptions() error {
 	// Check if domain, list of domains, or stdin info was provided.
 	// If none was provided, then return.
-	if len(options.Query) == 0 &&
-		len(options.Shodan) == 0 &&
-		len(options.Censys) == 0 &&
-		len(options.Quake) == 0 &&
-		len(options.Fofa) == 0 &&
-		len(options.ShodanIdb) == 0 &&
-		len(options.Hunter) == 0 &&
-		len(options.ZoomEye) == 0 &&
-		len(options.Netlas) == 0 &&
-		len(options.CriminalIP) == 0 &&
-		len(options.Publicwww) == 0 {
+	if genericutil.EqualsAll(0,
+		len(options.Query),
+		len(options.Shodan),
+		len(options.Censys),
+		len(options.Quake),
+		len(options.Fofa),
+		len(options.ShodanIdb),
+		len(options.Hunter),
+		len(options.ZoomEye),
+		len(options.Netlas),
+		len(options.CriminalIP),
+		len(options.Publicwww),
+		len(options.HunterHow)) {
 		return errors.New("no query provided")
 	}
 
@@ -252,17 +262,19 @@ func (options *Options) validateOptions() error {
 	}
 
 	// Validate threads and options
-	if len(options.Engine) == 0 &&
-		len(options.Shodan) == 0 &&
-		len(options.Censys) == 0 &&
-		len(options.Quake) == 0 &&
-		len(options.Fofa) == 0 &&
-		len(options.ShodanIdb) == 0 &&
-		len(options.Hunter) == 0 &&
-		len(options.ZoomEye) == 0 &&
-		len(options.Netlas) == 0 &&
-		len(options.CriminalIP) == 0 &&
-		len(options.Publicwww) == 0 {
+	if genericutil.EqualsAll(0,
+		len(options.Engine),
+		len(options.Shodan),
+		len(options.Censys),
+		len(options.Quake),
+		len(options.Fofa),
+		len(options.ShodanIdb),
+		len(options.Hunter),
+		len(options.ZoomEye),
+		len(options.Netlas),
+		len(options.CriminalIP),
+		len(options.Publicwww),
+		len(options.HunterHow)) {
 		return errors.New("no engine specified")
 	}
 

@@ -12,6 +12,7 @@ type Keys struct {
 	NetlasToken     string
 	CriminalIPToken string
 	PublicwwwToken  string
+	HunterHowToken  string
 }
 
 func (keys Keys) Empty() bool {
@@ -25,5 +26,6 @@ func (keys Keys) Empty() bool {
 		keys.ZoomEyeToken == "" &&
 		keys.NetlasToken == "" &&
 		keys.CriminalIPToken == "" &&
-		keys.PublicwwwToken == ""
+		keys.PublicwwwToken == "" &&
+		keys.HunterHowToken == ""
 }
