@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/goflags"
@@ -38,8 +37,6 @@ type Options struct {
 	Verbose         bool
 	NoColor         bool
 	Timeout         int
-	Delay           int
-	delay           time.Duration
 	RateLimit       int
 	RateLimitMinute int
 	Provider        *Provider
