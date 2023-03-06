@@ -87,11 +87,12 @@ SEARCH-ENGINE:
    -hh, -hunterhow string[]   search query for hunterhow (example: -hunterhow 'query.txt')
 
 CONFIG:
-   -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
-   -config string         flag configuration file (default "$HOME/.config/uncover/config.yaml")
-   -timeout int           timeout in seconds (default 30)
-   -rl, -rate-limit int   maximum number of http requests to send per second
-   -retry int             number of times to retry a failed request (default 2)
+   -pc, -provider string         provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
+   -config string                flag configuration file (default "$HOME/.config/uncover/config.yaml")
+   -timeout int                  timeout in seconds (default 30)
+   -rl, -rate-limit int          maximum number of http requests to send per second
+   -rlm, -rate-limit-minute int  maximum number of requests to send per minute
+   -retry int                    number of times to retry a failed request (default 2)
 
 OUTPUT:
    -o, -output string  output file to write found results
