@@ -60,14 +60,14 @@ func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, 
 		RateLimits: &ratelimit.MultiLimiter{},
 	}
 
-	for i, engine := range engines {
+	for _, engine := range engines {
 		var err error
 		rateLimitOpts := defaultRateLimits[engine]
 		if rateLimitOpts == nil {
 			return nil, fmt.Errorf("no default rate limit found for engine %s", engine)
 		}
-		if i == 0 {
-			session.RateLimits, err = ratelimit.NewMultiLimiter(context.Background(), defaultRateLimits[engine])
+		if session.RateLimits == nil {
+			session.RateLimits, err = ratelimit.NewMultiLimiter(context.Background(), rateLimitOpts)
 			if err != nil {
 				return &Session{}, err
 			}
@@ -75,8 +75,9 @@ func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, 
 			if rateLimit > 0 {
 				rateLimitOpts.MaxCount = uint(rateLimit)
 				rateLimitOpts.Duration = duration
+			} else {
+				rateLimitOpts.IsUnlimited = true
 			}
-			rateLimitOpts.IsUnlimited = rateLimit == 0
 			err = session.RateLimits.Add(rateLimitOpts)
 			if err != nil {
 				return nil, err
