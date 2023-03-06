@@ -105,21 +105,10 @@ func (s *Session) Do(request *retryablehttp.Request, sources ...string) (*http.R
 		requestURL, _ := url.QueryUnescape(request.URL.String())
 		return resp, errors.Errorf("unexpected status code %d received from %s", resp.StatusCode, requestURL)
 	}
-	// var f *os.File
-	// var err error
-	// if _, _, ok := request.BasicAuth(); ok {
-	// 	f, err = os.Open("/Users/marcornvh/go/src/github.com/projectdiscovery/uncover/uncover/agent/censys/example.json")
-	// } else {
-	// 	f, err = os.Open("/Users/marcornvh/go/src/github.com/projectdiscovery/uncover/uncover/agent/shodan/example.json")
-	// }
 
 	if err != nil {
 		return nil, err
 	}
 
-	// resp := &http.Response{
-	// 	StatusCode: 200,
-	// 	Body:       f,
-	// }
 	return resp, nil
 }
