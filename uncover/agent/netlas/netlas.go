@@ -92,5 +92,5 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Respon
 
 	request.Header.Set("Content-Type", contentType)
 	request.Header.Set("X-API-Key", session.Keys.NetlasToken)
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }

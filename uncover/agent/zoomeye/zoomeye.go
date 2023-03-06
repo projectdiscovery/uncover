@@ -67,7 +67,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, zoomeyeReques
 		return nil, err
 	}
 	request.Header.Set("API-KEY", session.Keys.ZoomEyeToken)
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }
 
 func (agent *Agent) query(URL string, session *uncover.Session, zoomeyeRequest *ZoomEyeRequest, results chan uncover.Result) *ZoomEyeResponse {

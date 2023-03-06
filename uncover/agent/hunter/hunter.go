@@ -93,5 +93,5 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, hunterRequest
 		return nil, err
 	}
 	request.Header.Set("Accept", "application/json")
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }

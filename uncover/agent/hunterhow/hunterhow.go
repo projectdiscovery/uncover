@@ -104,5 +104,5 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Respon
 	if err != nil {
 		return nil, err
 	}
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }

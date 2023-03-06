@@ -65,7 +65,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, censysRequest
 	}
 	request.Header.Set("Accept", "application/json")
 	request.SetBasicAuth(session.Keys.CensysToken, session.Keys.CensysSecret)
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }
 
 func (agent *Agent) query(URL string, session *uncover.Session, censysRequest *CensysRequest, results chan uncover.Result) *CensysResponse {
