@@ -121,9 +121,9 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		case "criminalip":
 			agents = append(agents, &criminalip.Agent{})
 		case "publicwww":
-			agent, err = publicwww.NewWithOptions(&uncover.AgentOptions{RateLimiter: publicwwwRatelimiter})
+			agents = append(agents, &publicwww.Agent{})
 		case "hunterhow":
-			agent, err = hunterhow.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterhowRateLimiter})
+			agents = append(agents, &hunterhow.Agent{})
 		default:
 			err = errors.New("unknown agent type")
 		}
