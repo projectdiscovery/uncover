@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/projectdiscovery/mapcidr"
 	"github.com/projectdiscovery/uncover/uncover"
 	iputil "github.com/projectdiscovery/utils/ip"

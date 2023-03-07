@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/projectdiscovery/ratelimit"
 	"github.com/projectdiscovery/retryablehttp-go"
 )
@@ -102,7 +101,7 @@ func (s *Session) Do(request *retryablehttp.Request, source string) (*http.Respo
 
 	if resp.StatusCode != http.StatusOK {
 		requestURL, _ := url.QueryUnescape(request.URL.String())
-		return resp, errors.Errorf("unexpected status code %d received from %s", resp.StatusCode, requestURL)
+		return resp, fmt.Errorf("unexpected status code %d received from %s", resp.StatusCode, requestURL)
 	}
 
 	if err != nil {
