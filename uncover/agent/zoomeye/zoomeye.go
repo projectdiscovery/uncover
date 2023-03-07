@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/pkg/errors"
+	"errors"
 
 	"github.com/projectdiscovery/uncover/uncover"
 )

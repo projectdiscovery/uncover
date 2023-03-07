@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/pkg/errors"
+	"errors"
 
 	"github.com/projectdiscovery/uncover/uncover"
 )
