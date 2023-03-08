@@ -87,11 +87,12 @@ SEARCH-ENGINE:
    -hh, -hunterhow string[]   search query for hunterhow (example: -hunterhow 'query.txt')
 
 CONFIG:
-   -pc, -provider string  provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
-   -config string         flag configuration file (default "$HOME/.config/uncover/config.yaml")
-   -timeout int           timeout in seconds (default 30)
-   -delay int             delay between requests in seconds (0 to disable) (default 1)
-   -retry int             number of times to retry a failed request (default 2)
+   -pc, -provider string         provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
+   -config string                flag configuration file (default "$HOME/.config/uncover/config.yaml")
+   -timeout int                  timeout in seconds (default 30)
+   -rl, -rate-limit int          maximum number of http requests to send per second
+   -rlm, -rate-limit-minute int  maximum number of requests to send per minute
+   -retry int                    number of times to retry a failed request (default 2)
 
 OUTPUT:
    -o, -output string  output file to write found results
@@ -139,6 +140,9 @@ netlas:
 criminalip:
   - CRIMINALIP_API_KEY_1
   - CRIMINALIP_API_KEY_2
+publicwww:
+  - PUBLICWWW_API_KEY_1
+  - PUBLICWWW_API_KEY_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -156,9 +160,10 @@ export HUNTER_API_KEY=xxx
 export ZOOMEYE_API_KEY=xxx
 export NETLAS_API_KEY=xxx
 export CRIMINALIP_API_KEY=xxx
+export PUBLICWWW_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.org/login), [Netlas](https://app.netlas.io/registration/) and [CriminalIP](https://www.criminalip.io/register).
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.org/login), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register) and [Publicwww](https://publicwww.com/profile/signup.html).
 
 ## Running Uncover
 

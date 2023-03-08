@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/pkg/errors"
+	"errors"
 
 	"github.com/projectdiscovery/uncover/uncover"
 )
@@ -16,17 +16,7 @@ const (
 	URL = "https://api.zoomeye.org/host/search?query=%s&page=%d"
 )
 
-type Agent struct {
-	options *uncover.AgentOptions
-}
-
-func New() (uncover.Agent, error) {
-	return &Agent{}, nil
-}
-
-func NewWithOptions(options *uncover.AgentOptions) (uncover.Agent, error) {
-	return &Agent{options: options}, nil
-}
+type Agent struct{}
 
 func (agent *Agent) Name() string {
 	return "zoomeye"
@@ -77,8 +67,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, zoomeyeReques
 		return nil, err
 	}
 	request.Header.Set("API-KEY", session.Keys.ZoomEyeToken)
-	agent.options.RateLimiter.Take()
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }
 
 func (agent *Agent) query(URL string, session *uncover.Session, zoomeyeRequest *ZoomEyeRequest, results chan uncover.Result) *ZoomEyeResponse {

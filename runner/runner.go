@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/projectdiscovery/gologger"
-	"github.com/projectdiscovery/ratelimit"
 	"github.com/projectdiscovery/uncover/uncover"
 	"github.com/projectdiscovery/uncover/uncover/agent/censys"
 	"github.com/projectdiscovery/uncover/uncover/agent/criminalip"
@@ -49,33 +49,6 @@ func NewRunner(options *Options) (*Runner, error) {
 func (r *Runner) Run(ctx context.Context, query ...string) error {
 	if !r.options.Provider.HasKeys() && !r.options.hasAnyAnonymousProvider() {
 		return errors.New("no keys provided")
-	}
-
-	var censysRateLimiter, fofaRateLimiter, shodanRateLimiter, shodanIdbRateLimiter, quakeRatelimiter, hunterRatelimiter, zoomeyeRatelimiter, netlasRatelimiter, criminalipRatelimiter, publicwwwRatelimiter, hunterhowRateLimiter *ratelimit.Limiter
-	if r.options.Delay > 0 {
-		censysRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		fofaRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		shodanRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		shodanIdbRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		quakeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		hunterRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		zoomeyeRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		netlasRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		criminalipRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		publicwwwRatelimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-		hunterhowRateLimiter = ratelimit.New(context.Background(), 1, time.Duration(r.options.Delay))
-	} else {
-		censysRateLimiter = ratelimit.NewUnlimited(context.Background())
-		fofaRateLimiter = ratelimit.NewUnlimited(context.Background())
-		shodanRateLimiter = ratelimit.NewUnlimited(context.Background())
-		shodanIdbRateLimiter = ratelimit.NewUnlimited(context.Background())
-		quakeRatelimiter = ratelimit.NewUnlimited(context.Background())
-		hunterRatelimiter = ratelimit.NewUnlimited(context.Background())
-		zoomeyeRatelimiter = ratelimit.NewUnlimited(context.Background())
-		netlasRatelimiter = ratelimit.NewUnlimited(context.Background())
-		criminalipRatelimiter = ratelimit.NewUnlimited(context.Background())
-		publicwwwRatelimiter = ratelimit.NewUnlimited(context.Background())
-		hunterhowRateLimiter = ratelimit.NewUnlimited(context.Background())
 	}
 
 	var agents []uncover.Agent
@@ -127,39 +100,37 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 	// declare clients
 	for _, engine := range r.options.Engine {
 		var (
-			agent uncover.Agent
-			err   error
+			err error
 		)
 		switch engine {
 		case "shodan":
-			agent, err = shodan.NewWithOptions(&uncover.AgentOptions{RateLimiter: shodanRateLimiter})
+			agents = append(agents, &shodan.Agent{})
 		case "censys":
-			agent, err = censys.NewWithOptions(&uncover.AgentOptions{RateLimiter: censysRateLimiter})
+			agents = append(agents, &censys.Agent{})
 		case "fofa":
-			agent, err = fofa.NewWithOptions(&uncover.AgentOptions{RateLimiter: fofaRateLimiter})
+			agents = append(agents, &fofa.Agent{})
 		case "shodan-idb":
-			agent, err = shodanidb.NewWithOptions(&uncover.AgentOptions{RateLimiter: shodanIdbRateLimiter})
+			agents = append(agents, &shodanidb.Agent{})
 		case "quake":
-			agent, err = quake.NewWithOptions(&uncover.AgentOptions{RateLimiter: quakeRatelimiter})
+			agents = append(agents, &quake.Agent{})
 		case "hunter":
-			agent, err = hunter.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterRatelimiter})
+			agents = append(agents, &hunter.Agent{})
 		case "zoomeye":
-			agent, err = zoomeye.NewWithOptions(&uncover.AgentOptions{RateLimiter: zoomeyeRatelimiter})
+			agents = append(agents, &zoomeye.Agent{})
 		case "netlas":
-			agent, err = netlas.NewWithOptions(&uncover.AgentOptions{RateLimiter: netlasRatelimiter})
+			agents = append(agents, &netlas.Agent{})
 		case "criminalip":
-			agent, err = criminalip.NewWithOptions(&uncover.AgentOptions{RateLimiter: criminalipRatelimiter})
+			agents = append(agents, &criminalip.Agent{})
 		case "publicwww":
-			agent, err = publicwww.NewWithOptions(&uncover.AgentOptions{RateLimiter: publicwwwRatelimiter})
+			agents = append(agents, &publicwww.Agent{})
 		case "hunterhow":
-			agent, err = hunterhow.NewWithOptions(&uncover.AgentOptions{RateLimiter: hunterhowRateLimiter})
+			agents = append(agents, &hunterhow.Agent{})
 		default:
 			err = errors.New("unknown agent type")
 		}
 		if err != nil {
 			return err
 		}
-		agents = append(agents, agent)
 	}
 
 	// open the output file - always overwrite
@@ -200,10 +171,16 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 					return
 				}
 
-				session, err := uncover.NewSession(&keys, r.options.Retries, r.options.Timeout)
+				var session *uncover.Session
+				if r.options.RateLimitMinute > 0 {
+					session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimitMinute, r.options.Engine, time.Minute)
+				} else {
+					session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimit, r.options.Engine, time.Second)
+				}
 				if err != nil {
 					gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
 				}
+
 				ch, err := agent.Query(session, uncoverQuery)
 				if err != nil {
 					gologger.Warning().Msgf("%s\n", err)
