@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/pkg/errors"
+	"errors"
 
 	"github.com/projectdiscovery/uncover/uncover"
 )
@@ -18,17 +18,7 @@ const (
 	Size   = 100
 )
 
-type Agent struct {
-	options *uncover.AgentOptions
-}
-
-func New() (uncover.Agent, error) {
-	return &Agent{}, nil
-}
-
-func NewWithOptions(options *uncover.AgentOptions) (uncover.Agent, error) {
-	return &Agent{options: options}, nil
-}
+type Agent struct{}
 
 func (agent *Agent) Name() string {
 	return "fofa"
@@ -77,8 +67,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, fofaRequest *
 		return nil, err
 	}
 	request.Header.Set("Accept", "application/json")
-	agent.options.RateLimiter.Take()
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }
 
 func (agent *Agent) query(URL string, session *uncover.Session, fofaRequest *FofaRequest, results chan uncover.Result) *FofaResponse {

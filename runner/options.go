@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/projectdiscovery/goflags"
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/gologger/formatter"
@@ -24,35 +24,35 @@ var (
 
 // Options contains the configuration options for tuning the enumeration process.
 type Options struct {
-	Query        goflags.StringSlice
-	Engine       goflags.StringSlice
-	ConfigFile   string
-	ProviderFile string
-	OutputFile   string
-	OutputFields string
-	JSON         bool
-	Raw          bool
-	Limit        int
-	Silent       bool
-	Version      bool
-	Verbose      bool
-	NoColor      bool
-	Timeout      int
-	Delay        int
-	delay        time.Duration
-	Provider     *Provider
-	Retries      int
-	Shodan       goflags.StringSlice
-	ShodanIdb    goflags.StringSlice
-	Fofa         goflags.StringSlice
-	Censys       goflags.StringSlice
-	Quake        goflags.StringSlice
-	Netlas       goflags.StringSlice
-	Hunter       goflags.StringSlice
-	ZoomEye      goflags.StringSlice
-	CriminalIP   goflags.StringSlice
-	Publicwww    goflags.StringSlice
-	HunterHow    goflags.StringSlice
+	Query           goflags.StringSlice
+	Engine          goflags.StringSlice
+	ConfigFile      string
+	ProviderFile    string
+	OutputFile      string
+	OutputFields    string
+	JSON            bool
+	Raw             bool
+	Limit           int
+	Silent          bool
+	Version         bool
+	Verbose         bool
+	NoColor         bool
+	Timeout         int
+	RateLimit       int
+	RateLimitMinute int
+	Provider        *Provider
+	Retries         int
+	Shodan          goflags.StringSlice
+	ShodanIdb       goflags.StringSlice
+	Fofa            goflags.StringSlice
+	Censys          goflags.StringSlice
+	Quake           goflags.StringSlice
+	Netlas          goflags.StringSlice
+	Hunter          goflags.StringSlice
+	ZoomEye         goflags.StringSlice
+	CriminalIP      goflags.StringSlice
+	Publicwww       goflags.StringSlice
+	HunterHow       goflags.StringSlice
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -85,7 +85,8 @@ func ParseOptions() *Options {
 		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", defaultProviderConfigLocation, "provider configuration file"),
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
-		flagSet.IntVar(&options.Delay, "delay", 1, "delay between requests in seconds (0 to disable)"),
+		flagSet.IntVarP(&options.RateLimit, "rate-limit", "rl", 0, "maximum number of http requests to send per second"),
+		flagSet.IntVarP(&options.RateLimitMinute, "rate-limit-minute", "rlm", 0, "maximum number of requests to send per minute"),
 		flagSet.IntVar(&options.Retries, "retry", 2, "number of times to retry a failed request"),
 	)
 
@@ -276,12 +277,6 @@ func (options *Options) validateOptions() error {
 		len(options.Publicwww),
 		len(options.HunterHow)) {
 		return errors.New("no engine specified")
-	}
-
-	if options.Delay < 0 {
-		return errors.New("delay can't be negative")
-	} else {
-		options.delay = time.Duration(options.Delay) * time.Second
 	}
 
 	return nil

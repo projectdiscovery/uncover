@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/pkg/errors"
+	"errors"
 
 	"github.com/projectdiscovery/uncover/uncover"
 )
@@ -15,17 +15,7 @@ const (
 	URL = "https://api.criminalip.io/v1/banner/search?query=%s&offset=%d"
 )
 
-type Agent struct {
-	options *uncover.AgentOptions
-}
-
-func New() (uncover.Agent, error) {
-	return &Agent{}, nil
-}
-
-func NewWithOptions(options *uncover.AgentOptions) (uncover.Agent, error) {
-	return &Agent{options: options}, nil
-}
+type Agent struct{}
 
 func (agent *Agent) Name() string {
 	return "criminalip"
@@ -73,8 +63,7 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, criminalipReq
 		return nil, err
 	}
 	request.Header.Set("x-api-key", session.Keys.CriminalIPToken)
-	agent.options.RateLimiter.Take()
-	return session.Do(request)
+	return session.Do(request, agent.Name())
 }
 
 func (agent *Agent) query(URL string, session *uncover.Session, criminalipRequest *CriminalIPRequest, results chan uncover.Result) *CriminalIPResponse {
