@@ -15,6 +15,7 @@ import (
 	fileutil "github.com/projectdiscovery/utils/file"
 	folderutil "github.com/projectdiscovery/utils/folder"
 	genericutil "github.com/projectdiscovery/utils/generic"
+	updateutils "github.com/projectdiscovery/utils/update"
 )
 
 var (
@@ -24,35 +25,36 @@ var (
 
 // Options contains the configuration options for tuning the enumeration process.
 type Options struct {
-	Query           goflags.StringSlice
-	Engine          goflags.StringSlice
-	ConfigFile      string
-	ProviderFile    string
-	OutputFile      string
-	OutputFields    string
-	JSON            bool
-	Raw             bool
-	Limit           int
-	Silent          bool
-	Version         bool
-	Verbose         bool
-	NoColor         bool
-	Timeout         int
-	RateLimit       int
-	RateLimitMinute int
-	Provider        *Provider
-	Retries         int
-	Shodan          goflags.StringSlice
-	ShodanIdb       goflags.StringSlice
-	Fofa            goflags.StringSlice
-	Censys          goflags.StringSlice
-	Quake           goflags.StringSlice
-	Netlas          goflags.StringSlice
-	Hunter          goflags.StringSlice
-	ZoomEye         goflags.StringSlice
-	CriminalIP      goflags.StringSlice
-	Publicwww       goflags.StringSlice
-	HunterHow       goflags.StringSlice
+	Query              goflags.StringSlice
+	Engine             goflags.StringSlice
+	ConfigFile         string
+	ProviderFile       string
+	OutputFile         string
+	OutputFields       string
+	JSON               bool
+	Raw                bool
+	Limit              int
+	Silent             bool
+	Version            bool
+	Verbose            bool
+	NoColor            bool
+	Timeout            int
+	RateLimit          int
+	RateLimitMinute    int
+	Provider           *Provider
+	Retries            int
+	Shodan             goflags.StringSlice
+	ShodanIdb          goflags.StringSlice
+	Fofa               goflags.StringSlice
+	Censys             goflags.StringSlice
+	Quake              goflags.StringSlice
+	Netlas             goflags.StringSlice
+	Hunter             goflags.StringSlice
+	ZoomEye            goflags.StringSlice
+	CriminalIP         goflags.StringSlice
+	Publicwww          goflags.StringSlice
+	HunterHow          goflags.StringSlice
+	DisableUpdateCheck bool
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -90,6 +92,11 @@ func ParseOptions() *Options {
 		flagSet.IntVar(&options.Retries, "retry", 2, "number of times to retry a failed request"),
 	)
 
+	flagSet.CreateGroup("update", "Update",
+		flagSet.CallbackVarP(GetUpdateCallback(), "update", "up", "update uncover to latest version"),
+		flagSet.BoolVarP(&options.DisableUpdateCheck, "disable-update-check", "duc", false, "disable automatic uncover update check"),
+	)
+
 	flagSet.CreateGroup("output", "Output",
 		flagSet.StringVarP(&options.OutputFile, "output", "o", "", "output file to write found results"),
 		flagSet.StringVarP(&options.OutputFields, "field", "f", "ip:port", "field to display in output (ip,port,host)"),
@@ -115,8 +122,19 @@ func ParseOptions() *Options {
 	showBanner()
 
 	if options.Version {
-		gologger.Info().Msgf("Current Version: %s\n", Version)
+		gologger.Info().Msgf("Current Version: %s\n", version)
 		os.Exit(0)
+	}
+
+	if !options.DisableUpdateCheck {
+		latestVersion, err := updateutils.GetVersionCheckCallback("uncover")()
+		if err != nil {
+			if options.Verbose {
+				gologger.Error().Msgf("uncover version check failed: %v", err.Error())
+			}
+		} else {
+			gologger.Info().Msgf("Current uncover version %v %v", version, updateutils.GetVersionDescription(version, latestVersion))
+		}
 	}
 
 	if options.ConfigFile != defaultConfigLocation {
