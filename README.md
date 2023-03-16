@@ -1,7 +1,8 @@
 <h1 align="center">
-  uncover
-  <br>
+<img src="https://user-images.githubusercontent.com/8293321/211795814-5dc72ad0-9539-4bf5-af5a-f806025e1bda.png" width="200px">
+<br>
 </h1>
+
 
 <h4 align="center">Quickly discover exposed hosts on the internet using multiple search engines.</h4>
 
