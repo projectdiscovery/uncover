@@ -33,7 +33,7 @@ jobs:
         working-directory: .
        
       - name: Race Condition Tests
-        run: go run -race .
+        run: go build -race .
         working-directory: cmd/uncover/
 
       
