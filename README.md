@@ -44,6 +44,8 @@
   - **[Zoomeye](https://www.zoomeye.org)**
   - **[Netlas](https://netlas.io/)**
   - **[CriminalIP](https://www.criminalip.io)**
+  - **[PublicWWW](https://publicwww.com)**
+  - **[HunterHow](https://hunter.how)**
 - Multiple API key input support
 - Automatic API key randomization
 - **stdin** / **stdout** support for input

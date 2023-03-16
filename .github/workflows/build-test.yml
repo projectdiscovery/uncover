@@ -2,6 +2,9 @@ name: 🔨 Build Test
 
 on:
   pull_request:
+    paths:
+      - '**.go'
+      - '**.mod'
   workflow_dispatch:
 
 jobs:
@@ -30,7 +33,7 @@ jobs:
         working-directory: .
        
       - name: Race Condition Tests
-        run: go build -race .
+        run: go run -race .
         working-directory: cmd/uncover/
 
       
