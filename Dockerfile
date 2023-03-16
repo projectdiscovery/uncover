@@ -1,7 +1,15 @@
-FROM golang:1.18.2-alpine3.14 AS build-env
-RUN go install -v github.com/projectdiscovery/uncover/cmd/uncover@latest
+# Base
+FROM golang:1.20.2-alpine AS builder
+RUN apk add --no-cache git build-base
+WORKDIR /app
+COPY . /app
+RUN go mod download
+RUN go build -o ./cmd/uncover ./cmd/uncover
 
-FROM alpine:3.17.0
-RUN apk add --no-cache bind-tools ca-certificates
-COPY --from=build-env /go/bin/uncover /usr/local/bin/uncover
+# Release
+FROM alpine:3.17.2
+RUN apk -U upgrade --no-cache \
+    && apk add --no-cache bind-tools ca-certificates
+COPY --from=builder /app/cmd/uncover/uncover /usr/local/bin/
+
 ENTRYPOINT ["uncover"]
