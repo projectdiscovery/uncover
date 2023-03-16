@@ -1,16 +1,18 @@
 package uncover
 
 type Keys struct {
-	CensysToken  string
-	CensysSecret string
-	Shodan       string
-	FofaEmail    string
-	FofaKey      string
-	QuakeToken   string
-	HunterToken  string
-	ZoomEyeToken string
-	NetlasToken  string
+	CensysToken     string
+	CensysSecret    string
+	Shodan          string
+	FofaEmail       string
+	FofaKey         string
+	QuakeToken      string
+	HunterToken     string
+	ZoomEyeToken    string
+	NetlasToken     string
 	CriminalIPToken string
+	PublicwwwToken  string
+	HunterHowToken  string
 }
 
 func (keys Keys) Empty() bool {
@@ -23,5 +25,7 @@ func (keys Keys) Empty() bool {
 		keys.HunterToken == "" &&
 		keys.ZoomEyeToken == "" &&
 		keys.NetlasToken == "" &&
-		keys.CriminalIPToken == ""
+		keys.CriminalIPToken == "" &&
+		keys.PublicwwwToken == "" &&
+		keys.HunterHowToken == ""
 }

@@ -8,14 +8,16 @@ import (
 )
 
 type Provider struct {
-	Shodan  []string `yaml:"shodan"`
-	Censys  []string `yaml:"censys"`
-	Fofa    []string `yaml:"fofa"`
-	Quake   []string `yaml:"quake"`
-	Hunter  []string `yaml:"hunter"`
-	ZoomEye []string `yaml:"zoomeye"`
-	Netlas  []string `yaml:"netlas"`
+	Shodan     []string `yaml:"shodan"`
+	Censys     []string `yaml:"censys"`
+	Fofa       []string `yaml:"fofa"`
+	Quake      []string `yaml:"quake"`
+	Hunter     []string `yaml:"hunter"`
+	ZoomEye    []string `yaml:"zoomeye"`
+	Netlas     []string `yaml:"netlas"`
 	CriminalIP []string `yaml:"criminalip"`
+	Publicwww  []string `yaml:"publicwww"`
+	HunterHow  []string `yaml:"hunterhow"`
 }
 
 func (provider *Provider) GetKeys() uncover.Keys {
@@ -59,9 +61,16 @@ func (provider *Provider) GetKeys() uncover.Keys {
 		keys.NetlasToken = provider.Netlas[rand.Intn(len(provider.Netlas))]
 	}
 
-        if len(provider.CriminalIP) > 0 {
-                keys.CriminalIPToken = provider.CriminalIP[rand.Intn(len(provider.CriminalIP))]
-        }
+	if len(provider.CriminalIP) > 0 {
+		keys.CriminalIPToken = provider.CriminalIP[rand.Intn(len(provider.CriminalIP))]
+	}
+
+	if len(provider.Publicwww) > 0 {
+		keys.PublicwwwToken = provider.Publicwww[rand.Intn(len(provider.Publicwww))]
+	}
+	if len(provider.HunterHow) > 0 {
+		keys.HunterHowToken = provider.HunterHow[rand.Intn(len(provider.HunterHow))]
+	}
 
 	return keys
 }
@@ -74,5 +83,6 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Hunter) > 0 ||
 		len(provider.ZoomEye) > 0 ||
 		len(provider.Netlas) > 0 ||
-		len(provider.CriminalIP) > 0
+		len(provider.CriminalIP) > 0 ||
+		len(provider.HunterHow) > 0
 }

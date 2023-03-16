@@ -2,6 +2,8 @@ package uncover
 
 import (
 	"io"
+	"net/url"
+
 	"github.com/projectdiscovery/retryablehttp-go"
 )
 
@@ -12,4 +14,12 @@ func NewHTTPRequest(method, url string, body io.Reader) (*retryablehttp.Request,
 	}
 	request.Header.Set("User-Agent", "Uncover - FOSS Project (github.com/projectdiscovery/uncover)")
 	return request, nil
+}
+
+func GetHostname(u string) (string, error) {
+	parsedURL, err := url.Parse(u)
+	if err != nil {
+		return "", err
+	}
+	return parsedURL.Hostname(), nil
 }
