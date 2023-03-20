@@ -50,6 +50,7 @@ func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, 
 		"netlas":     {Key: "netlas", MaxCount: 1, Duration: time.Second, IsUnlimited: false},
 		"criminalip": {Key: "criminalip", MaxCount: 1, Duration: time.Second, IsUnlimited: true},
 		"publicwww":  {Key: "publicwww", MaxCount: 1, Duration: time.Minute, IsUnlimited: false},
+		"hunterhow":  {Key: "hunterhow", MaxCount: 1, Duration: time.Second, IsUnlimited: false},
 	}
 
 	session := &Session{
