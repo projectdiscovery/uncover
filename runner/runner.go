@@ -35,7 +35,7 @@ func NewRunner(options *Options, agentFactory AgentFactory) (*Runner, error) {
 }
 
 // RunEnumeration runs the subdomain enumeration flow on the targets specified
-func (r *Runner) Run(ctx context.Context, query ...string) error {
+func (r *Runner) Run(ctx context.Context) error {
 	if !r.options.Provider.HasKeys() && !r.options.hasAnyAnonymousProvider() {
 		return errors.New("no keys provided")
 	}
@@ -63,7 +63,7 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		outputWriter.AddWriters(outputFile)
 	}
 
-	query = r.agentFactory.UpdateOptionsQueries(r.options)
+	query := r.agentFactory.UpdateOptionsQueries(r.options)
 
 	var wg sync.WaitGroup
 	for _, q := range query {
