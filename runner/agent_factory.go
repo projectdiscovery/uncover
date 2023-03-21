@@ -20,16 +20,60 @@ import (
 // AgentFactory is an interface for creating uncover agents.
 type AgentFactory interface {
 	CreateAgents(options *Options) ([]uncover.Agent, error)
+	CreateAgentByType(engine string) (uncover.Agent, error)
+	UpdateOptionsQueries(options *Options) []string
 }
 
 // DefaultAgentFactory is the default implementation of the AgentFactory interface.
 type DefaultAgentFactory struct{}
 
 // CreateAgents creates a list of uncover agents based on the provided engines and queries.
+
 func (f *DefaultAgentFactory) CreateAgents(options *Options) ([]uncover.Agent, error) {
 	var agents []uncover.Agent
-	query := []string{}
 
+	for _, engine := range options.Engine {
+		agent, err := f.CreateAgentByType(engine)
+		if err != nil {
+			return nil, err
+		}
+		agents = append(agents, agent)
+	}
+
+	return agents, nil
+}
+
+func (f *DefaultAgentFactory) CreateAgentByType(engine string) (uncover.Agent, error) {
+	switch engine {
+	case "shodan":
+		return &shodan.Agent{}, nil
+	case "censys":
+		return &censys.Agent{}, nil
+	case "fofa":
+		return &fofa.Agent{}, nil
+	case "shodan-idb":
+		return &shodanidb.Agent{}, nil
+	case "quake":
+		return &quake.Agent{}, nil
+	case "hunter":
+		return &hunter.Agent{}, nil
+	case "zoomeye":
+		return &zoomeye.Agent{}, nil
+	case "netlas":
+		return &netlas.Agent{}, nil
+	case "criminalip":
+		return &criminalip.Agent{}, nil
+	case "publicwww":
+		return &publicwww.Agent{}, nil
+	case "hunterhow":
+		return &hunterhow.Agent{}, nil
+	default:
+		return nil, errors.New("unknown agent type")
+	}
+}
+
+func (f *DefaultAgentFactory) UpdateOptionsQueries(options *Options) []string {
+	var query []string = options.Query
 	if len(options.Shodan) > 0 {
 		options.Engine = append(options.Engine, "shodan")
 		query = append(query, options.Shodan...)
@@ -74,40 +118,5 @@ func (f *DefaultAgentFactory) CreateAgents(options *Options) ([]uncover.Agent, e
 		options.Engine = append(options.Engine, "hunterhow")
 		query = append(query, options.HunterHow...)
 	}
-
-	for _, engine := range options.Engine {
-		var (
-			err error
-		)
-		switch engine {
-		case "shodan":
-			agents = append(agents, &shodan.Agent{})
-		case "censys":
-			agents = append(agents, &censys.Agent{})
-		case "fofa":
-			agents = append(agents, &fofa.Agent{})
-		case "shodan-idb":
-			agents = append(agents, &shodanidb.Agent{})
-		case "quake":
-			agents = append(agents, &quake.Agent{})
-		case "hunter":
-			agents = append(agents, &hunter.Agent{})
-		case "zoomeye":
-			agents = append(agents, &zoomeye.Agent{})
-		case "netlas":
-			agents = append(agents, &netlas.Agent{})
-		case "criminalip":
-			agents = append(agents, &criminalip.Agent{})
-		case "publicwww":
-			agents = append(agents, &publicwww.Agent{})
-		case "hunterhow":
-			agents = append(agents, &hunterhow.Agent{})
-		default:
-			err = errors.New("unknown agent type")
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	return agents, nil
+	return query
 }

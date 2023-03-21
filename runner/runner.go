@@ -63,6 +63,8 @@ func (r *Runner) Run(ctx context.Context, query ...string) error {
 		outputWriter.AddWriters(outputFile)
 	}
 
+	query = r.agentFactory.UpdateOptionsQueries(r.options)
+
 	var wg sync.WaitGroup
 	for _, q := range query {
 		uncoverQuery := &uncover.Query{
