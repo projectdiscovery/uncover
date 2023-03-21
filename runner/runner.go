@@ -40,7 +40,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		return errors.New("no keys provided")
 	}
 
-	agents, err := r.agentFactory.CreateAgents(r.options)
+	agents, err := r.agentFactory.CreateAgents()
 	if err != nil {
 		return err
 	}
@@ -63,10 +63,8 @@ func (r *Runner) Run(ctx context.Context) error {
 		outputWriter.AddWriters(outputFile)
 	}
 
-	query := r.agentFactory.UpdateOptionsQueries(r.options)
-
 	var wg sync.WaitGroup
-	for _, q := range query {
+	for _, q := range r.options.Query {
 		uncoverQuery := &uncover.Query{
 			Query: q,
 			Limit: r.options.Limit,

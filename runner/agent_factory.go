@@ -17,23 +17,29 @@ import (
 	"github.com/projectdiscovery/uncover/uncover/agent/zoomeye"
 )
 
-// AgentFactory is an interface for creating uncover agents.
-type AgentFactory interface {
-	CreateAgents(options *Options) ([]uncover.Agent, error)
-	CreateAgentByType(engine string) (uncover.Agent, error)
-	UpdateOptionsQueries(options *Options) []string
+// AgentFactory is an implementation for creating and executing uncover agents.
+type AgentFactory struct {
+	options *Options
 }
 
-// DefaultAgentFactory is the default implementation of the AgentFactory interface.
-type DefaultAgentFactory struct{}
+func New(options *Options) (AgentFactory, error) {
+	factory := AgentFactory{
+		options: options,
+	}
 
-// CreateAgents creates a list of uncover agents based on the provided engines and queries.
+	err := factory.updateOptionsQueries()
+	if err != nil {
+		return AgentFactory{}, err
+	}
 
-func (f *DefaultAgentFactory) CreateAgents(options *Options) ([]uncover.Agent, error) {
+	return factory, nil
+}
+
+func (f *AgentFactory) CreateAgents() ([]uncover.Agent, error) {
 	var agents []uncover.Agent
 
-	for _, engine := range options.Engine {
-		agent, err := f.CreateAgentByType(engine)
+	for _, engine := range f.options.Engine {
+		agent, err := f.createAgentByType(engine)
 		if err != nil {
 			return nil, err
 		}
@@ -43,7 +49,7 @@ func (f *DefaultAgentFactory) CreateAgents(options *Options) ([]uncover.Agent, e
 	return agents, nil
 }
 
-func (f *DefaultAgentFactory) CreateAgentByType(engine string) (uncover.Agent, error) {
+func (f *AgentFactory) createAgentByType(engine string) (uncover.Agent, error) {
 	switch engine {
 	case "shodan":
 		return &shodan.Agent{}, nil
@@ -72,51 +78,53 @@ func (f *DefaultAgentFactory) CreateAgentByType(engine string) (uncover.Agent, e
 	}
 }
 
-func (f *DefaultAgentFactory) UpdateOptionsQueries(options *Options) []string {
-	var query []string = options.Query
-	if len(options.Shodan) > 0 {
-		options.Engine = append(options.Engine, "shodan")
-		query = append(query, options.Shodan...)
+func (f *AgentFactory) updateOptionsQueries() error {
+	var query []string = f.options.Query
+	if len(f.options.Shodan) > 0 {
+		f.options.Engine = append(f.options.Engine, "shodan")
+		query = append(query, f.options.Shodan...)
 	}
-	if len(options.ShodanIdb) > 0 {
-		options.Engine = append(options.Engine, "shodan-idb")
-		query = append(query, options.ShodanIdb...)
+	if len(f.options.ShodanIdb) > 0 {
+		f.options.Engine = append(f.options.Engine, "shodan-idb")
+		query = append(query, f.options.ShodanIdb...)
 	}
-	if len(options.Fofa) > 0 {
-		options.Engine = append(options.Engine, "fofa")
-		query = append(query, options.Fofa...)
+	if len(f.options.Fofa) > 0 {
+		f.options.Engine = append(f.options.Engine, "fofa")
+		query = append(query, f.options.Fofa...)
 	}
-	if len(options.Censys) > 0 {
-		options.Engine = append(options.Engine, "censys")
-		query = append(query, options.Censys...)
+	if len(f.options.Censys) > 0 {
+		f.options.Engine = append(f.options.Engine, "censys")
+		query = append(query, f.options.Censys...)
 	}
-	if len(options.Quake) > 0 {
-		options.Engine = append(options.Engine, "quake")
-		query = append(query, options.Quake...)
+	if len(f.options.Quake) > 0 {
+		f.options.Engine = append(f.options.Engine, "quake")
+		query = append(query, f.options.Quake...)
 	}
-	if len(options.Hunter) > 0 {
-		options.Engine = append(options.Engine, "hunter")
-		query = append(query, options.Hunter...)
+	if len(f.options.Hunter) > 0 {
+		f.options.Engine = append(f.options.Engine, "hunter")
+		query = append(query, f.options.Hunter...)
 	}
-	if len(options.ZoomEye) > 0 {
-		options.Engine = append(options.Engine, "zoomeye")
-		query = append(query, options.ZoomEye...)
+	if len(f.options.ZoomEye) > 0 {
+		f.options.Engine = append(f.options.Engine, "zoomeye")
+		query = append(query, f.options.ZoomEye...)
 	}
-	if len(options.Netlas) > 0 {
-		options.Engine = append(options.Engine, "netlas")
-		query = append(query, options.Netlas...)
+	if len(f.options.Netlas) > 0 {
+		f.options.Engine = append(f.options.Engine, "netlas")
+		query = append(query, f.options.Netlas...)
 	}
-	if len(options.CriminalIP) > 0 {
-		options.Engine = append(options.Engine, "criminalip")
-		query = append(query, options.CriminalIP...)
+	if len(f.options.CriminalIP) > 0 {
+		f.options.Engine = append(f.options.Engine, "criminalip")
+		query = append(query, f.options.CriminalIP...)
 	}
-	if len(options.Publicwww) > 0 {
-		options.Engine = append(options.Engine, "publicwww")
-		query = append(query, options.Publicwww...)
+	if len(f.options.Publicwww) > 0 {
+		f.options.Engine = append(f.options.Engine, "publicwww")
+		query = append(query, f.options.Publicwww...)
 	}
-	if len(options.HunterHow) > 0 {
-		options.Engine = append(options.Engine, "hunterhow")
-		query = append(query, options.HunterHow...)
+	if len(f.options.HunterHow) > 0 {
+		f.options.Engine = append(f.options.Engine, "hunterhow")
+		query = append(query, f.options.HunterHow...)
 	}
-	return query
+
+	f.options.Query = query
+	return nil
 }
