@@ -1,10 +1,8 @@
 package runner
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"errors"
 
@@ -19,8 +17,7 @@ import (
 )
 
 var (
-	defaultConfigLocation         = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/config.yaml")
-	defaultProviderConfigLocation = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/provider-config.yaml")
+	defaultConfigLocation = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/config.yaml")
 )
 
 // Options contains the configuration options for tuning the enumeration process.
@@ -41,7 +38,6 @@ type Options struct {
 	Timeout            int
 	RateLimit          int
 	RateLimitMinute    int
-	Provider           *Provider
 	Retries            int
 	Shodan             goflags.StringSlice
 	ShodanIdb          goflags.StringSlice
@@ -59,7 +55,7 @@ type Options struct {
 
 // ParseOptions parses the command line flags provided by a user
 func ParseOptions() *Options {
-	options := &Options{Provider: &Provider{}}
+	options := &Options{}
 	var err error
 	flagSet := goflags.NewFlagSet()
 	flagSet.SetDescription(`quickly discover exposed assets on the internet using multiple search engines.`)
@@ -84,7 +80,7 @@ func ParseOptions() *Options {
 	)
 
 	flagSet.CreateGroup("config", "Config",
-		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", defaultProviderConfigLocation, "provider configuration file"),
+		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", "", "provider configuration file"),
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
 		flagSet.IntVarP(&options.RateLimit, "rate-limit", "rl", 0, "maximum number of http requests to send per second"),
@@ -113,8 +109,7 @@ func ParseOptions() *Options {
 	)
 
 	if err := flagSet.Parse(); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		gologger.Fatal().Msg(err.Error())
 	}
 
 	options.configureOutput()
@@ -139,19 +134,6 @@ func ParseOptions() *Options {
 
 	if options.ConfigFile != defaultConfigLocation {
 		_ = options.loadConfigFrom(options.ConfigFile)
-	}
-
-	// create default provider file if it doesn't exist
-	if !fileutil.FileExists(defaultProviderConfigLocation) {
-		if err := fileutil.Marshal(fileutil.YAML, []byte(defaultProviderConfigLocation), Provider{}); err != nil {
-			gologger.Warning().Msgf("couldn't write provider default file: %s\n", err)
-		}
-	}
-
-	// provider chores
-	_ = options.loadProvidersFrom(options.ProviderFile)
-	if err = options.loadProvidersFromEnv(); err != nil {
-		gologger.Warning().Msgf("couldn't parse env vars: %s\n", err)
 	}
 
 	if genericutil.EqualsAll(0,
@@ -209,52 +191,6 @@ func (Options *Options) loadConfigFrom(location string) error {
 	return fileutil.Unmarshal(fileutil.YAML, []byte(location), Options)
 }
 
-func (options *Options) loadProvidersFrom(location string) error {
-	return fileutil.Unmarshal(fileutil.YAML, []byte(location), options.Provider)
-}
-
-func (options *Options) loadProvidersFromEnv() error {
-	if key, exists := os.LookupEnv("SHODAN_API_KEY"); exists {
-		options.Provider.Shodan = append(options.Provider.Shodan, key)
-	}
-	if id, exists := os.LookupEnv("CENSYS_API_ID"); exists {
-		if secret, exists := os.LookupEnv("CENSYS_API_SECRET"); exists {
-			options.Provider.Censys = append(options.Provider.Censys, fmt.Sprintf("%s:%s", id, secret))
-		} else {
-			return errors.New("missing censys secret")
-		}
-	}
-	if email, exists := os.LookupEnv("FOFA_EMAIL"); exists {
-		if key, exists := os.LookupEnv("FOFA_KEY"); exists {
-			options.Provider.Fofa = append(options.Provider.Fofa, fmt.Sprintf("%s:%s", email, key))
-		} else {
-			return errors.New("missing fofa key")
-		}
-	}
-	if key, exists := os.LookupEnv("HUNTER_API_KEY"); exists {
-		options.Provider.Hunter = append(options.Provider.Hunter, key)
-	}
-	if key, exists := os.LookupEnv("QUAKE_TOKEN"); exists {
-		options.Provider.Quake = append(options.Provider.Quake, key)
-	}
-	if key, exists := os.LookupEnv("ZOOMEYE_API_KEY"); exists {
-		options.Provider.ZoomEye = append(options.Provider.ZoomEye, key)
-	}
-	if key, exists := os.LookupEnv("NETLAS_API_KEY"); exists {
-		options.Provider.Netlas = append(options.Provider.Netlas, key)
-	}
-	if key, exists := os.LookupEnv("CRIMINALIP_API_KEY"); exists {
-		options.Provider.CriminalIP = append(options.Provider.CriminalIP, key)
-	}
-	if key, exists := os.LookupEnv("PUBLICWWW_API_KEY"); exists {
-		options.Provider.Publicwww = append(options.Provider.Publicwww, key)
-	}
-	if key, exists := os.LookupEnv("HUNTERHOW_API_KEY"); exists {
-		options.Provider.HunterHow = append(options.Provider.HunterHow, key)
-	}
-	return nil
-}
-
 // validateOptions validates the configuration options passed
 func (options *Options) validateOptions() error {
 	// Check if domain, list of domains, or stdin info was provided.
@@ -300,11 +236,52 @@ func (options *Options) validateOptions() error {
 	return nil
 }
 
-func (options *Options) hasAnyAnonymousProvider() bool {
-	for _, engine := range options.Engine {
-		if strings.EqualFold(engine, "shodan-idb") {
-			return true
-		}
+func appendAllQueries(options *Options) {
+	var query []string = options.Query
+	if len(options.Shodan) > 0 {
+		options.Engine = append(options.Engine, "shodan")
+		query = append(query, options.Shodan...)
 	}
-	return false
+	if len(options.ShodanIdb) > 0 {
+		options.Engine = append(options.Engine, "shodan-idb")
+		query = append(query, options.ShodanIdb...)
+	}
+	if len(options.Fofa) > 0 {
+		options.Engine = append(options.Engine, "fofa")
+		query = append(query, options.Fofa...)
+	}
+	if len(options.Censys) > 0 {
+		options.Engine = append(options.Engine, "censys")
+		query = append(query, options.Censys...)
+	}
+	if len(options.Quake) > 0 {
+		options.Engine = append(options.Engine, "quake")
+		query = append(query, options.Quake...)
+	}
+	if len(options.Hunter) > 0 {
+		options.Engine = append(options.Engine, "hunter")
+		query = append(query, options.Hunter...)
+	}
+	if len(options.ZoomEye) > 0 {
+		options.Engine = append(options.Engine, "zoomeye")
+		query = append(query, options.ZoomEye...)
+	}
+	if len(options.Netlas) > 0 {
+		options.Engine = append(options.Engine, "netlas")
+		query = append(query, options.Netlas...)
+	}
+	if len(options.CriminalIP) > 0 {
+		options.Engine = append(options.Engine, "criminalip")
+		query = append(query, options.CriminalIP...)
+	}
+	if len(options.Publicwww) > 0 {
+		options.Engine = append(options.Engine, "publicwww")
+		query = append(query, options.Publicwww...)
+	}
+	if len(options.HunterHow) > 0 {
+		options.Engine = append(options.Engine, "hunterhow")
+		query = append(query, options.HunterHow...)
+	}
+
+	options.Query = query
 }

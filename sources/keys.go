@@ -1,4 +1,4 @@
-package uncover
+package sources
 
 type Keys struct {
 	CensysToken     string

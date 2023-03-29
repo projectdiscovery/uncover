@@ -6,7 +6,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/projectdiscovery/uncover/uncover"
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
@@ -20,12 +20,12 @@ func (agent *Agent) Name() string {
 	return "quake"
 }
 
-func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan uncover.Result, error) {
+func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.QuakeToken == "" {
 		return nil, errors.New("empty quake keys")
 	}
 
-	results := make(chan uncover.Result)
+	results := make(chan sources.Result)
 
 	go func() {
 		defer close(results)
@@ -56,21 +56,21 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(URL string, session *uncover.Session, quakeRequest *Request, results chan uncover.Result) *Response {
+func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Request, results chan sources.Result) *Response {
 	resp, err := agent.queryURL(session, URL, quakeRequest)
 	if err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	quakeResponse := &Response{}
 	if err := json.NewDecoder(resp.Body).Decode(quakeResponse); err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	for _, quakeResult := range quakeResponse.Data {
-		result := uncover.Result{Source: agent.Name()}
+		result := sources.Result{Source: agent.Name()}
 		result.IP = quakeResult.IP
 		result.Port = quakeResult.Port
 		result.Host = quakeResult.Hostname
@@ -82,13 +82,13 @@ func (agent *Agent) query(URL string, session *uncover.Session, quakeRequest *Re
 	return quakeResponse
 }
 
-func (agent *Agent) queryURL(session *uncover.Session, URL string, quakeRequest *Request) (*http.Response, error) {
+func (agent *Agent) queryURL(session *sources.Session, URL string, quakeRequest *Request) (*http.Response, error) {
 	body, err := json.Marshal(quakeRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	request, err := uncover.NewHTTPRequest(
+	request, err := sources.NewHTTPRequest(
 		http.MethodPost,
 		URL,
 		bytes.NewReader(body),

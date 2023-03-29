@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/projectdiscovery/uncover/uncover"
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
@@ -21,12 +21,12 @@ func (agent *Agent) Name() string {
 	return "hunter"
 }
 
-func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan uncover.Result, error) {
+func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.HunterToken == "" {
 		return nil, errors.New("empty hunter keys")
 	}
 
-	results := make(chan uncover.Result)
+	results := make(chan sources.Result)
 
 	go func() {
 		defer close(results)
@@ -58,21 +58,21 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(URL string, session *uncover.Session, hunterRequest *Request, results chan uncover.Result) *Response {
+func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *Request, results chan sources.Result) *Response {
 	resp, err := agent.queryURL(session, URL, hunterRequest)
 	if err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	hunterResponse := &Response{}
 	if err := json.NewDecoder(resp.Body).Decode(hunterResponse); err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 	if hunterResponse.Code == http.StatusOK && hunterResponse.Data.Total > 0 {
 		for _, hunterResult := range hunterResponse.Data.Arr {
-			result := uncover.Result{Source: agent.Name()}
+			result := sources.Result{Source: agent.Name()}
 			result.IP = hunterResult.IP
 			result.Port = hunterResult.Port
 			result.Host = hunterResult.Domain
@@ -85,10 +85,10 @@ func (agent *Agent) query(URL string, session *uncover.Session, hunterRequest *R
 	return hunterResponse
 }
 
-func (agent *Agent) queryURL(session *uncover.Session, URL string, hunterRequest *Request) (*http.Response, error) {
+func (agent *Agent) queryURL(session *sources.Session, URL string, hunterRequest *Request) (*http.Response, error) {
 	base64Query := base64.URLEncoding.EncodeToString([]byte(hunterRequest.Search))
 	hunterURL := fmt.Sprintf(URL, hunterRequest.ApiKey, base64Query, hunterRequest.Page, hunterRequest.PageSize)
-	request, err := uncover.NewHTTPRequest(http.MethodGet, hunterURL, nil)
+	request, err := sources.NewHTTPRequest(http.MethodGet, hunterURL, nil)
 	if err != nil {
 		return nil, err
 	}

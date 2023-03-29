@@ -9,7 +9,7 @@ import (
 
 	"errors"
 
-	"github.com/projectdiscovery/uncover/uncover"
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
@@ -22,11 +22,11 @@ func (agent *Agent) Name() string {
 	return "zoomeye"
 }
 
-func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan uncover.Result, error) {
+func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.ZoomEyeToken == "" {
 		return nil, errors.New("empty zoomeye keys")
 	}
-	results := make(chan uncover.Result)
+	results := make(chan sources.Result)
 
 	go func() {
 		defer close(results)
@@ -59,10 +59,10 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *uncover.Session, URL string, zoomeyeRequest *ZoomEyeRequest) (*http.Response, error) {
+func (agent *Agent) queryURL(session *sources.Session, URL string, zoomeyeRequest *ZoomEyeRequest) (*http.Response, error) {
 	zoomeyeURL := fmt.Sprintf(URL, url.QueryEscape(zoomeyeRequest.Query), zoomeyeRequest.Page)
 
-	request, err := uncover.NewHTTPRequest(http.MethodGet, zoomeyeURL, nil)
+	request, err := sources.NewHTTPRequest(http.MethodGet, zoomeyeURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -70,22 +70,22 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, zoomeyeReques
 	return session.Do(request, agent.Name())
 }
 
-func (agent *Agent) query(URL string, session *uncover.Session, zoomeyeRequest *ZoomEyeRequest, results chan uncover.Result) *ZoomEyeResponse {
+func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *ZoomEyeRequest, results chan sources.Result) *ZoomEyeResponse {
 	// query certificates
 	resp, err := agent.queryURL(session, URL, zoomeyeRequest)
 	if err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	zoomeyeResponse := &ZoomEyeResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(zoomeyeResponse); err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	for _, zoomeyeResult := range zoomeyeResponse.Results {
-		result := uncover.Result{Source: agent.Name()}
+		result := sources.Result{Source: agent.Name()}
 		if ip, ok := zoomeyeResult["ip"]; ok {
 			result.IP = ip.(string)
 		}

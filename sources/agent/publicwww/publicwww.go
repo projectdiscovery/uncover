@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/projectdiscovery/uncover/uncover"
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
@@ -22,12 +22,12 @@ func (agent *Agent) Name() string {
 	return "publicwww"
 }
 
-func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan uncover.Result, error) {
+func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.PublicwwwToken == "" {
 		return nil, errors.New("empty publicwww keys")
 	}
 
-	results := make(chan uncover.Result)
+	results := make(chan sources.Result)
 
 	go func() {
 		defer close(results)
@@ -59,16 +59,16 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(URL string, session *uncover.Session, results chan uncover.Result) []string {
+func (agent *Agent) query(URL string, session *sources.Session, results chan sources.Result) []string {
 	resp, err := agent.queryURL(session, URL)
 	if err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 	content := string(body)
@@ -82,16 +82,16 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 			if err == io.EOF {
 				break
 			}
-			results <- uncover.Result{Source: agent.Name(), Error: err}
+			results <- sources.Result{Source: agent.Name(), Error: err}
 		}
 
-		result := uncover.Result{Source: agent.Name()}
+		result := sources.Result{Source: agent.Name()}
 		if len(record) > 0 {
 			trimmedLine := strings.TrimRight(record[0], " \r\n\t")
 			if trimmedLine != "" {
-				hostname, err := uncover.GetHostname(record[0])
+				hostname, err := sources.GetHostname(record[0])
 				if err != nil {
-					results <- uncover.Result{Source: agent.Name(), Error: err}
+					results <- sources.Result{Source: agent.Name(), Error: err}
 					continue
 				}
 				result.Host = hostname
@@ -107,8 +107,8 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 	return lines
 }
 
-func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Response, error) {
-	request, err := uncover.NewHTTPRequest(
+func (agent *Agent) queryURL(session *sources.Session, URL string) (*http.Response, error) {
+	request, err := sources.NewHTTPRequest(
 		http.MethodGet,
 		URL,
 		nil,

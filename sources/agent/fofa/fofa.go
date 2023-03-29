@@ -9,7 +9,7 @@ import (
 
 	"errors"
 
-	"github.com/projectdiscovery/uncover/uncover"
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
@@ -24,12 +24,12 @@ func (agent *Agent) Name() string {
 	return "fofa"
 }
 
-func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan uncover.Result, error) {
+func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.FofaEmail == "" || session.Keys.FofaKey == "" {
 		return nil, errors.New("empty fofa keys")
 	}
 
-	results := make(chan uncover.Result)
+	results := make(chan sources.Result)
 
 	go func() {
 		defer close(results)
@@ -59,10 +59,10 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *uncover.Session, URL string, fofaRequest *FofaRequest) (*http.Response, error) {
+func (agent *Agent) queryURL(session *sources.Session, URL string, fofaRequest *FofaRequest) (*http.Response, error) {
 	base64Query := base64.StdEncoding.EncodeToString([]byte(fofaRequest.Query))
 	fofaURL := fmt.Sprintf(URL, session.Keys.FofaEmail, session.Keys.FofaKey, base64Query, Fields, fofaRequest.Page, fofaRequest.Size)
-	request, err := uncover.NewHTTPRequest(http.MethodGet, fofaURL, nil)
+	request, err := sources.NewHTTPRequest(http.MethodGet, fofaURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -70,20 +70,20 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, fofaRequest *
 	return session.Do(request, agent.Name())
 }
 
-func (agent *Agent) query(URL string, session *uncover.Session, fofaRequest *FofaRequest, results chan uncover.Result) *FofaResponse {
+func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *FofaRequest, results chan sources.Result) *FofaResponse {
 	resp, err := agent.queryURL(session, URL, fofaRequest)
 	if err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 	fofaResponse := &FofaResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(fofaResponse); err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	for _, fofaResult := range fofaResponse.Results {
-		result := uncover.Result{Source: agent.Name()}
+		result := sources.Result{Source: agent.Name()}
 		result.IP = fofaResult[0]
 		result.Port, _ = strconv.Atoi(fofaResult[1])
 		result.Host = fofaResult[2]

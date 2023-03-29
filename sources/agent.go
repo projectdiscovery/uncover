@@ -1,4 +1,4 @@
-package uncover
+package sources
 
 type Query struct {
 	Query string

@@ -1,4 +1,4 @@
-package uncover
+package sources
 
 import (
 	"io"

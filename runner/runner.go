@@ -2,14 +2,15 @@ package runner
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"math/rand"
-	"os"
-	"sync"
+	"strings"
 	"time"
 
 	"github.com/projectdiscovery/gologger"
-	"github.com/projectdiscovery/uncover/uncover"
+	"github.com/projectdiscovery/uncover"
+	"github.com/projectdiscovery/uncover/sources"
+	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
 func init() {
@@ -19,7 +20,9 @@ func init() {
 // Runner is an instance of the uncover enumeration
 // client used to orchestrate the whole process.
 type Runner struct {
-	options *Options
+	options      *Options
+	service      *uncover.Service
+	outputWriter *OutputWriter
 }
 
 // NewRunner creates a new runner struct instance by parsing
@@ -27,71 +30,61 @@ type Runner struct {
 // and setting up loggers, etc.
 func NewRunner(options *Options) (*Runner, error) {
 	runner := &Runner{options: options}
+	appendAllQueries(options)
+
+	opts := uncover.Options{
+		Agents:  options.Engine,
+		Queries: options.Query,
+		Limit:   options.Limit,
+	}
+	service := uncover.New(&opts)
+	runner.service = service
+
+	var err error
+	runner.outputWriter, err = NewOutputWriter()
+	if err != nil {
+		return nil, err
+	}
+
 	return runner, nil
 }
 
 // RunEnumeration runs the subdomain enumeration flow on the targets specified
 func (r *Runner) Run(ctx context.Context) error {
-	if !r.options.Provider.HasKeys() && !r.options.hasAnyAnonymousProvider() {
-		return errors.New("no keys provided")
-	}
 
-	agents, err := NewAgents(r.options)
-	if err != nil {
-		return err
-	}
-
-	outputWriter, err := NewOutputWriter()
-	if err != nil {
-		return err
-	}
-
-	if !r.options.Verbose {
-		outputWriter.AddWriters(os.Stdout)
-	}
-
-	if r.options.OutputFile != "" {
-		outputFile, err := os.Create(r.options.OutputFile)
-		if err != nil {
-			return err
-		}
-		defer outputFile.Close()
-		outputWriter.AddWriters(outputFile)
-	}
-
-	var wg sync.WaitGroup
-	for _, q := range r.options.Query {
-		uncoverQuery := &uncover.Query{
-			Query: q,
-			Limit: r.options.Limit,
-		}
-		for _, agent := range agents {
-			wg.Add(1)
-			keys := r.options.Provider.GetKeys()
-			if keys.Empty() && agent.Name() != "shodan-idb" {
-				gologger.Error().Label(agent.Name()).Msgf("empty keys\n")
-				return nil
+	resultCallback := func(result sources.Result) {
+		optionFields := r.options.OutputFields
+		switch {
+		case result.Error != nil:
+			gologger.Warning().Label(result.Source).Msgf("%s\n", result.Error.Error())
+		case r.options.JSON:
+			gologger.Verbose().Label(result.Source).Msgf("%s\n", result.JSON())
+			r.outputWriter.WriteJsonData(result)
+		case r.options.Raw:
+			gologger.Verbose().Label(result.Source).Msgf("%s\n", result.RawData())
+			r.outputWriter.WriteString(result.RawData())
+		default:
+			port := fmt.Sprint(result.Port)
+			replacer := strings.NewReplacer(
+				"ip", result.IP,
+				"host", result.Host,
+				"port", port,
+				"url", result.Url,
+			)
+			if (result.IP == "" || port == "0") && stringsutil.ContainsAny(r.options.OutputFields, "ip", "port") {
+				optionFields = "host"
 			}
-			var session *uncover.Session
-			if r.options.RateLimitMinute > 0 {
-				session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimitMinute, r.options.Engine, time.Minute)
-			} else {
-				session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimit, r.options.Engine, time.Second)
+			outData := replacer.Replace(optionFields)
+			searchFor := []string{result.IP, port}
+			if result.Host != "" || r.options.OutputFile != "" {
+				searchFor = append(searchFor, result.Host)
 			}
-			if err != nil {
-				gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
+			if stringsutil.ContainsAny(outData, searchFor...) {
+				gologger.Verbose().Label(result.Source).Msgf("%s\n", outData)
+				r.outputWriter.WriteString(outData)
 			}
-			go func(agent uncover.Agent, uncoverQuery *uncover.Query) {
-				defer wg.Done()
-
-				err := r.Execute(agent, session, uncoverQuery, outputWriter)
-				if err != nil {
-					gologger.Warning().Msgf("%s\n", err)
-				}
-			}(agent, uncoverQuery)
 		}
 	}
-
-	wg.Wait()
+	r.service.ExecuteWithCallback(ctx, resultCallback)
 	return nil
 }

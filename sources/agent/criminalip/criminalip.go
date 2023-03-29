@@ -8,7 +8,7 @@ import (
 
 	"errors"
 
-	"github.com/projectdiscovery/uncover/uncover"
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
@@ -21,11 +21,11 @@ func (agent *Agent) Name() string {
 	return "criminalip"
 }
 
-func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan uncover.Result, error) {
+func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.CriminalIPToken == "" {
 		return nil, errors.New("empty criminalip keys")
 	}
-	results := make(chan uncover.Result)
+	results := make(chan sources.Result)
 
 	go func() {
 		defer close(results)
@@ -55,10 +55,10 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *uncover.Session, URL string, criminalipRequest *CriminalIPRequest) (*http.Response, error) {
+func (agent *Agent) queryURL(session *sources.Session, URL string, criminalipRequest *CriminalIPRequest) (*http.Response, error) {
 	criminalipURL := fmt.Sprintf(URL, url.QueryEscape(criminalipRequest.Query), criminalipRequest.Offset)
 
-	request, err := uncover.NewHTTPRequest(http.MethodGet, criminalipURL, nil)
+	request, err := sources.NewHTTPRequest(http.MethodGet, criminalipURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -66,22 +66,22 @@ func (agent *Agent) queryURL(session *uncover.Session, URL string, criminalipReq
 	return session.Do(request, agent.Name())
 }
 
-func (agent *Agent) query(URL string, session *uncover.Session, criminalipRequest *CriminalIPRequest, results chan uncover.Result) *CriminalIPResponse {
+func (agent *Agent) query(URL string, session *sources.Session, criminalipRequest *CriminalIPRequest, results chan sources.Result) *CriminalIPResponse {
 	// query certificates
 	resp, err := agent.queryURL(session, URL, criminalipRequest)
 	if err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	criminalipResponse := &CriminalIPResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(criminalipResponse); err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 	if criminalipResponse.Status == http.StatusOK && criminalipResponse.Data.Count > 0 {
 		for _, criminalipResult := range criminalipResponse.Data.Result {
-			result := uncover.Result{Source: agent.Name()}
+			result := sources.Result{Source: agent.Name()}
 			result.IP = criminalipResult.IP
 			result.Port = criminalipResult.Port
 			result.Host = criminalipResult.Domain

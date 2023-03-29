@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/projectdiscovery/uncover/uncover"
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
@@ -20,12 +20,12 @@ func (agent *Agent) Name() string {
 	return "netlas"
 }
 
-func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan uncover.Result, error) {
+func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.NetlasToken == "" {
 		return nil, errors.New("empty netlas keys")
 	}
 
-	results := make(chan uncover.Result)
+	results := make(chan sources.Result)
 
 	go func() {
 		defer close(results)
@@ -54,21 +54,21 @@ func (agent *Agent) Query(session *uncover.Session, query *uncover.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(URL string, session *uncover.Session, results chan uncover.Result) *Response {
+func (agent *Agent) query(URL string, session *sources.Session, results chan sources.Result) *Response {
 	resp, err := agent.queryURL(session, URL)
 	if err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	netlasResponse := &Response{}
 	if err := json.NewDecoder(resp.Body).Decode(netlasResponse); err != nil {
-		results <- uncover.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
 	for _, netlasResult := range netlasResponse.Items {
-		result := uncover.Result{Source: agent.Name()}
+		result := sources.Result{Source: agent.Name()}
 		result.IP = netlasResult.Data.IP
 		result.Port = netlasResult.Data.Port
 		result.Host = netlasResult.Data.Host
@@ -80,8 +80,8 @@ func (agent *Agent) query(URL string, session *uncover.Session, results chan unc
 	return netlasResponse
 }
 
-func (agent *Agent) queryURL(session *uncover.Session, URL string) (*http.Response, error) {
-	request, err := uncover.NewHTTPRequest(
+func (agent *Agent) queryURL(session *sources.Session, URL string) (*http.Response, error) {
+	request, err := sources.NewHTTPRequest(
 		http.MethodGet,
 		URL,
 		nil,
