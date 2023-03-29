@@ -25,9 +25,15 @@ import (
 var DefaultChannelBuffSize = 32
 
 type Options struct {
-	Agents  []string // Uncover Agents to use
-	Queries []string // Queries to pass to Agents
-	Limit   int
+	Agents   []string // Uncover Agents to use
+	Queries  []string // Queries to pass to Agents
+	Limit    int
+	MaxRetry int
+	Timeout  int
+	// Note these ratelimits are used as fallback in case agent
+	// ratelimit is not available in DefaultRateLimits
+	RateLimit     uint          // default 30 req
+	RateLimitUnit time.Duration // default unit
 }
 
 // Service handler of all uncover Agents
@@ -36,11 +42,12 @@ type Service struct {
 	Agents   []sources.Agent
 	Session  *sources.Session
 	Provider *sources.Provider
+	Keys     sources.Keys
 }
 
 // New creates new uncover service instance
-func New(opts *Options) *Service {
-	s := &Service{Agents: []sources.Agent{}}
+func New(opts *Options) (*Service, error) {
+	s := &Service{Agents: []sources.Agent{}, Options: opts}
 	for _, v := range opts.Agents {
 		switch v {
 		case "shodan":
@@ -68,7 +75,21 @@ func New(opts *Options) *Service {
 		}
 	}
 	s.Provider = sources.NewProvider()
-	return s
+	s.Keys = s.Provider.GetKeys()
+
+	if opts.RateLimit == 0 {
+		opts.RateLimit = 30
+	}
+	if opts.RateLimitUnit == 0 {
+		opts.RateLimitUnit = time.Minute
+	}
+
+	var err error
+	s.Session, err = sources.NewSession(&s.Keys, opts.MaxRetry, opts.Timeout, 10, opts.Agents, opts.RateLimitUnit)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
 }
 
 func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
@@ -99,10 +120,9 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 				Limit: s.Options.Limit,
 			})
 			if err != nil {
-				gologger.Warning().Msgf("%s\n", err)
+				gologger.Error().Msgf("%s\n", err)
 				continue agentLabel
 			}
-
 			wg.Add(1)
 			go func(source, relay chan sources.Result, ctx context.Context) {
 				defer wg.Done()
@@ -119,18 +139,13 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 					}
 				}
 			}(ch, megaChan, ctx)
-
-			for result := range ch {
-				result.Timestamp = time.Now().Unix()
-
-			}
 		}
 	}
 
 	// close channel when all sources return
 	go func(wg *sync.WaitGroup, megaChan chan sources.Result) {
+		wg.Wait()
 		defer close(megaChan)
-		wg.Done()
 	}(wg, megaChan)
 
 	return megaChan, nil

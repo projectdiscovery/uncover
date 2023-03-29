@@ -37,10 +37,12 @@ func NewRunner(options *Options) (*Runner, error) {
 		Queries: options.Query,
 		Limit:   options.Limit,
 	}
-	service := uncover.New(&opts)
+	service, err := uncover.New(&opts)
+	if err != nil {
+		return nil, err
+	}
 	runner.service = service
 
-	var err error
 	runner.outputWriter, err = NewOutputWriter()
 	if err != nil {
 		return nil, err
@@ -85,6 +87,5 @@ func (r *Runner) Run(ctx context.Context) error {
 			}
 		}
 	}
-	r.service.ExecuteWithCallback(ctx, resultCallback)
-	return nil
+	return r.service.ExecuteWithCallback(ctx, resultCallback)
 }
