@@ -53,7 +53,6 @@ func NewRunner(options *Options) (*Runner, error) {
 
 // RunEnumeration runs the subdomain enumeration flow on the targets specified
 func (r *Runner) Run(ctx context.Context) error {
-
 	resultCallback := func(result sources.Result) {
 		optionFields := r.options.OutputFields
 		switch {

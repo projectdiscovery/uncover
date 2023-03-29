@@ -232,52 +232,25 @@ func versionCallback() {
 	os.Exit(0)
 }
 
+func appendQuery(options *Options, name string, queries ...string) {
+	if len(queries) > 0 {
+		options.Engine = append(options.Engine, name)
+		options.Query = append(options.Query, queries...)
+	}
+}
+
 func appendAllQueries(options *Options) {
 	var query []string = options.Query
-	if len(options.Shodan) > 0 {
-		options.Engine = append(options.Engine, "shodan")
-		query = append(query, options.Shodan...)
-	}
-	if len(options.ShodanIdb) > 0 {
-		options.Engine = append(options.Engine, "shodan-idb")
-		query = append(query, options.ShodanIdb...)
-	}
-	if len(options.Fofa) > 0 {
-		options.Engine = append(options.Engine, "fofa")
-		query = append(query, options.Fofa...)
-	}
-	if len(options.Censys) > 0 {
-		options.Engine = append(options.Engine, "censys")
-		query = append(query, options.Censys...)
-	}
-	if len(options.Quake) > 0 {
-		options.Engine = append(options.Engine, "quake")
-		query = append(query, options.Quake...)
-	}
-	if len(options.Hunter) > 0 {
-		options.Engine = append(options.Engine, "hunter")
-		query = append(query, options.Hunter...)
-	}
-	if len(options.ZoomEye) > 0 {
-		options.Engine = append(options.Engine, "zoomeye")
-		query = append(query, options.ZoomEye...)
-	}
-	if len(options.Netlas) > 0 {
-		options.Engine = append(options.Engine, "netlas")
-		query = append(query, options.Netlas...)
-	}
-	if len(options.CriminalIP) > 0 {
-		options.Engine = append(options.Engine, "criminalip")
-		query = append(query, options.CriminalIP...)
-	}
-	if len(options.Publicwww) > 0 {
-		options.Engine = append(options.Engine, "publicwww")
-		query = append(query, options.Publicwww...)
-	}
-	if len(options.HunterHow) > 0 {
-		options.Engine = append(options.Engine, "hunterhow")
-		query = append(query, options.HunterHow...)
-	}
-
+	appendQuery(options, "shodan", options.Shodan...)
+	appendQuery(options, "shodan-idb", options.ShodanIdb...)
+	appendQuery(options, "fofa", options.Fofa...)
+	appendQuery(options, "censys", options.Censys...)
+	appendQuery(options, "quake", options.Quake...)
+	appendQuery(options, "hunter", options.Hunter...)
+	appendQuery(options, "zoomeye", options.ZoomEye...)
+	appendQuery(options, "netlas", options.Netlas...)
+	appendQuery(options, "criminalip", options.CriminalIP...)
+	appendQuery(options, "publicwww", options.Publicwww...)
+	appendQuery(options, "hunterhow", options.HunterHow...)
 	options.Query = query
 }
