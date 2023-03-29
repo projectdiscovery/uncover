@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover"
 	"github.com/projectdiscovery/uncover/sources"
 )
@@ -22,6 +23,13 @@ func main() {
 		panic(err)
 	}
 
+	allagents := u.AllAgents()
+	gologger.Info().Msgf("Available uncover agents/sources :")
+	for _, v := range allagents {
+		fmt.Println(v)
+	}
+
+	fmt.Println("\n\n- Uncover Results:")
 	result := func(result sources.Result) {
 		fmt.Println(result.IpPort())
 	}
