@@ -13,11 +13,7 @@ func main() {
 	// Parse the command line flags and read config files
 	options := runner.ParseOptions()
 
-	agentFactory, err := runner.New(options)
-	if err != nil {
-		gologger.Fatal().Msgf("Could not create runner: %s\n", err)
-	}
-	newRunner, err := runner.NewRunner(options, agentFactory)
+	newRunner, err := runner.NewRunner(options)
 	if err != nil {
 		gologger.Fatal().Msgf("Could not create runner: %s\n", err)
 	}

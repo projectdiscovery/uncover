@@ -3,16 +3,13 @@ package runner
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math/rand"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover/uncover"
-	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
 func init() {
@@ -22,15 +19,14 @@ func init() {
 // Runner is an instance of the uncover enumeration
 // client used to orchestrate the whole process.
 type Runner struct {
-	options      *Options
-	agentFactory AgentFactory
+	options *Options
 }
 
 // NewRunner creates a new runner struct instance by parsing
 // the configuration options, configuring sources, reading lists
 // and setting up loggers, etc.
-func NewRunner(options *Options, agentFactory AgentFactory) (*Runner, error) {
-	runner := &Runner{options: options, agentFactory: agentFactory}
+func NewRunner(options *Options) (*Runner, error) {
+	runner := &Runner{options: options}
 	return runner, nil
 }
 
@@ -40,7 +36,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		return errors.New("no keys provided")
 	}
 
-	agents, err := r.agentFactory.CreateAgents()
+	agents, err := NewAgents(r.options)
 	if err != nil {
 		return err
 	}
@@ -71,62 +67,26 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 		for _, agent := range agents {
 			wg.Add(1)
+			keys := r.options.Provider.GetKeys()
+			if keys.Empty() && agent.Name() != "shodan-idb" {
+				gologger.Error().Label(agent.Name()).Msgf("empty keys\n")
+				return nil
+			}
+			var session *uncover.Session
+			if r.options.RateLimitMinute > 0 {
+				session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimitMinute, r.options.Engine, time.Minute)
+			} else {
+				session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimit, r.options.Engine, time.Second)
+			}
+			if err != nil {
+				gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
+			}
 			go func(agent uncover.Agent, uncoverQuery *uncover.Query) {
-				optionFields := r.options.OutputFields
 				defer wg.Done()
-				keys := r.options.Provider.GetKeys()
-				if keys.Empty() && agent.Name() != "shodan-idb" {
-					gologger.Error().Label(agent.Name()).Msgf("empty keys\n")
-					return
-				}
 
-				var session *uncover.Session
-				if r.options.RateLimitMinute > 0 {
-					session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimitMinute, r.options.Engine, time.Minute)
-				} else {
-					session, err = uncover.NewSession(&keys, r.options.Retries, r.options.Timeout, r.options.RateLimit, r.options.Engine, time.Second)
-				}
-				if err != nil {
-					gologger.Error().Label(agent.Name()).Msgf("couldn't create new session: %s\n", err)
-				}
-
-				ch, err := agent.Query(session, uncoverQuery)
+				err := r.Execute(agent, session, uncoverQuery, outputWriter)
 				if err != nil {
 					gologger.Warning().Msgf("%s\n", err)
-					return
-				}
-				for result := range ch {
-					result.Timestamp = time.Now().Unix()
-					switch {
-					case result.Error != nil:
-						gologger.Warning().Label(agent.Name()).Msgf("%s\n", result.Error.Error())
-					case r.options.JSON:
-						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.JSON())
-						outputWriter.WriteJsonData(result)
-					case r.options.Raw:
-						gologger.Verbose().Label(agent.Name()).Msgf("%s\n", result.RawData())
-						outputWriter.WriteString(result.RawData())
-					default:
-						port := fmt.Sprint(result.Port)
-						replacer := strings.NewReplacer(
-							"ip", result.IP,
-							"host", result.Host,
-							"port", port,
-							"url", result.Url,
-						)
-						if (result.IP == "" || port == "0") && stringsutil.ContainsAny(r.options.OutputFields, "ip", "port") {
-							optionFields = "host"
-						}
-						outData := replacer.Replace(optionFields)
-						searchFor := []string{result.IP, port}
-						if result.Host != "" || r.options.OutputFile != "" {
-							searchFor = append(searchFor, result.Host)
-						}
-						if stringsutil.ContainsAny(outData, searchFor...) {
-							gologger.Verbose().Label(agent.Name()).Msgf("%s\n", outData)
-							outputWriter.WriteString(outData)
-						}
-					}
 				}
 			}(agent, uncoverQuery)
 		}
