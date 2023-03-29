@@ -111,6 +111,10 @@ DEBUG:
    -v        show verbose output
 ```
 
+## Using uncover as library
+
+Example of using uncover as library is provided in [examples](examples/main.go) directory.
+
 ## Provider Configuration
 
 The default provider configuration file should be located at `$HOME/.config/uncover/provider-config.yaml` and has the following contents as an example.

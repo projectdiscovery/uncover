@@ -32,7 +32,6 @@ type Options struct {
 	Raw                bool
 	Limit              int
 	Silent             bool
-	Version            bool
 	Verbose            bool
 	NoColor            bool
 	Timeout            int
@@ -56,7 +55,6 @@ type Options struct {
 // ParseOptions parses the command line flags provided by a user
 func ParseOptions() *Options {
 	options := &Options{}
-	var err error
 	flagSet := goflags.NewFlagSet()
 	flagSet.SetDescription(`quickly discover exposed assets on the internet using multiple search engines.`)
 
@@ -104,7 +102,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("debug", "Debug",
 		flagSet.BoolVar(&options.Silent, "silent", false, "show only results in output"),
-		flagSet.BoolVar(&options.Version, "version", false, "show version of the project"),
+		flagSet.CallbackVar(versionCallback, "version", "show version of the project"),
 		flagSet.BoolVar(&options.Verbose, "v", false, "show verbose output"),
 	)
 
@@ -113,13 +111,7 @@ func ParseOptions() *Options {
 	}
 
 	options.configureOutput()
-
 	showBanner()
-
-	if options.Version {
-		gologger.Info().Msgf("Current Version: %s\n", version)
-		os.Exit(0)
-	}
 
 	if !options.DisableUpdateCheck {
 		latestVersion, err := updateutils.GetVersionCheckCallback("uncover")()
@@ -165,8 +157,7 @@ func ParseOptions() *Options {
 
 	// Validate the options passed by the user and if any
 	// invalid options have been used, exit.
-	err = options.validateOptions()
-	if err != nil {
+	if err := options.validateOptions(); err != nil {
 		gologger.Fatal().Msgf("Program exiting: %s\n", err)
 	}
 
@@ -234,6 +225,11 @@ func (options *Options) validateOptions() error {
 	}
 
 	return nil
+}
+
+func versionCallback() {
+	gologger.Info().Msgf("Current Version: %s\n", version)
+	os.Exit(0)
 }
 
 func appendAllQueries(options *Options) {
