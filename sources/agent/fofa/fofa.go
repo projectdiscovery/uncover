@@ -77,8 +77,13 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 		return nil
 	}
 	fofaResponse := &FofaResponse{}
+
 	if err := json.NewDecoder(resp.Body).Decode(fofaResponse); err != nil {
 		results <- sources.Result{Source: agent.Name(), Error: err}
+		return nil
+	}
+	if fofaResponse.Error {
+		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf(fofaResponse.ErrMsg)}
 		return nil
 	}
 
@@ -91,7 +96,6 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 		result.Raw = raw
 		results <- result
 	}
-
 	return fofaResponse
 }
 
