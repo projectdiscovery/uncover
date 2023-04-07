@@ -43,7 +43,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 
-			if numberOfResults > query.Limit || len(netlasResponse.Items) == 0 {
+			if numberOfResults >= query.Limit || len(netlasResponse.Items) == 0 {
 				break
 			}
 

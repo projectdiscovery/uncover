@@ -49,7 +49,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			}
 
 			// query certificates
-			if numberOfResults > query.Limit || numberOfResults > totalResults || len(shodanResponse.Results) == 0 {
+			if numberOfResults >= query.Limit || numberOfResults > totalResults || len(shodanResponse.Results) == 0 {
 				break
 			}
 		}

@@ -44,7 +44,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 			nextCursor = censysResponse.Results.Links.Next
-			if nextCursor == "" || numberOfResults > query.Limit || len(censysResponse.Results.Hits) == 0 {
+			if nextCursor == "" || numberOfResults >= query.Limit || len(censysResponse.Results.Hits) == 0 {
 				break
 			}
 			numberOfResults += len(censysResponse.Results.Hits)

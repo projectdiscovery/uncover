@@ -41,7 +41,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Page:     pageQuery,
 			}
 
-			if numberOfResults > query.Limit {
+			if numberOfResults >= query.Limit {
 				break
 			}
 

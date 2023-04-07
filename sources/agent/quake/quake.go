@@ -45,7 +45,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 
-			if numberOfResults > query.Limit || len(quakeResponse.Data) == 0 {
+			if numberOfResults >= query.Limit || len(quakeResponse.Data) == 0 {
 				break
 			}
 

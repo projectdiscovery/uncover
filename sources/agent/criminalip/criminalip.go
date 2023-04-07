@@ -46,7 +46,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			numberOfResults += len(criminalipResponse.Data.Result)
 			currentPage++
 
-			if numberOfResults > query.Limit || criminalipResponse.Data.Count == 0 || len(criminalipResponse.Data.Result) == 0 {
+			if numberOfResults >= query.Limit || criminalipResponse.Data.Count == 0 || len(criminalipResponse.Data.Result) == 0 {
 				break
 			}
 		}
