@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
@@ -48,6 +49,18 @@ func NewRunner(options *Options) (*Runner, error) {
 		return nil, err
 	}
 
+	if !options.Verbose {
+		runner.outputWriter.AddWriters(os.Stdout)
+	}
+
+	if options.OutputFile != "" {
+		outputFile, err := os.Create(options.OutputFile)
+		if err != nil {
+			return nil, err
+		}
+		defer outputFile.Close()
+		runner.outputWriter.AddWriters(outputFile)
+	}
 	return runner, nil
 }
 
