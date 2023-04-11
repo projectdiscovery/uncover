@@ -81,7 +81,12 @@ func (r *Runner) Run(ctx context.Context) error {
 				searchFor = append(searchFor, result.Host)
 			}
 			if stringsutil.ContainsAny(outData, searchFor...) {
-				gologger.Info().Label(result.Source).Msgf("%s\n", outData)
+				if r.options.Verbose {
+					// if output is verbose include source name
+					gologger.Info().Label(result.Source).Msg(outData)
+				} else {
+					gologger.DefaultLogger.Print().Msg(outData)
+				}
 				r.outputWriter.WriteString(outData)
 			}
 		}
