@@ -7,10 +7,10 @@ type responseData struct {
 }
 
 type pagination struct {
-	Count     int   `json:"count"`
-	PageIndex int   `json:"page_index"`
-	PageSize  int   `json:"page_size"`
-	Total     int64 `json:"total"`
+	Count     int `json:"count"`
+	PageIndex int `json:"page_index"`
+	PageSize  int `json:"page_size"`
+	Total     int `json:"total"`
 }
 
 type meta struct {
@@ -18,5 +18,7 @@ type meta struct {
 }
 
 type Response struct {
-	Data []responseData `json:"data,omitempty"`
+	Data    []responseData `json:"data"`
+	Message string         `json:"message"`
+	Meta    meta           `json:"meta"`
 }

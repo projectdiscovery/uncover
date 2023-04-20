@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/projectdiscovery/uncover/sources"
-	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
 const (
@@ -51,6 +52,11 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			}
 
 			numberOfResults += len(quakeResponse.Data)
+
+			// early exit without more results
+			if quakeResponse.Meta.Pagination.Count > 0 && numberOfResults >= quakeResponse.Meta.Pagination.Total {
+				break
+			}
 		}
 	}()
 
@@ -65,12 +71,12 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 	}
 
 	quakeResponse := &Response{}
-	if err := json.NewDecoder(resp.Body).Decode(quakeResponse); err != nil {
-		// empty "data" == EOF
-		// the server returns "data":{} (object) when there are no more results (instead of "data":[] - slice)
-		if stringsutil.ContainsAnyI(err.Error(), "cannot unmarshal object into Go struct") {
-			return nil
-		}
+	respdata, err := io.ReadAll(resp.Body)
+	if err != nil {
+		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("%v: %v", err, string(respdata))}
+		return nil
+	}
+	if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(quakeResponse); err != nil {
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
