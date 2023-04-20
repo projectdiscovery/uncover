@@ -10,6 +10,7 @@ import (
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/gologger/formatter"
 	"github.com/projectdiscovery/gologger/levels"
+	"github.com/projectdiscovery/uncover/sources"
 	fileutil "github.com/projectdiscovery/utils/file"
 	folderutil "github.com/projectdiscovery/utils/folder"
 	genericutil "github.com/projectdiscovery/utils/generic"
@@ -78,7 +79,7 @@ func ParseOptions() *Options {
 	)
 
 	flagSet.CreateGroup("config", "Config",
-		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", "", "provider configuration file"),
+		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", sources.DefaultProviderConfigLocation, "provider configuration file"),
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
 		flagSet.IntVarP(&options.RateLimit, "rate-limit", "rl", 0, "maximum number of http requests to send per second"),
@@ -126,6 +127,10 @@ func ParseOptions() *Options {
 
 	if options.ConfigFile != defaultConfigLocation {
 		_ = options.loadConfigFrom(options.ConfigFile)
+	}
+
+	if options.ProviderFile != sources.DefaultProviderConfigLocation {
+		sources.DefaultProviderConfigLocation = options.ProviderFile
 	}
 
 	if genericutil.EqualsAll(0,
@@ -240,7 +245,6 @@ func appendQuery(options *Options, name string, queries ...string) {
 }
 
 func appendAllQueries(options *Options) {
-	var query []string = options.Query
 	appendQuery(options, "shodan", options.Shodan...)
 	appendQuery(options, "shodan-idb", options.ShodanIdb...)
 	appendQuery(options, "fofa", options.Fofa...)
@@ -252,5 +256,4 @@ func appendAllQueries(options *Options) {
 	appendQuery(options, "criminalip", options.CriminalIP...)
 	appendQuery(options, "publicwww", options.Publicwww...)
 	appendQuery(options, "hunterhow", options.HunterHow...)
-	options.Query = query
 }

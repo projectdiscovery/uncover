@@ -18,7 +18,6 @@ type meta struct {
 }
 
 type Response struct {
-	Code    int            `json:"code"`
 	Data    []responseData `json:"data"`
 	Message string         `json:"message"`
 	Meta    meta           `json:"meta"`
