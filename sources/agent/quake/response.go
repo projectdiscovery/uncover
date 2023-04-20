@@ -18,7 +18,5 @@ type meta struct {
 }
 
 type Response struct {
-	Data    []responseData `json:"data"`
-	Message string         `json:"message"`
-	Meta    meta           `json:"meta"`
+	Data []responseData `json:"data,omitempty"`
 }
