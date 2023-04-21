@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/projectdiscovery/uncover/sources"
+	errorutil "github.com/projectdiscovery/utils/errors"
 )
 
 const (
@@ -77,7 +78,7 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 		return nil
 	}
 	if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(quakeResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		results <- sources.Result{Source: agent.Name(), Error: errorutil.NewWithErr(err).Msgf("failed to decode quake response: %s", string(respdata))}
 		return nil
 	}
 
