@@ -78,7 +78,15 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 		return nil
 	}
 	if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(quakeResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: errorutil.NewWithErr(err).Msgf("failed to decode quake response: %s", string(respdata))}
+		errx := errorutil.NewWithErr(err)
+		// quake has different json format for error messages try to unmarshal it in map and print map
+		var errMap map[string]interface{}
+		if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(&errMap); err == nil {
+			errx = errx.Msgf("failed to decode quake response: %v", errMap)
+		} else {
+			errx = errx.Msgf("failed to decode quake response: %s", string(respdata))
+		}
+		results <- sources.Result{Source: agent.Name(), Error: errx}
 		return nil
 	}
 
