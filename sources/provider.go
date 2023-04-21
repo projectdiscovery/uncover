@@ -108,13 +108,13 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 		return arr
 	}
 	provider.Shodan = appendIfExists(provider.Shodan, "SHODAN_API_KEY")
-	provider.Hunter = appendIfExists(provider.Shodan, "HUNTER_API_KEY")
-	provider.Quake = appendIfExists(provider.Shodan, "QUAKE_TOKEN")
-	provider.ZoomEye = appendIfExists(provider.Shodan, "ZOOMEYE_API_KEY")
-	provider.Netlas = appendIfExists(provider.Shodan, "NETLAS_API_KEY")
-	provider.CriminalIP = appendIfExists(provider.Shodan, "CRIMINALIP_API_KEY")
-	provider.Publicwww = appendIfExists(provider.Shodan, "PUBLICWWW_API_KEY")
-	provider.HunterHow = appendIfExists(provider.Shodan, "HUNTERHOW_API_KEY")
+	provider.Hunter = appendIfExists(provider.Hunter, "HUNTER_API_KEY")
+	provider.Quake = appendIfExists(provider.Quake, "QUAKE_TOKEN")
+	provider.ZoomEye = appendIfExists(provider.ZoomEye, "ZOOMEYE_API_KEY")
+	provider.Netlas = appendIfExists(provider.Netlas, "NETLAS_API_KEY")
+	provider.CriminalIP = appendIfExists(provider.CriminalIP, "CRIMINALIP_API_KEY")
+	provider.Publicwww = appendIfExists(provider.Publicwww, "PUBLICWWW_API_KEY")
+	provider.HunterHow = appendIfExists(provider.HunterHow, "HUNTERHOW_API_KEY")
 
 	appendIfAllExists := func(arr []string, env1 string, env2 string) []string {
 		if val1, ok := os.LookupEnv(env1); ok {
@@ -127,7 +127,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 		return arr
 	}
 	provider.Fofa = appendIfAllExists(provider.Fofa, "FOFA_EMAIL", "FOFA_KEY")
-	provider.Fofa = appendIfAllExists(provider.Fofa, "CENSYS_API_ID", "CENSYS_API_SECRET")
+	provider.Censys = appendIfAllExists(provider.Censys, "CENSYS_API_ID", "CENSYS_API_SECRET")
 }
 
 // HasKeys returns true if at least one agent/source has keys

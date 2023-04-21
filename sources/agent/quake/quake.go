@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/projectdiscovery/uncover/sources"
+	errorutil "github.com/projectdiscovery/utils/errors"
 )
 
 const (
@@ -50,6 +53,11 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			}
 
 			numberOfResults += len(quakeResponse.Data)
+
+			// early exit without more results
+			if quakeResponse.Meta.Pagination.Count > 0 && numberOfResults >= quakeResponse.Meta.Pagination.Total {
+				break
+			}
 		}
 	}()
 
@@ -64,8 +72,21 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 	}
 
 	quakeResponse := &Response{}
-	if err := json.NewDecoder(resp.Body).Decode(quakeResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+	respdata, err := io.ReadAll(resp.Body)
+	if err != nil {
+		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("%v: %v", err, string(respdata))}
+		return nil
+	}
+	if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(quakeResponse); err != nil {
+		errx := errorutil.NewWithErr(err)
+		// quake has different json format for error messages try to unmarshal it in map and print map
+		var errMap map[string]interface{}
+		if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(&errMap); err == nil {
+			errx = errx.Msgf("failed to decode quake response: %v", errMap)
+		} else {
+			errx = errx.Msgf("failed to decode quake response: %s", string(respdata))
+		}
+		results <- sources.Result{Source: agent.Name(), Error: errx}
 		return nil
 	}
 
