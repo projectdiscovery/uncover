@@ -115,7 +115,7 @@ func ParseOptions() *Options {
 	showBanner()
 
 	if !options.DisableUpdateCheck {
-		latestVersion, err := updateutils.GetVersionCheckCallback("uncover")()
+		latestVersion, err := updateutils.GetToolVersionCallback("uncover", version)()
 		if err != nil {
 			if options.Verbose {
 				gologger.Error().Msgf("uncover version check failed: %v", err.Error())
