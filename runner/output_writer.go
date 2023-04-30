@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	lru "github.com/hashicorp/golang-lru"
-	"github.com/projectdiscovery/uncover/uncover"
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 type OutputWriter struct {
@@ -59,7 +59,7 @@ func (o *OutputWriter) WriteString(data string) {
 }
 
 // WriteJsonData writes the result taken as input in JSON format
-func (o *OutputWriter) WriteJsonData(data uncover.Result) {
+func (o *OutputWriter) WriteJsonData(data sources.Result) {
 	if o.findDuplicate(fmt.Sprintf("%s:%d", data.IP, data.Port)) {
 		return
 	}
