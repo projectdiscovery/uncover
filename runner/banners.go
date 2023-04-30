@@ -3,7 +3,6 @@ package runner
 import (
 	"github.com/projectdiscovery/gologger"
 	updateutils "github.com/projectdiscovery/utils/update"
-
 )
 
 const banner = `
@@ -14,7 +13,7 @@ const banner = `
 `
 
 // Version is the current version of uncover
-const version = `v1.0.3`
+const version = `v1.0.4`
 
 // showBanner is used to show the banner to the user
 func showBanner() {

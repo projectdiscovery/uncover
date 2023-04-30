@@ -1,10 +1,8 @@
 package runner
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"errors"
 
@@ -12,6 +10,7 @@ import (
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/gologger/formatter"
 	"github.com/projectdiscovery/gologger/levels"
+	"github.com/projectdiscovery/uncover/sources"
 	fileutil "github.com/projectdiscovery/utils/file"
 	folderutil "github.com/projectdiscovery/utils/folder"
 	genericutil "github.com/projectdiscovery/utils/generic"
@@ -19,8 +18,7 @@ import (
 )
 
 var (
-	defaultConfigLocation         = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/config.yaml")
-	defaultProviderConfigLocation = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/provider-config.yaml")
+	defaultConfigLocation = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/config.yaml")
 )
 
 // Options contains the configuration options for tuning the enumeration process.
@@ -35,13 +33,11 @@ type Options struct {
 	Raw                bool
 	Limit              int
 	Silent             bool
-	Version            bool
 	Verbose            bool
 	NoColor            bool
 	Timeout            int
 	RateLimit          int
 	RateLimitMinute    int
-	Provider           *Provider
 	Retries            int
 	Shodan             goflags.StringSlice
 	ShodanIdb          goflags.StringSlice
@@ -59,8 +55,7 @@ type Options struct {
 
 // ParseOptions parses the command line flags provided by a user
 func ParseOptions() *Options {
-	options := &Options{Provider: &Provider{}}
-	var err error
+	options := &Options{}
 	flagSet := goflags.NewFlagSet()
 	flagSet.SetDescription(`quickly discover exposed assets on the internet using multiple search engines.`)
 
@@ -84,7 +79,7 @@ func ParseOptions() *Options {
 	)
 
 	flagSet.CreateGroup("config", "Config",
-		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", defaultProviderConfigLocation, "provider configuration file"),
+		flagSet.StringVarP(&options.ProviderFile, "provider", "pc", sources.DefaultProviderConfigLocation, "provider configuration file"),
 		flagSet.StringVar(&options.ConfigFile, "config", defaultConfigLocation, "flag configuration file"),
 		flagSet.IntVar(&options.Timeout, "timeout", 30, "timeout in seconds"),
 		flagSet.IntVarP(&options.RateLimit, "rate-limit", "rl", 0, "maximum number of http requests to send per second"),
@@ -108,26 +103,19 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("debug", "Debug",
 		flagSet.BoolVar(&options.Silent, "silent", false, "show only results in output"),
-		flagSet.BoolVar(&options.Version, "version", false, "show version of the project"),
+		flagSet.CallbackVar(versionCallback, "version", "show version of the project"),
 		flagSet.BoolVar(&options.Verbose, "v", false, "show verbose output"),
 	)
 
 	if err := flagSet.Parse(); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		gologger.Fatal().Msg(err.Error())
 	}
 
 	options.configureOutput()
-
 	showBanner()
 
-	if options.Version {
-		gologger.Info().Msgf("Current Version: %s\n", version)
-		os.Exit(0)
-	}
-
 	if !options.DisableUpdateCheck {
-		latestVersion, err := updateutils.GetVersionCheckCallback("uncover")()
+		latestVersion, err := updateutils.GetToolVersionCallback("uncover", version)()
 		if err != nil {
 			if options.Verbose {
 				gologger.Error().Msgf("uncover version check failed: %v", err.Error())
@@ -141,17 +129,8 @@ func ParseOptions() *Options {
 		_ = options.loadConfigFrom(options.ConfigFile)
 	}
 
-	// create default provider file if it doesn't exist
-	if !fileutil.FileExists(defaultProviderConfigLocation) {
-		if err := fileutil.Marshal(fileutil.YAML, []byte(defaultProviderConfigLocation), Provider{}); err != nil {
-			gologger.Warning().Msgf("couldn't write provider default file: %s\n", err)
-		}
-	}
-
-	// provider chores
-	_ = options.loadProvidersFrom(options.ProviderFile)
-	if err = options.loadProvidersFromEnv(); err != nil {
-		gologger.Warning().Msgf("couldn't parse env vars: %s\n", err)
+	if options.ProviderFile != sources.DefaultProviderConfigLocation {
+		sources.DefaultProviderConfigLocation = options.ProviderFile
 	}
 
 	if genericutil.EqualsAll(0,
@@ -183,8 +162,7 @@ func ParseOptions() *Options {
 
 	// Validate the options passed by the user and if any
 	// invalid options have been used, exit.
-	err = options.validateOptions()
-	if err != nil {
+	if err := options.validateOptions(); err != nil {
 		gologger.Fatal().Msgf("Program exiting: %s\n", err)
 	}
 
@@ -207,52 +185,6 @@ func (options *Options) configureOutput() {
 
 func (Options *Options) loadConfigFrom(location string) error {
 	return fileutil.Unmarshal(fileutil.YAML, []byte(location), Options)
-}
-
-func (options *Options) loadProvidersFrom(location string) error {
-	return fileutil.Unmarshal(fileutil.YAML, []byte(location), options.Provider)
-}
-
-func (options *Options) loadProvidersFromEnv() error {
-	if key, exists := os.LookupEnv("SHODAN_API_KEY"); exists {
-		options.Provider.Shodan = append(options.Provider.Shodan, key)
-	}
-	if id, exists := os.LookupEnv("CENSYS_API_ID"); exists {
-		if secret, exists := os.LookupEnv("CENSYS_API_SECRET"); exists {
-			options.Provider.Censys = append(options.Provider.Censys, fmt.Sprintf("%s:%s", id, secret))
-		} else {
-			return errors.New("missing censys secret")
-		}
-	}
-	if email, exists := os.LookupEnv("FOFA_EMAIL"); exists {
-		if key, exists := os.LookupEnv("FOFA_KEY"); exists {
-			options.Provider.Fofa = append(options.Provider.Fofa, fmt.Sprintf("%s:%s", email, key))
-		} else {
-			return errors.New("missing fofa key")
-		}
-	}
-	if key, exists := os.LookupEnv("HUNTER_API_KEY"); exists {
-		options.Provider.Hunter = append(options.Provider.Hunter, key)
-	}
-	if key, exists := os.LookupEnv("QUAKE_TOKEN"); exists {
-		options.Provider.Quake = append(options.Provider.Quake, key)
-	}
-	if key, exists := os.LookupEnv("ZOOMEYE_API_KEY"); exists {
-		options.Provider.ZoomEye = append(options.Provider.ZoomEye, key)
-	}
-	if key, exists := os.LookupEnv("NETLAS_API_KEY"); exists {
-		options.Provider.Netlas = append(options.Provider.Netlas, key)
-	}
-	if key, exists := os.LookupEnv("CRIMINALIP_API_KEY"); exists {
-		options.Provider.CriminalIP = append(options.Provider.CriminalIP, key)
-	}
-	if key, exists := os.LookupEnv("PUBLICWWW_API_KEY"); exists {
-		options.Provider.Publicwww = append(options.Provider.Publicwww, key)
-	}
-	if key, exists := os.LookupEnv("HUNTERHOW_API_KEY"); exists {
-		options.Provider.HunterHow = append(options.Provider.HunterHow, key)
-	}
-	return nil
 }
 
 // validateOptions validates the configuration options passed
@@ -300,11 +232,28 @@ func (options *Options) validateOptions() error {
 	return nil
 }
 
-func (options *Options) hasAnyAnonymousProvider() bool {
-	for _, engine := range options.Engine {
-		if strings.EqualFold(engine, "shodan-idb") {
-			return true
-		}
+func versionCallback() {
+	gologger.Info().Msgf("Current Version: %s\n", version)
+	os.Exit(0)
+}
+
+func appendQuery(options *Options, name string, queries ...string) {
+	if len(queries) > 0 {
+		options.Engine = append(options.Engine, name)
+		options.Query = append(options.Query, queries...)
 	}
-	return false
+}
+
+func appendAllQueries(options *Options) {
+	appendQuery(options, "shodan", options.Shodan...)
+	appendQuery(options, "shodan-idb", options.ShodanIdb...)
+	appendQuery(options, "fofa", options.Fofa...)
+	appendQuery(options, "censys", options.Censys...)
+	appendQuery(options, "quake", options.Quake...)
+	appendQuery(options, "hunter", options.Hunter...)
+	appendQuery(options, "zoomeye", options.ZoomEye...)
+	appendQuery(options, "netlas", options.Netlas...)
+	appendQuery(options, "criminalip", options.CriminalIP...)
+	appendQuery(options, "publicwww", options.Publicwww...)
+	appendQuery(options, "hunterhow", options.HunterHow...)
 }

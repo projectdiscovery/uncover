@@ -53,7 +53,7 @@
 
 ## Installation Instructions
 
-uncover requires **go1.17** to install successfully. Run the following command to get the repo -
+uncover requires **go1.19** to install successfully. Run the following command to get the repo -
 
 ```sh
 go install -v github.com/projectdiscovery/uncover/cmd/uncover@latest
@@ -110,6 +110,10 @@ DEBUG:
    -version  show version of the project
    -v        show verbose output
 ```
+
+## Using uncover as library
+
+Example of using uncover as library is provided in [examples](examples/main.go) directory.
 
 ## Provider Configuration
 
