@@ -34,11 +34,11 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/projectdiscovery/blackrock v0.0.0-20221025011524-9e4efe804fb4 // indirect
-	github.com/projectdiscovery/utils v0.0.26
+	github.com/projectdiscovery/utils v0.0.29
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
