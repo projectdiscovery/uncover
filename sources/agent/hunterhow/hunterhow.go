@@ -37,7 +37,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		for {
 			hunterhowRequest := &Request{
 				Query:    query.Query,
-				PageSize: query.Limit,
+				PageSize: Size, // max size is 100
 				Page:     pageQuery,
 			}
 
@@ -75,7 +75,7 @@ func (agent *Agent) query(URL string, session *sources.Session, results chan sou
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
-	if apiResponse.Code != 200 {
+	if apiResponse.Code != http.StatusOK {
 		results <- sources.Result{Source: agent.Name(), Error: errors.New(apiResponse.Message)}
 		return nil
 	}
