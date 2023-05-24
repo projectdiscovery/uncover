@@ -26,7 +26,7 @@ var DefaultRateLimits = map[string]*ratelimit.Options{
 	"netlas":     {Key: "netlas", MaxCount: 1, Duration: time.Second},
 	"criminalip": {Key: "criminalip", MaxCount: 1, Duration: time.Second},
 	"publicwww":  {Key: "publicwww", MaxCount: 1, Duration: time.Minute},
-	"hunterhow":  {Key: "hunterhow", MaxCount: 1, Duration: time.Second},
+	"hunterhow":  {Key: "hunterhow", MaxCount: 1, Duration: 3 * time.Second},
 }
 
 // Session handles session agent sessions
