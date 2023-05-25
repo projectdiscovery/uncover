@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
+	"os"
 	"sync"
 
 	lru "github.com/hashicorp/golang-lru"
@@ -64,5 +65,14 @@ func (o *OutputWriter) WriteJsonData(data sources.Result) {
 		return
 	}
 	o.Write([]byte(data.JSON()))
+}
 
+// Close closes the output writers
+func (o *OutputWriter) Close() {
+	// Iterate over the writers and close the file writers
+	for _, writer := range o.writers {
+		if fileWriter, ok := writer.(*os.File); ok {
+			fileWriter.Close()
+		}
+	}
 }
