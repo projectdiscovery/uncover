@@ -22,4 +22,8 @@ func main() {
 	if err != nil {
 		gologger.Fatal().Msgf("Could not run enumeration: %s\n", err)
 	}
+	// close the runner
+	if newRunner != nil {
+		newRunner.Close()
+	}
 }
