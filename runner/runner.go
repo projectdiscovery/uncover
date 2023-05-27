@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover"
 	"github.com/projectdiscovery/uncover/sources"
+	errorutil "github.com/projectdiscovery/utils/errors"
 	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
@@ -48,6 +50,13 @@ func NewRunner(options *Options) (*Runner, error) {
 		return nil, err
 	}
 
+	if runner.options.OutputFile != "" {
+		outputFile, err := os.Create(runner.options.OutputFile)
+		if err != nil {
+			return nil, errorutil.New("could not create output file %s: %s", options.OutputFile, err)
+		}
+		runner.outputWriter.AddWriters(outputFile)
+	}
 	return runner, nil
 }
 
@@ -92,4 +101,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 	}
 	return r.service.ExecuteWithCallback(ctx, resultCallback)
+}
+
+// Close closes its resources
+func (r *Runner) Close() {
+	if r.outputWriter != nil {
+		r.outputWriter.Close()
+	}
 }
