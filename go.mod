@@ -11,7 +11,7 @@ require (
 	github.com/projectdiscovery/gologger v1.1.10
 	github.com/projectdiscovery/mapcidr v1.1.2
 	github.com/projectdiscovery/ratelimit v0.0.8
-	github.com/projectdiscovery/retryablehttp-go v1.0.16
+	github.com/projectdiscovery/retryablehttp-go v1.0.17
 	github.com/stretchr/testify v1.8.3
 )
 
