@@ -91,7 +91,7 @@ func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *
 		}
 		if portinfo, ok := zoomeyeResult["portinfo"]; ok {
 			if port, ok := portinfo.(map[string]interface{}); ok {
-				result.Port = convertPortFromValue(port["port"].(float64))
+				result.Port = convertPortFromValue(port["port"])
 				if result.Port == 0 {
 					continue
 				}
