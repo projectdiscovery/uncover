@@ -120,7 +120,7 @@ Example of using uncover as library is provided in [examples](examples/main.go) 
 The default provider configuration file should be located at `$HOME/.config/uncover/provider-config.yaml` and has the following contents as an example.
 
 
-> **Note**: API keys are required needs to be configured before running uncover.
+> **Note**: API keys are required and must be configured before running uncover.
 
 ```yaml
 shodan:
