@@ -8,13 +8,18 @@ import (
 	"strings"
 
 	"github.com/projectdiscovery/gologger"
+	errorutil "github.com/projectdiscovery/utils/errors"
 	fileutil "github.com/projectdiscovery/utils/file"
 	folderutil "github.com/projectdiscovery/utils/folder"
 	"github.com/projectdiscovery/utils/generic"
 )
 
-// DefaultProviderConfigLocation where keys and config of providers are stored
-var DefaultProviderConfigLocation = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/provider-config.yaml")
+var (
+	// Todo: replace from utils with ConfigDirOrDefault
+	UncoverConfigDir = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover")
+	// DefaultProviderConfigLocation where keys and config of providers are stored
+	DefaultProviderConfigLocation = filepath.Join(UncoverConfigDir, "provider-config.yaml")
+)
 
 type Provider struct {
 	Shodan     []string `yaml:"shodan"`
@@ -96,6 +101,9 @@ func (provider *Provider) GetKeys() Keys {
 
 // LoadProvidersFrom loads provider config from given location
 func (provider *Provider) LoadProviderConfig(location string) error {
+	if !fileutil.FileExists(location) {
+		return errorutil.NewWithTag("uncover", "provider config file %v does not exist", location)
+	}
 	return fileutil.Unmarshal(fileutil.YAML, []byte(location), provider)
 }
 
@@ -146,6 +154,12 @@ func (provider *Provider) HasKeys() bool {
 }
 
 func init() {
+	// check if config dir exists
+	if !fileutil.FolderExists(UncoverConfigDir) {
+		if err := fileutil.CreateFolder(UncoverConfigDir); err != nil {
+			gologger.Warning().Msgf("couldn't create uncover config dir: %s\n", err)
+		}
+	}
 	// create default provider file if it doesn't exist
 	if !fileutil.FileExists(DefaultProviderConfigLocation) {
 		if err := fileutil.Marshal(fileutil.YAML, []byte(DefaultProviderConfigLocation), Provider{}); err != nil {
