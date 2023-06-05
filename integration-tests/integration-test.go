@@ -28,6 +28,7 @@ var (
 		"quake":      quakeTestcases{},
 		"netlas":     netlasTestcases{},
 		"criminalip": criminalipTestcases{},
+		"hunterhow":  hunterhowTestcases{},
 		// feature tests
 		"output": outputTestcases{},
 	}
