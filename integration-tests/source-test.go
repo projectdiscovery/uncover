@@ -150,3 +150,20 @@ func (h criminalipTestcases) Execute() error {
         }
         return expectResultsGreaterThanCount(results, 0)
 }
+
+type hunterhowTestcases struct{}
+
+func (h hunterhowTestcases) Execute() error {
+	token := os.Getenv("HUNTERHOW_API_KEY")
+	if token == "" {
+		return errors.New("missing hunterhow api key")
+	}
+	hunterhowApiKey := fmt.Sprintf(`hunterhow: [%s]`, token)
+	_ = os.WriteFile(ConfigFile, []byte(hunterhowApiKey), 0644)
+	defer os.RemoveAll(ConfigFile)
+	results, err := testutils.RunUncoverAndGetResults(debug, "-hunterhow", "'web.body=\"ElasticJob\"'")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}

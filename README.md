@@ -150,6 +150,9 @@ criminalip:
 publicwww:
   - PUBLICWWW_API_KEY_1
   - PUBLICWWW_API_KEY_2
+hunterhow:
+  - HUNTERHOW_API_KEY_1 
+  - HUNTERHOW_API_KEY_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -168,6 +171,7 @@ export ZOOMEYE_API_KEY=xxx
 export NETLAS_API_KEY=xxx
 export CRIMINALIP_API_KEY=xxx
 export PUBLICWWW_API_KEY=xxx
+export HUNTERHOW_API_KEY=xxx
 ```
 
 Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.org/login), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register) and [Publicwww](https://publicwww.com/profile/signup.html).
