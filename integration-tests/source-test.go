@@ -137,16 +137,34 @@ func (h netlasTestcases) Execute() error {
 type criminalipTestcases struct{}
 
 func (h criminalipTestcases) Execute() error {
-        token := os.Getenv("CRIMINALIP_API_KEY")
-        if token == "" {
-                return errors.New("missing criminalip api key")
-        }
-        criminalipToken := fmt.Sprintf(`criminalip: [%s]`, token)
-        _ = os.WriteFile(ConfigFile, []byte(criminalipToken), 0644)
-        defer os.RemoveAll(ConfigFile)
-        results, err := testutils.RunUncoverAndGetResults(debug, "-criminalip", "'Grafana'")
-        if err != nil {
-                return err
-        }
-        return expectResultsGreaterThanCount(results, 0)
+	token := os.Getenv("CRIMINALIP_API_KEY")
+	if token == "" {
+		return errors.New("missing criminalip api key")
+	}
+	criminalipToken := fmt.Sprintf(`criminalip: [%s]`, token)
+	_ = os.WriteFile(ConfigFile, []byte(criminalipToken), 0644)
+	defer os.RemoveAll(ConfigFile)
+	results, err := testutils.RunUncoverAndGetResults(debug, "-criminalip", "'Grafana'")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}
+
+type outputTestcases struct{}
+
+func (h outputTestcases) Execute() error {
+	results, err := testutils.RunUncoverAndGetResults(debug, "-q", "'element'", "-j", "-silent")
+	if err != nil {
+		return err
+	}
+	err = expectResultsGreaterThanCount(results, 0)
+	if err != nil {
+		return err
+	}
+	results, err = testutils.RunUncoverAndGetResults(debug, "-q", "'element'", "-r", "-silent")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
 }
