@@ -50,7 +50,9 @@ func NewRunner(options *Options) (*Runner, error) {
 		return nil, err
 	}
 
-	runner.outputWriter.AddWriters(os.Stdout)
+	if !options.Verbose {
+		runner.outputWriter.AddWriters(os.Stdout)
+	}
 	if runner.options.OutputFile != "" {
 		outputFile, err := os.Create(runner.options.OutputFile)
 		if err != nil {
