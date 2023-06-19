@@ -7,7 +7,7 @@ RUN go mod download
 RUN go build -o ./cmd/uncover ./cmd/uncover
 
 # Release
-FROM alpine:3.18.0
+FROM alpine:3.18.2
 RUN apk -U upgrade --no-cache \
     && apk add --no-cache bind-tools ca-certificates
 COPY --from=builder /app/cmd/uncover/uncover /usr/local/bin/
