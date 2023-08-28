@@ -18,26 +18,29 @@ var (
 	success = aurora.Green("[✓]").String()
 	failed  = aurora.Red("[✘]").String()
 
-	sourceTests = map[string]testutils.TestCase{
+	tests = map[string]testutils.TestCase{
+		// source tests
 		"censys":  censysTestcases{},
 		"shodan":  shodanTestcases{},
 		"zoomeye": zoomeyeTestcases{},
 		"fofa":    fofaTestcases{},
 		//"hunter":  hunterTestcases{},
-		"quake":  quakeTestcases{},
-		"netlas": netlasTestcases{},
+		"quake":      quakeTestcases{},
+		"netlas":     netlasTestcases{},
 		"criminalip": criminalipTestcases{},
-		"hunterhow": hunterhowTestcases{},
+		"hunterhow":  hunterhowTestcases{},
+		// feature tests
+		"output": outputTestcases{},
 	}
 )
 
 func main() {
-	failedTestCases := runTests(toMap(toSlice(customTests)))
+	failedTestCases := runTests(toSlice(customTests))
 
 	if len(failedTestCases) > 0 {
 		if githubAction {
 			debug = true
-			fmt.Println("::group::Failed integration tests in debug mode")
+			fmt.Println("\n::group::Failed integration tests in debug mode")
 			_ = runTests(failedTestCases)
 			fmt.Println("::endgroup::")
 		}
@@ -45,28 +48,32 @@ func main() {
 	}
 }
 
-func runTests(customTestCases map[string]struct{}) map[string]struct{} {
-	failedTestCases := map[string]struct{}{}
-
-	for source, testCase := range sourceTests {
-		if len(customTestCases) == 0 {
-			fmt.Printf("Running test cases for %q source\n", aurora.Blue(source))
+func runTests(customTests []string) []string {
+	if len(customTests) == 0 {
+		customTests = make([]string, 0, len(tests))
+		for test := range tests {
+			customTests = append(customTests, test)
 		}
-		if err, failedTemplatePath := execute(source, testCase); err != nil {
-			failedTestCases[failedTemplatePath] = struct{}{}
+	}
+
+	failedTestCases := []string{}
+	for _, test := range customTests {
+		fmt.Printf("Running test cases for \"%s\"\n", aurora.Blue(test))
+		if failedTest, err := execute(test, tests[test]); err != nil {
+			failedTestCases = append(failedTestCases, failedTest)
 		}
 	}
 	return failedTestCases
 }
 
-func execute(source string, testCase testutils.TestCase) (error, string) {
+func execute(test string, testCase testutils.TestCase) (string, error) {
 	if err := testCase.Execute(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%s Test \"%s\" failed: %s\n", failed, source, err)
-		return err, source
+		_, _ = fmt.Fprintf(os.Stderr, "%s Test \"%s\" failed: %s\n", failed, test, err)
+		return test, err
 	}
 
-	fmt.Printf("%s Test \"%s\" passed!\n", success, source)
-	return nil, ""
+	fmt.Printf("%s Test \"%s\" passed!\n", success, test)
+	return "", nil
 }
 
 func expectResultsGreaterThanCount(results []string, expectedNumber int) error {
@@ -75,20 +82,11 @@ func expectResultsGreaterThanCount(results []string, expectedNumber int) error {
 	}
 	return fmt.Errorf("incorrect number of results: expected a result greater than %d,but got %d", expectedNumber, len(results))
 }
+
 func toSlice(value string) []string {
 	if strings.TrimSpace(value) == "" {
 		return []string{}
 	}
 
 	return strings.Split(value, ",")
-}
-
-func toMap(slice []string) map[string]struct{} {
-	result := make(map[string]struct{}, len(slice))
-	for _, value := range slice {
-		if _, ok := result[value]; !ok {
-			result[value] = struct{}{}
-		}
-	}
-	return result
 }
