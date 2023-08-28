@@ -11,6 +11,7 @@ import (
 	"github.com/projectdiscovery/gologger/formatter"
 	"github.com/projectdiscovery/gologger/levels"
 	"github.com/projectdiscovery/uncover/sources"
+	errorutil "github.com/projectdiscovery/utils/errors"
 	fileutil "github.com/projectdiscovery/utils/file"
 	folderutil "github.com/projectdiscovery/utils/folder"
 	genericutil "github.com/projectdiscovery/utils/generic"
@@ -184,6 +185,9 @@ func (options *Options) configureOutput() {
 }
 
 func (Options *Options) loadConfigFrom(location string) error {
+	if !fileutil.FileExists(location) {
+		return errorutil.New("config file %s does not exist", location)
+	}
 	return fileutil.Unmarshal(fileutil.YAML, []byte(location), Options)
 }
 
