@@ -78,12 +78,12 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/projectdiscovery/fastdialer v0.0.36 // indirect
+	github.com/projectdiscovery/fastdialer v0.0.37 // indirect
 	github.com/projectdiscovery/hmap v0.0.17 // indirect
 	github.com/projectdiscovery/networkpolicy v0.0.6 // indirect
 	github.com/projectdiscovery/retryabledns v1.0.35 // indirect
 	github.com/quic-go/quic-go v0.38.1 // indirect
-	github.com/refraction-networking/utls v1.5.0 // indirect
+	github.com/refraction-networking/utls v1.5.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tidwall/btree v1.6.0 // indirect
