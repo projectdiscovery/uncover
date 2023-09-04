@@ -154,8 +154,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/projectdiscovery/blackrock v0.0.1 h1:lHQqhaaEFjgf5WkuItbpeCZv2DUIE45k0VbGJyft6LQ=
 github.com/projectdiscovery/blackrock v0.0.1/go.mod h1:ANUtjDfaVrqB453bzToU+YB4cUbvBRpLvEwoWIwlTss=
-github.com/projectdiscovery/fastdialer v0.0.36 h1:Ac/CRLryJB2mA8erDwAHoCJGFvjCDIPUznxWl9kJPW8=
-github.com/projectdiscovery/fastdialer v0.0.36/go.mod h1:jxX9iQJdTwlD6u0Q9Dj9/AmatHPW2GRl3V6XTAvKtHY=
+github.com/projectdiscovery/fastdialer v0.0.37 h1:GEn0VYD/Q+KWiUlQDPP5stvIauN8+gE/eooPzrwidic=
+github.com/projectdiscovery/fastdialer v0.0.37/go.mod h1:e4Rg9mQ5mNCDFV37njgGCognM0PdLq5f8CcljBqTkRw=
 github.com/projectdiscovery/fdmax v0.0.4 h1:K9tIl5MUZrEMzjvwn/G4drsHms2aufTn1xUdeVcmhmc=
 github.com/projectdiscovery/fdmax v0.0.4/go.mod h1:oZLqbhMuJ5FmcoaalOm31B1P4Vka/CqP50nWjgtSz+I=
 github.com/projectdiscovery/goflags v0.1.19 h1:VgDzPZTW4LrOL8uka1C18y4a2dcaLk7u7t/eJXd+43k=
@@ -178,8 +178,8 @@ github.com/projectdiscovery/utils v0.0.54 h1:qwTIalrK8pKYaxFObdeSfCtwDmVCN9qswc8
 github.com/projectdiscovery/utils v0.0.54/go.mod h1:WhzbWSyGkTDn4Jvw+7jM2yP675/RARegNjoA6S7zYcc=
 github.com/quic-go/quic-go v0.38.1 h1:M36YWA5dEhEeT+slOu/SwMEucbYd0YFidxG3KlGPZaE=
 github.com/quic-go/quic-go v0.38.1/go.mod h1:ijnZM7JsFIkp4cRyjxJNIzdSfCLmUMg9wdyhGmg+SN4=
-github.com/refraction-networking/utls v1.5.0 h1:Ucbojt9Wc4yFc3oyQyCmmuvPUFmTdb3AXaCWYTUlyZA=
-github.com/refraction-networking/utls v1.5.0/go.mod h1:SPuDbBmgLGp8s+HLNc83FuavwZCFoMmExj+ltUHiHUw=
+github.com/refraction-networking/utls v1.5.2 h1:l6diiLbEoRqdQ+/osPDO0z0lTc8O8VZV+p82N+Hi+ws=
+github.com/refraction-networking/utls v1.5.2/go.mod h1:SPuDbBmgLGp8s+HLNc83FuavwZCFoMmExj+ltUHiHUw=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.4 h1:8TfxU8dW6PdqD27gjM8MVNuicgxIjxpm4K7x4jp8sis=
