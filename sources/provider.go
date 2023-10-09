@@ -15,8 +15,7 @@ import (
 )
 
 var (
-	// Todo: replace from utils with ConfigDirOrDefault
-	UncoverConfigDir = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover")
+	UncoverConfigDir = folderutil.AppConfigDirOrDefault(".uncover-config", "uncover")
 	// DefaultProviderConfigLocation where keys and config of providers are stored
 	DefaultProviderConfigLocation = filepath.Join(UncoverConfigDir, "provider-config.yaml")
 )

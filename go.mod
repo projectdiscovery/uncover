@@ -1,6 +1,6 @@
 module github.com/projectdiscovery/uncover
 
-go 1.19
+go 1.20
 
 require (
 	github.com/hashicorp/golang-lru v0.5.4
@@ -34,7 +34,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/projectdiscovery/blackrock v0.0.1 // indirect
-	github.com/projectdiscovery/utils v0.0.57
+	github.com/projectdiscovery/utils v0.0.58-0.20231009161115-60268dca6e8f
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.15.0 // indirect
