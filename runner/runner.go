@@ -3,10 +3,8 @@ package runner
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover"
@@ -14,10 +12,6 @@ import (
 	errorutil "github.com/projectdiscovery/utils/errors"
 	stringsutil "github.com/projectdiscovery/utils/strings"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 // Runner is an instance of the uncover enumeration
 // client used to orchestrate the whole process.
