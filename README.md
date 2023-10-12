@@ -53,7 +53,7 @@
 
 ## Installation Instructions
 
-uncover requires **go1.19** to install successfully. Run the following command to get the repo -
+uncover requires **go1.20** to install successfully. Run the following command to get the repo -
 
 ```sh
 go install -v github.com/projectdiscovery/uncover/cmd/uncover@latest
@@ -90,8 +90,8 @@ SEARCH-ENGINE:
    -hh, -hunterhow string[]   search query for hunterhow (example: -hunterhow 'query.txt')
 
 CONFIG:
-   -pc, -provider string         provider configuration file (default "$HOME/.config/uncover/provider-config.yaml")
-   -config string                flag configuration file (default "$HOME/.config/uncover/config.yaml")
+   -pc, -provider string         provider configuration file (default "$CONFIG/uncover/provider-config.yaml")
+   -config string                flag configuration file (default "$CONFIG/uncover/config.yaml")
    -timeout int                  timeout in seconds (default 30)
    -rl, -rate-limit int          maximum number of http requests to send per second
    -rlm, -rate-limit-minute int  maximum number of requests to send per minute
@@ -117,7 +117,7 @@ Example of using uncover as library is provided in [examples](examples/main.go) 
 
 ## Provider Configuration
 
-The default provider configuration file should be located at `$HOME/.config/uncover/provider-config.yaml` and has the following contents as an example.
+The default provider configuration file should be located at `$CONFIG/uncover/provider-config.yaml` and has the following contents as an example.
 
 
 > **Note**: API keys are required needs to be configured before running uncover.
