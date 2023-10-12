@@ -19,7 +19,8 @@ import (
 )
 
 var (
-	defaultConfigLocation = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/config.yaml")
+	// cli flags config file location
+	defaultConfigLocation = filepath.Join(folderutil.AppConfigDirOrDefault(".uncover-config", "uncover"), "config.yaml")
 )
 
 // Options contains the configuration options for tuning the enumeration process.
@@ -238,6 +239,7 @@ func (options *Options) validateOptions() error {
 
 func versionCallback() {
 	gologger.Info().Msgf("Current Version: %s\n", version)
+	gologger.Info().Msgf("Uncover ConfigDir: %s\n", folderutil.AppConfigDirOrDefault(".uncover-config", "uncover"))
 	os.Exit(0)
 }
 
