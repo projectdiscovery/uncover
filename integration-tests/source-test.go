@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	ConfigFile = filepath.Join(folderutil.HomeDirOrDefault("."), ".config/uncover/provider-config.yaml")
+	ConfigFile = filepath.Join(folderutil.AppConfigDirOrDefault(".uncover-config", "uncover"), "provider-config.yaml")
 )
 
 type censysTestcases struct{}
