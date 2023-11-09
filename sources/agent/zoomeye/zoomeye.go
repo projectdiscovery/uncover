@@ -33,6 +33,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 
 		currentPage := 1
 		var numberOfResults, totalResults int
+		const perPageMaxTotal int = 20
 		for {
 			zoomeyeRequest := &ZoomEyeRequest{
 				Query: query.Query,
@@ -50,7 +51,8 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			}
 
 			// query certificates
-			if numberOfResults > query.Limit || numberOfResults > totalResults || len(zoomeyeResponse.Results) == 0 {
+			if totalResults <= perPageMaxTotal || numberOfResults > query.Limit ||
+				numberOfResults > totalResults || len(zoomeyeResponse.Results) == 0 {
 				break
 			}
 		}
