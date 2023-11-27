@@ -80,7 +80,7 @@ require (
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/projectdiscovery/fastdialer v0.0.46 // indirect
-	github.com/projectdiscovery/hmap v0.0.26 // indirect
+	github.com/projectdiscovery/hmap v0.0.27 // indirect
 	github.com/projectdiscovery/networkpolicy v0.0.6 // indirect
 	github.com/projectdiscovery/retryabledns v1.0.43 // indirect
 	github.com/quic-go/quic-go v0.38.1 // indirect
