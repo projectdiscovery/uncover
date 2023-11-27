@@ -7,7 +7,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/projectdiscovery/fdmax v0.0.4
-	github.com/projectdiscovery/goflags v0.1.28
+	github.com/projectdiscovery/goflags v0.1.29
 	github.com/projectdiscovery/gologger v1.1.11
 	github.com/projectdiscovery/mapcidr v1.1.16
 	github.com/projectdiscovery/ratelimit v0.0.16
