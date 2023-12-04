@@ -164,8 +164,8 @@ github.com/projectdiscovery/goflags v0.1.29 h1:RIfBxJrm9ApJLKxizNm9vZq3/8uH7WBHy
 github.com/projectdiscovery/goflags v0.1.29/go.mod h1:JuNseKacVYPqxwhN7NLw/UPrzyZOuJ58ufLrPuZsXDY=
 github.com/projectdiscovery/gologger v1.1.11 h1:8vsz9oJlDT9euw6xlj7F7dZ6RWItVIqVwn4Mr6uzky8=
 github.com/projectdiscovery/gologger v1.1.11/go.mod h1:UR2bgXl7zraOxYGnUwuO917hifWrwMJ0feKnVqMQkzY=
-github.com/projectdiscovery/hmap v0.0.27 h1:I4oYpNRmEYSs0CAL6qlxxKL60wn84tMgV2hC2jgB1/A=
-github.com/projectdiscovery/hmap v0.0.27/go.mod h1:QOzaiI4PATlCb4bE50CLC6RAJ+wz0RXtlQUrR2vFmAI=
+github.com/projectdiscovery/hmap v0.0.28 h1:2FrjMtGi5Xbh07AuidN1s+gAw6KJixZZ/QT5XcC3448=
+github.com/projectdiscovery/hmap v0.0.28/go.mod h1:EkSVc8LdqRNDEjzGXwFWIkmQE467mZnVVaKK1kKrbUk=
 github.com/projectdiscovery/mapcidr v1.1.16 h1:rjj1w5D6hbTsUQXYClLcGdfBEy9bryclgi70t0vBggo=
 github.com/projectdiscovery/mapcidr v1.1.16/go.mod h1:rGqpBhStdwOQ2uS62QM9qPsybwMwIhT7CTd2bxoHs8Q=
 github.com/projectdiscovery/networkpolicy v0.0.6 h1:yDvm0XCrS9HeemRrBS+J+22surzVczM94W5nHiOy/1o=
@@ -176,8 +176,8 @@ github.com/projectdiscovery/retryabledns v1.0.43 h1:QQPwb1J7NvjAjyXueKS/ZmoAqofD
 github.com/projectdiscovery/retryabledns v1.0.43/go.mod h1:ZKe4nKyrmZhoxEOL5DLaqqNP7QN9lqeu15sfBigxmqU=
 github.com/projectdiscovery/retryablehttp-go v1.0.37 h1:sdMEj+Rno3lHJGRfx+F8+PPLGluJA1k1gYLhegUjTAo=
 github.com/projectdiscovery/retryablehttp-go v1.0.37/go.mod h1:4b+LWch6Vu9aUBRlWqd5mq4ncpkz1vDIyu0dcrf/84w=
-github.com/projectdiscovery/utils v0.0.64 h1:umTmYC9srbLgtJcMbHK+I77oT2MjrW6SjCt7P/F9puA=
-github.com/projectdiscovery/utils v0.0.64/go.mod h1:buA3AXoT1TVb21YWp6QM/Ks2bq/UgQU20s2E9TE9L5Y=
+github.com/projectdiscovery/utils v0.0.65 h1:QanNhSFhOfkUjniSlsV2Exm3m5MDyTGmpKbJDMcAVhg=
+github.com/projectdiscovery/utils v0.0.65/go.mod h1:qs8T5JWLIXZmoc1DbUkihFVTjPtuYgJ3WOmaNQedhwg=
 github.com/quic-go/quic-go v0.38.1 h1:M36YWA5dEhEeT+slOu/SwMEucbYd0YFidxG3KlGPZaE=
 github.com/quic-go/quic-go v0.38.1/go.mod h1:ijnZM7JsFIkp4cRyjxJNIzdSfCLmUMg9wdyhGmg+SN4=
 github.com/refraction-networking/utls v1.5.4 h1:9k6EO2b8TaOGsQ7Pl7p9w6PUhx18/ZCeT0WNTZ7Uw4o=
