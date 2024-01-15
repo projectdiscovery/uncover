@@ -54,7 +54,7 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/glamour v0.6.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.4 // indirect
-	github.com/cloudflare/circl v1.3.3 // indirect
+	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/denisbrodbeck/machineid v1.0.1 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.8.1 // indirect
@@ -80,7 +80,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/projectdiscovery/fastdialer v0.0.52 // indirect
+	github.com/projectdiscovery/fastdialer v0.0.53 // indirect
 	github.com/projectdiscovery/hmap v0.0.34 // indirect
 	github.com/projectdiscovery/networkpolicy v0.0.7 // indirect
 	github.com/projectdiscovery/retryabledns v1.0.50 // indirect

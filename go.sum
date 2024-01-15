@@ -30,8 +30,8 @@ github.com/charmbracelet/glamour v0.6.0/go.mod h1:taqWV4swIMMbWALc0m7AfE9JkPSU8o
 github.com/cheggaaa/pb/v3 v3.1.4 h1:DN8j4TVVdKu3WxVwcRKu0sG00IIU6FewoABZzXbRQeo=
 github.com/cheggaaa/pb/v3 v3.1.4/go.mod h1:6wVjILNBaXMs8c21qRiaUM8BR82erfgau1DQ4iUXmSA=
 github.com/cloudflare/circl v1.1.0/go.mod h1:prBCrKB9DV4poKZY1l9zBXg2QJY7mvgRvtMxxK7fi4I=
-github.com/cloudflare/circl v1.3.3 h1:fE/Qz0QdIGqeWfnwq0RE0R7MI51s0M2E4Ga9kq5AEMs=
-github.com/cloudflare/circl v1.3.3/go.mod h1:5XYMA4rFBvNIrhs50XuiBJ15vF2pZn4nnUKZrLbUZFA=
+github.com/cloudflare/circl v1.3.7 h1:qlCDlTPz2n9fu58M0Nh1J/JzcFpfgkFHHX3O35r5vcU=
+github.com/cloudflare/circl v1.3.7/go.mod h1:sRTcRWXGLrKw6yIGJ+l7amYJFfAXbZG0kBSc8r4zxgA=
 github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08 h1:ox2F0PSMlrAAiAdknSRMDrAr8mfxPCfSZolH+/qQnyQ=
 github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08/go.mod h1:pCxVEbcm3AMg7ejXyorUXi6HQCzOIBf7zEDVPtw0/U4=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
@@ -161,8 +161,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/projectdiscovery/blackrock v0.0.1 h1:lHQqhaaEFjgf5WkuItbpeCZv2DUIE45k0VbGJyft6LQ=
 github.com/projectdiscovery/blackrock v0.0.1/go.mod h1:ANUtjDfaVrqB453bzToU+YB4cUbvBRpLvEwoWIwlTss=
-github.com/projectdiscovery/fastdialer v0.0.52 h1:K7EjNm/u79B2pAK+UAEjPf6nd6KSsN78S7Il8XcxpK8=
-github.com/projectdiscovery/fastdialer v0.0.52/go.mod h1:aLhrsv+PyfuB5/Jm09cuplIXawNtLSXBJM0bFIkhsz4=
+github.com/projectdiscovery/fastdialer v0.0.53 h1:s9BuOMpeIu8E7muTwYG0aQYpp5TEdlJYy8GBCWO6V+Q=
+github.com/projectdiscovery/fastdialer v0.0.53/go.mod h1:Fvbo4+QTc6grX5eGYcEHwJHE9Grq7iATP/nfTcatTKk=
 github.com/projectdiscovery/fdmax v0.0.4 h1:K9tIl5MUZrEMzjvwn/G4drsHms2aufTn1xUdeVcmhmc=
 github.com/projectdiscovery/fdmax v0.0.4/go.mod h1:oZLqbhMuJ5FmcoaalOm31B1P4Vka/CqP50nWjgtSz+I=
 github.com/projectdiscovery/goflags v0.1.33 h1:6B/YkHMfnClSb+ibbS4GnSVXINSYxLNXGhEk5lwwogQ=
