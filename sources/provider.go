@@ -149,6 +149,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Netlas) > 0,
 		len(provider.CriminalIP) > 0,
 		len(provider.HunterHow) > 0,
+		len(provider.Publicwww) > 0,
 	)
 }
 
