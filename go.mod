@@ -82,7 +82,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/projectdiscovery/fastdialer v0.0.56 // indirect
+	github.com/projectdiscovery/fastdialer v0.0.58 // indirect
 	github.com/projectdiscovery/hmap v0.0.38 // indirect
 	github.com/projectdiscovery/networkpolicy v0.0.7 // indirect
 	github.com/projectdiscovery/retryabledns v1.0.55 // indirect
