@@ -3,6 +3,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"strconv"
 )
 
 type Result struct {
@@ -17,18 +18,25 @@ type Result struct {
 }
 
 func (result *Result) IpPort() string {
-	return net.JoinHostPort(result.IP, fmt.Sprint(result.Port))
+	return net.JoinHostPort(result.IP, strconv.Itoa(result.Port))
 }
 
 func (result *Result) HostPort() string {
-	return net.JoinHostPort(result.Host, fmt.Sprint(result.Port))
+	return net.JoinHostPort(result.Host, strconv.Itoa(result.Port))
 }
 
 func (result *Result) RawData() string {
 	return string(result.Raw)
 }
 
-func (result *Result) JSON() string {
-	data, _ := json.Marshal(result)
-	return string(data)
+func (result *Result) JSON() (string, error) {
+	data, err := json.Marshal(result)
+	if err != nil {
+		return "", err
+	}	
+	return string(data), nil
+}
+
+func (result *Result) Error() error {
+	return result.error
 }
