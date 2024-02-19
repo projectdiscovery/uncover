@@ -10,8 +10,8 @@ require (
 	github.com/projectdiscovery/goflags v0.1.38
 	github.com/projectdiscovery/gologger v1.1.12
 	github.com/projectdiscovery/mapcidr v1.1.16
-	github.com/projectdiscovery/ratelimit v0.0.28
-	github.com/projectdiscovery/retryablehttp-go v1.0.45
+	github.com/projectdiscovery/ratelimit v0.0.29
+	github.com/projectdiscovery/retryablehttp-go v1.0.46
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -34,7 +34,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/projectdiscovery/blackrock v0.0.1 // indirect
-	github.com/projectdiscovery/utils v0.0.77
+	github.com/projectdiscovery/utils v0.0.78
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
@@ -82,7 +82,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/projectdiscovery/fastdialer v0.0.56 // indirect
+	github.com/projectdiscovery/fastdialer v0.0.57 // indirect
 	github.com/projectdiscovery/hmap v0.0.38 // indirect
 	github.com/projectdiscovery/networkpolicy v0.0.7 // indirect
 	github.com/projectdiscovery/retryabledns v1.0.55 // indirect
