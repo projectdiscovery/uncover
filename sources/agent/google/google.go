@@ -1,16 +1,17 @@
 package google
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"errors"
-	"github.com/projectdiscovery/uncover/sources"
 	"net/http"
 	"net/url"
+
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
 	baseURL = "https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&q=%s&start=%d&num=%d"
-	Size    = 10
 )
 
 type Agent struct{}
@@ -33,10 +34,19 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		numberOfResults := 0
 		pageQuery := 1
 
+		escapedQuery := url.QueryEscape(query.Query)
+
+		var size int
+		if query.Limit > 10 {
+			size = 10
+		} else {
+			size = query.Limit
+		}
+
 		for {
 			googleRequest := &Request{
-				SearchTerms: query.Query,
-				Count:       Size, // max size is 10
+				SearchTerms: escapedQuery,
+				Count:       size, // max size is 10
 				StartIndex:  pageQuery,
 			}
 
@@ -74,7 +84,18 @@ func (agent *Agent) query(session *sources.Session, googleRequest *Request, resu
 	}
 
 	var apiResponse Response
-	err = json.NewDecoder(resp.Body).Decode(&apiResponse)
+	if resp.Header.Get("Content-Encoding") == "gzip" {
+		gzipReader, err := gzip.NewReader(resp.Body)
+		if err != nil {
+			results <- sources.Result{Source: agent.Name(), Error: err}
+			return nil
+		}
+		defer gzipReader.Close()
+		err = json.NewDecoder(gzipReader).Decode(&apiResponse)
+	} else {
+		err = json.NewDecoder(resp.Body).Decode(&apiResponse)
+	}
+
 	if err != nil {
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
@@ -105,8 +126,7 @@ func (agent *Agent) queryURL(session *sources.Session, googleRequest *Request) (
 		return nil, err
 	}
 
-	request.Header.Set("Accept-Encoding", "gzip, deflate")
-	request.Header.Del("Connection")
+	request.Header.Set("Accept-Encoding", "gzip")
 	return session.Do(request, agent.Name())
 }
 
