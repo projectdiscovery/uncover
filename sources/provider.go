@@ -110,7 +110,10 @@ func (provider *Provider) GetKeys() Keys {
 // LoadProvidersFrom loads provider config from given location
 func (provider *Provider) LoadProviderConfig(location string) error {
 	if !fileutil.FileExists(location) {
-		return errorutil.NewWithTag("uncover", "provider config file %v does not exist", location)
+		//create provider config file if it doesn't exist
+		if err := fileutil.Marshal(fileutil.YAML, []byte(location), Provider{}); err != nil {
+			return errorutil.NewWithTag("uncover", "couldn't write provider config file(%s): %s\n", location, err)
+		}
 	}
 	return fileutil.Unmarshal(fileutil.YAML, []byte(location), provider)
 }
@@ -160,6 +163,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.CriminalIP) > 0,
 		len(provider.HunterHow) > 0,
 		len(provider.Google) > 0,
+		len(provider.Publicwww) > 0,
 	)
 }
 
