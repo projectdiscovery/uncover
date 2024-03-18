@@ -36,22 +36,16 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 
 		escapedQuery := url.QueryEscape(query.Query)
 
-		var size int
-		if query.Limit > 10 {
-			size = 10
-		} else {
+		size := 10 // Max number of search results to return.
+		if query.Limit < size {
 			size = query.Limit
 		}
 
 		for {
 			googleRequest := &Request{
 				SearchTerms: escapedQuery,
-				Count:       size, // max size is 10
+				Count:       size,
 				StartIndex:  pageQuery,
-			}
-
-			if pageQuery > 10 {
-				break
 			}
 
 			if numberOfResults > query.Limit {
