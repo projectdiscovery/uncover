@@ -29,6 +29,7 @@ var (
 		"netlas":     netlasTestcases{},
 		"criminalip": criminalipTestcases{},
 		"hunterhow":  hunterhowTestcases{},
+		"google":     googleTestcases{},
 		// feature tests
 		"output": outputTestcases{},
 	}

@@ -185,3 +185,24 @@ func (h outputTestcases) Execute() error {
 	}
 	return expectResultsGreaterThanCount(results, 0)
 }
+
+type googleTestcases struct{}
+
+func (h googleTestcases) Execute() error {
+	token := os.Getenv("GOOGLE_API_KEY")
+	if token == "" {
+		return errors.New("missing google api key")
+	}
+	engineId := os.Getenv("GOOGLE_API_CX")
+	if engineId == "" {
+		return errors.New("missing google engine id")
+	}
+	googleToken := fmt.Sprintf(`google: [%s,%s]`, token, engineId)
+	_ = os.WriteFile(ConfigFile, []byte(googleToken), 0644)
+	defer os.RemoveAll(ConfigFile)
+	results, err := testutils.RunUncoverAndGetResults(debug, "-google", "site:*.hackerone.com")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}

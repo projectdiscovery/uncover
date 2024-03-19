@@ -1,5 +1,5 @@
 # Base
-FROM golang:1.20.5-alpine AS builder
+FROM golang:1.21.4-alpine AS builder
 RUN apk add --no-cache git build-base
 WORKDIR /app
 COPY . /app
