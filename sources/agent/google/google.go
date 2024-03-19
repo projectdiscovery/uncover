@@ -79,20 +79,22 @@ func (agent *Agent) query(session *sources.Session, googleRequest *Request, resu
 
 	var apiResponse Response
 	if resp.Header.Get("Content-Encoding") == "gzip" {
-		gzipReader, err := gzip.NewReader(resp.Body)
-		if err != nil {
-			results <- sources.Result{Source: agent.Name(), Error: err}
+		gzipReader, errGzip := gzip.NewReader(resp.Body)
+		if errGzip != nil {
+			results <- sources.Result{Source: agent.Name(), Error: errGzip}
 			return nil
 		}
 		defer gzipReader.Close()
-		err = json.NewDecoder(gzipReader).Decode(&apiResponse)
-	} else {
-		err = json.NewDecoder(resp.Body).Decode(&apiResponse)
-	}
 
-	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
-		return nil
+		if errDecode := json.NewDecoder(gzipReader).Decode(&apiResponse); errDecode != nil {
+			results <- sources.Result{Source: agent.Name(), Error: errDecode}
+			return nil
+		}
+	} else {
+		if errDecode := json.NewDecoder(resp.Body).Decode(&apiResponse); errDecode != nil {
+			results <- sources.Result{Source: agent.Name(), Error: errDecode}
+			return nil
+		}
 	}
 
 	var lines []string
