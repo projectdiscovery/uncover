@@ -8,6 +8,7 @@ type Keys struct {
 	FofaKey         string
 	QuakeToken      string
 	HunterToken     string
+	ZoomEyeHost     string
 	ZoomEyeToken    string
 	NetlasToken     string
 	CriminalIPToken string
@@ -23,6 +24,7 @@ func (keys Keys) Empty() bool {
 		keys.FofaKey == "" &&
 		keys.QuakeToken == "" &&
 		keys.HunterToken == "" &&
+		keys.ZoomEyeHost == "" &&
 		keys.ZoomEyeToken == "" &&
 		keys.NetlasToken == "" &&
 		keys.CriminalIPToken == "" &&

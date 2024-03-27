@@ -77,7 +77,12 @@ func (provider *Provider) GetKeys() Keys {
 	}
 
 	if len(provider.ZoomEye) > 0 {
-		keys.ZoomEyeToken = provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
+		zoomeye := provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
+		parts := strings.Split(zoomeye, ":")
+		if len(parts) == 2 {
+			keys.ZoomEyeToken = parts[0]
+			keys.ZoomEyeHost = parts[1]
+		}
 	}
 
 	if len(provider.Netlas) > 0 {
@@ -120,7 +125,6 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.Shodan = appendIfExists(provider.Shodan, "SHODAN_API_KEY")
 	provider.Hunter = appendIfExists(provider.Hunter, "HUNTER_API_KEY")
 	provider.Quake = appendIfExists(provider.Quake, "QUAKE_TOKEN")
-	provider.ZoomEye = appendIfExists(provider.ZoomEye, "ZOOMEYE_API_KEY")
 	provider.Netlas = appendIfExists(provider.Netlas, "NETLAS_API_KEY")
 	provider.CriminalIP = appendIfExists(provider.CriminalIP, "CRIMINALIP_API_KEY")
 	provider.Publicwww = appendIfExists(provider.Publicwww, "PUBLICWWW_API_KEY")
@@ -136,6 +140,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 		}
 		return arr
 	}
+	provider.ZoomEye = appendIfAllExists(provider.ZoomEye, "ZOOMEYE_API_KEY", "ZOOMEYE_HOST")
 	provider.Fofa = appendIfAllExists(provider.Fofa, "FOFA_EMAIL", "FOFA_KEY")
 	provider.Censys = appendIfAllExists(provider.Censys, "CENSYS_API_ID", "CENSYS_API_SECRET")
 }
