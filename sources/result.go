@@ -1,4 +1,5 @@
 package sources
+package result
 import (
 	"encoding/json"
 	"net"
