@@ -1,7 +1,6 @@
 package sources
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 	"strconv"
 )
@@ -18,25 +17,29 @@ type Result struct {
 }
 
 func (result *Result) IpPort() string {
-	return net.JoinHostPort(result.IP, strconv.Itoa(result.Port))
+    return net.JoinHostPort(result.IP, strconv.Itoa(result.Port))
 }
 
 func (result *Result) HostPort() string {
-	return net.JoinHostPort(result.Host, strconv.Itoa(result.Port))
+    return net.JoinHostPort(result.Host, strconv.Itoa(result.Port))
 }
 
 func (result *Result) RawData() string {
-	return string(result.Raw)
+    return string(result.Raw)
 }
 
 func (result *Result) JSON() (string, error) {
-	data, err := json.Marshal(result)
-	if err != nil {
-		return "", err
-	}	
-	return string(data), nil
+    data, err := json.Marshal(result)
+    if err != nil {
+        return "", err
+    }
+    return string(data), nil
 }
 
+// Could also be removed
 func (result *Result) Error() error {
-	return result.error
+    if result == nil {
+        return fmt.Errorf("Result is nil")
+    }
+    return nil
 }
