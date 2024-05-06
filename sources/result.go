@@ -3,7 +3,6 @@ package sources
 import (
 	"encoding/json"
 	"net"
-	"fmt"
 	"strconv"
 )
 
