@@ -15,7 +15,7 @@ type Result struct {
 	Host      string `json:"host"`
 	Url       string `json:"url"`
 	Raw       []byte `json:"-"`
-	Error     error  `json:"-"`
+	Err     error  `json:"-"`
 }
 
 func (result *Result) IpPort() string {
@@ -39,9 +39,9 @@ func (result *Result) JSON() (string, error) {
 }
 
 // Could also be removed
-func (result *Result) Error() error {
-    if result == nil {
-        return fmt.Errorf("Result is nil")
+func (result *Result) Error() string {
+    if result.Err == nil {
+        return result.Err.Error()
     }
-    return nil
+    return ""
 }
