@@ -120,7 +120,7 @@ Example of using uncover as library is provided in [examples](examples/main.go) 
 The default provider configuration file should be located at `$CONFIG/uncover/provider-config.yaml` and has the following contents as an example.
 
 
-> **Note**: API keys are required needs to be configured before running uncover.
+> **Note**: API keys are required and must be configured before running uncover.
 
 ```yaml
 shodan:
@@ -130,7 +130,7 @@ censys:
   - CENSYS_API_ID_1:CENSYS_API_SECRET_1
   - CENSYS_API_ID_2:CENSYS_API_SECRET_2
 fofa:
-  - FOFA_EMAIL_1:FOFA_KEY_2
+  - FOFA_EMAIL_1:FOFA_KEY_1
   - FOFA_EMAIL_2:FOFA_KEY_2
 quake:
   - QUAKE_TOKEN_1

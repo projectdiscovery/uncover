@@ -1,8 +1,9 @@
 package sources
+
 import (
 	"encoding/json"
-	"fmt"
 	"net"
+	"strconv"
 )
 
 type Result struct {
@@ -13,22 +14,33 @@ type Result struct {
 	Host      string `json:"host"`
 	Url       string `json:"url"`
 	Raw       []byte `json:"-"`
-	Error     error  `json:"-"`
+	Err     error  `json:"-"`
 }
 
 func (result *Result) IpPort() string {
-	return net.JoinHostPort(result.IP, fmt.Sprint(result.Port))
+    return net.JoinHostPort(result.IP, strconv.Itoa(result.Port))
 }
 
 func (result *Result) HostPort() string {
-	return net.JoinHostPort(result.Host, fmt.Sprint(result.Port))
+    return net.JoinHostPort(result.Host, strconv.Itoa(result.Port))
 }
 
 func (result *Result) RawData() string {
-	return string(result.Raw)
+    return string(result.Raw)
 }
 
-func (result *Result) JSON() string {
-	data, _ := json.Marshal(result)
-	return string(data)
+func (result *Result) JSON() (string, error) {
+    data, err := json.Marshal(result)
+    if err != nil {
+        return "", err
+    }
+    return string(data), nil
+}
+
+// Could also be removed
+func (result *Result) Error() string {
+    if result.Err == nil {
+        return result.Err.Error()
+    }
+    return ""
 }
