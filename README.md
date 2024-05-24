@@ -47,6 +47,7 @@
   - **[CriminalIP](https://www.criminalip.io)**
   - **[PublicWWW](https://publicwww.com)**
   - **[HunterHow](https://hunter.how)**
+  - **[Google](https://www.google.com)**
 - Multiple API key input support
 - Automatic API key randomization
 - **stdin** / **stdout** support for input
@@ -74,7 +75,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google) (default shodan)
 
 SEARCH-ENGINE:
    -s, -shodan string[]       search query for shodan (example: -shodan 'query.txt')
@@ -88,6 +89,7 @@ SEARCH-ENGINE:
    -cl, -criminalip string[]  search query for criminalip (example: -criminalip 'query.txt')
    -pw, -publicwww string[]   search query for publicwww (example: -publicwww 'query.txt')
    -hh, -hunterhow string[]   search query for hunterhow (example: -hunterhow 'query.txt')
+   -gg, -google string[]       search query for google (example: -google 'query.txt')
 
 CONFIG:
    -pc, -provider string         provider configuration file (default "$CONFIG/uncover/provider-config.yaml")
@@ -120,7 +122,7 @@ Example of using uncover as library is provided in [examples](examples/main.go) 
 The default provider configuration file should be located at `$CONFIG/uncover/provider-config.yaml` and has the following contents as an example.
 
 
-> **Note**: API keys are required needs to be configured before running uncover.
+> **Note**: API keys are required and must be configured before running uncover.
 
 ```yaml
 shodan:
@@ -130,7 +132,7 @@ censys:
   - CENSYS_API_ID_1:CENSYS_API_SECRET_1
   - CENSYS_API_ID_2:CENSYS_API_SECRET_2
 fofa:
-  - FOFA_EMAIL_1:FOFA_KEY_2
+  - FOFA_EMAIL_1:FOFA_KEY_1
   - FOFA_EMAIL_2:FOFA_KEY_2
 quake:
   - QUAKE_TOKEN_1
@@ -153,6 +155,9 @@ publicwww:
 hunterhow:
   - HUNTERHOW_API_KEY_1 
   - HUNTERHOW_API_KEY_2
+google:
+  - GOOGLE_API_KEY_1:Google_API_CX_1
+  - GOOGLE_API_KEY_2:Google_API_CX_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -172,9 +177,11 @@ export NETLAS_API_KEY=xxx
 export CRIMINALIP_API_KEY=xxx
 export PUBLICWWW_API_KEY=xxx
 export HUNTERHOW_API_KEY=xxx
+export GOOGLE_API_KEY=xxx
+export GOOGLE_API_CX=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.org/login), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register) and [Publicwww](https://publicwww.com/profile/signup.html).
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.org/login), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html) and [Google](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key).
 
 ## Running Uncover
 
