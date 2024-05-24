@@ -31,6 +31,7 @@ type Provider struct {
 	CriminalIP []string `yaml:"criminalip"`
 	Publicwww  []string `yaml:"publicwww"`
 	HunterHow  []string `yaml:"hunterhow"`
+	Google     []string `yaml:"google"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -99,6 +100,14 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.HunterHow) > 0 {
 		keys.HunterHowToken = provider.HunterHow[rand.Intn(len(provider.HunterHow))]
 	}
+	if len(provider.Google) > 0 {
+		googleKeys := provider.Google[rand.Intn(len(provider.Google))]
+		parts := strings.Split(googleKeys, ":")
+		if len(parts) == 2 {
+			keys.GoogleKey = parts[0]
+			keys.GoogleCX = parts[1]
+		}
+	}
 
 	return keys
 }
@@ -143,6 +152,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.ZoomEye = appendIfAllExists(provider.ZoomEye, "ZOOMEYE_API_KEY", "ZOOMEYE_HOST")
 	provider.Fofa = appendIfAllExists(provider.Fofa, "FOFA_EMAIL", "FOFA_KEY")
 	provider.Censys = appendIfAllExists(provider.Censys, "CENSYS_API_ID", "CENSYS_API_SECRET")
+	provider.Google = appendIfAllExists(provider.Google, "GOOGLE_API_KEY", "GOOGLE_API_CX")
 }
 
 // HasKeys returns true if at least one agent/source has keys
@@ -157,6 +167,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Netlas) > 0,
 		len(provider.CriminalIP) > 0,
 		len(provider.HunterHow) > 0,
+		len(provider.Google) > 0,
 		len(provider.Publicwww) > 0,
 	)
 }
