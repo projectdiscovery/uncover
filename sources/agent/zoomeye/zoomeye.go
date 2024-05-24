@@ -3,6 +3,7 @@ package zoomeye
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -12,7 +13,7 @@ import (
 	"github.com/projectdiscovery/uncover/sources"
 )
 
-const (
+var (
 	URL = "https://api.zoomeye.org/host/search?query=%s&page=%d"
 )
 
@@ -23,6 +24,10 @@ func (agent *Agent) Name() string {
 }
 
 func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+	if session.Keys.ZoomEyeHost != "" {
+		URL = strings.Replace(URL, "zoomeye.org", session.Keys.ZoomEyeHost, 1)
+	}
+
 	if session.Keys.ZoomEyeToken == "" {
 		return nil, errors.New("empty zoomeye keys")
 	}
@@ -50,7 +55,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			}
 
 			// query certificates
-			if numberOfResults > query.Limit || numberOfResults > totalResults || len(zoomeyeResponse.Results) == 0 {
+			if numberOfResults >= query.Limit || numberOfResults >= totalResults || len(zoomeyeResponse.Results) == 0 {
 				break
 			}
 		}

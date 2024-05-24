@@ -31,6 +31,7 @@ type Provider struct {
 	CriminalIP []string `yaml:"criminalip"`
 	Publicwww  []string `yaml:"publicwww"`
 	HunterHow  []string `yaml:"hunterhow"`
+	Google     []string `yaml:"google"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -77,7 +78,12 @@ func (provider *Provider) GetKeys() Keys {
 	}
 
 	if len(provider.ZoomEye) > 0 {
-		keys.ZoomEyeToken = provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
+		zoomeye := provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
+		parts := strings.Split(zoomeye, ":")
+		if len(parts) == 2 {
+			keys.ZoomEyeToken = parts[0]
+			keys.ZoomEyeHost = parts[1]
+		}
 	}
 
 	if len(provider.Netlas) > 0 {
@@ -94,6 +100,14 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.HunterHow) > 0 {
 		keys.HunterHowToken = provider.HunterHow[rand.Intn(len(provider.HunterHow))]
 	}
+	if len(provider.Google) > 0 {
+		googleKeys := provider.Google[rand.Intn(len(provider.Google))]
+		parts := strings.Split(googleKeys, ":")
+		if len(parts) == 2 {
+			keys.GoogleKey = parts[0]
+			keys.GoogleCX = parts[1]
+		}
+	}
 
 	return keys
 }
@@ -101,7 +115,10 @@ func (provider *Provider) GetKeys() Keys {
 // LoadProvidersFrom loads provider config from given location
 func (provider *Provider) LoadProviderConfig(location string) error {
 	if !fileutil.FileExists(location) {
-		return errorutil.NewWithTag("uncover", "provider config file %v does not exist", location)
+		//create provider config file if it doesn't exist
+		if err := fileutil.Marshal(fileutil.YAML, []byte(location), Provider{}); err != nil {
+			return errorutil.NewWithTag("uncover", "couldn't write provider config file(%s): %s\n", location, err)
+		}
 	}
 	return fileutil.Unmarshal(fileutil.YAML, []byte(location), provider)
 }
@@ -117,7 +134,6 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.Shodan = appendIfExists(provider.Shodan, "SHODAN_API_KEY")
 	provider.Hunter = appendIfExists(provider.Hunter, "HUNTER_API_KEY")
 	provider.Quake = appendIfExists(provider.Quake, "QUAKE_TOKEN")
-	provider.ZoomEye = appendIfExists(provider.ZoomEye, "ZOOMEYE_API_KEY")
 	provider.Netlas = appendIfExists(provider.Netlas, "NETLAS_API_KEY")
 	provider.CriminalIP = appendIfExists(provider.CriminalIP, "CRIMINALIP_API_KEY")
 	provider.Publicwww = appendIfExists(provider.Publicwww, "PUBLICWWW_API_KEY")
@@ -133,8 +149,10 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 		}
 		return arr
 	}
+	provider.ZoomEye = appendIfAllExists(provider.ZoomEye, "ZOOMEYE_API_KEY", "ZOOMEYE_HOST")
 	provider.Fofa = appendIfAllExists(provider.Fofa, "FOFA_EMAIL", "FOFA_KEY")
 	provider.Censys = appendIfAllExists(provider.Censys, "CENSYS_API_ID", "CENSYS_API_SECRET")
+	provider.Google = appendIfAllExists(provider.Google, "GOOGLE_API_KEY", "GOOGLE_API_CX")
 }
 
 // HasKeys returns true if at least one agent/source has keys
@@ -149,6 +167,8 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Netlas) > 0,
 		len(provider.CriminalIP) > 0,
 		len(provider.HunterHow) > 0,
+		len(provider.Google) > 0,
+		len(provider.Publicwww) > 0,
 	)
 }
 
