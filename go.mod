@@ -10,7 +10,7 @@ require (
 	github.com/projectdiscovery/goflags v0.1.56
 	github.com/projectdiscovery/gologger v1.1.12
 	github.com/projectdiscovery/mapcidr v1.1.34
-	github.com/projectdiscovery/ratelimit v0.0.44
+	github.com/projectdiscovery/ratelimit v0.0.45
 	github.com/projectdiscovery/retryablehttp-go v1.0.65
 	github.com/stretchr/testify v1.9.0
 )
