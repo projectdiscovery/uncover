@@ -41,19 +41,21 @@ func (o *OutputWriter) Write(data []byte) {
 	}
 }
 
-func (o *OutputWriter) findDuplicate(data string) bool {
+func (o *OutputWriter) findDuplicate(data string, markAsSeen bool) bool {
 	// check if we've already printed this data
 	itemHash := sha1.Sum([]byte(data))
 	if o.cache.Contains(itemHash) {
 		return true
 	}
-	o.cache.Add(itemHash, struct{}{})
+	if markAsSeen {
+		o.cache.Add(itemHash, struct{}{})
+	}
 	return false
 }
 
 // WriteString writes the string taken as input using only
 func (o *OutputWriter) WriteString(data string) {
-	if o.findDuplicate(data) {
+	if o.findDuplicate(data, true) {
 		return
 	}
 	o.Write([]byte(data))
@@ -61,7 +63,7 @@ func (o *OutputWriter) WriteString(data string) {
 
 // WriteJsonData writes the result taken as input in JSON format
 func (o *OutputWriter) WriteJsonData(data sources.Result) {
-	if o.findDuplicate(fmt.Sprintf("%s:%d", data.IP, data.Port)) {
+	if o.findDuplicate(fmt.Sprintf("%s:%d", data.IP, data.Port), true) {
 		return
 	}
 	o.Write([]byte(data.JSON()))
