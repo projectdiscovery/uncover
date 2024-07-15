@@ -104,7 +104,7 @@ func (agent *Agent) query(session *sources.Session, googleRequest *Request, resu
 			result.Url = googleResult.Link
 			result.Host = agent.parseLink(googleResult.Link)
 			result.IP = googleResult.Link
-			raw, _ := json.Marshal(result)
+			raw, _ := json.Marshal(googleResult)
 			result.Raw = raw
 			results <- result
 			lines = append(lines, googleResult.Link)

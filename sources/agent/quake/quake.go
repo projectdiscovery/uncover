@@ -95,7 +95,7 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 		result.IP = quakeResult.IP
 		result.Port = quakeResult.Port
 		result.Host = quakeResult.Hostname
-		raw, _ := json.Marshal(result)
+		raw, _ := json.Marshal(quakeResult)
 		result.Raw = raw
 		results <- result
 	}
