@@ -72,7 +72,7 @@ func (agent *Agent) query(URL string, session *sources.Session, results chan sou
 		result.IP = netlasResult.Data.IP
 		result.Port = netlasResult.Data.Port
 		result.Host = netlasResult.Data.Host
-		raw, _ := json.Marshal(result)
+		raw, _ := json.Marshal(netlasResult)
 		result.Raw = raw
 		results <- result
 	}

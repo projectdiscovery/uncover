@@ -85,7 +85,7 @@ func (agent *Agent) query(URL string, session *sources.Session, criminalipReques
 			result.IP = criminalipResult.IP
 			result.Port = criminalipResult.Port
 			result.Host = criminalipResult.Domain
-			raw, _ := json.Marshal(result)
+			raw, _ := json.Marshal(criminalipResult)
 			result.Raw = raw
 			results <- result
 		}
