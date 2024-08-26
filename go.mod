@@ -8,7 +8,7 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/projectdiscovery/fdmax v0.0.4
 	github.com/projectdiscovery/goflags v0.1.62
-	github.com/projectdiscovery/gologger v1.1.18
+	github.com/projectdiscovery/gologger v1.1.21
 	github.com/projectdiscovery/mapcidr v1.1.34
 	github.com/projectdiscovery/ratelimit v0.0.51
 	github.com/projectdiscovery/retryablehttp-go v1.0.73
@@ -34,7 +34,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/projectdiscovery/blackrock v0.0.1 // indirect
-	github.com/projectdiscovery/utils v0.2.5
+	github.com/projectdiscovery/utils v0.2.6
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
@@ -92,7 +92,7 @@ require (
 	github.com/projectdiscovery/hmap v0.0.54 // indirect
 	github.com/projectdiscovery/machineid v0.0.0-20240226150047-2e2c51e35983 // indirect
 	github.com/projectdiscovery/networkpolicy v0.0.9 // indirect
-	github.com/projectdiscovery/retryabledns v1.0.70 // indirect
+	github.com/projectdiscovery/retryabledns v1.0.71 // indirect
 	github.com/refraction-networking/utls v1.6.7 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.7 // indirect
