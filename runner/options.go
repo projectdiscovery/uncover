@@ -2,7 +2,6 @@ package runner
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -176,9 +175,6 @@ func ParseOptions() *Options {
 			gologger.Fatal().Msgf("could not use awesome search queries: %s\n", err)
 		}
 	}
-
-	fmt.Println(options.Engine)
-	fmt.Println(options.Query)
 
 	// Validate the options passed by the user and if any
 	// invalid options have been used, exit.
