@@ -1,6 +1,8 @@
 module github.com/projectdiscovery/uncover
 
-go 1.21
+go 1.21.3
+
+toolchain go1.23.2
 
 require (
 	github.com/hashicorp/golang-lru v0.5.4
@@ -88,6 +90,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
+	github.com/projectdiscovery/awesome-search-queries v0.0.0-20241111181020-ad0097bd63a1 // indirect
 	github.com/projectdiscovery/fastdialer v0.2.4 // indirect
 	github.com/projectdiscovery/hmap v0.0.54 // indirect
 	github.com/projectdiscovery/machineid v0.0.0-20240226150047-2e2c51e35983 // indirect
