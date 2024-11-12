@@ -83,7 +83,7 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 		return nil
 	}
 	if fofaResponse.Error {
-		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf(fofaResponse.ErrMsg)}
+		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("%s", fofaResponse.ErrMsg)}
 		return nil
 	}
 
