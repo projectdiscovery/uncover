@@ -9,7 +9,7 @@ require (
 	github.com/projectdiscovery/awesome-search-queries v0.0.0-20241111181020-ad0097bd63a1
 	github.com/projectdiscovery/fdmax v0.0.4
 	github.com/projectdiscovery/goflags v0.1.65
-	github.com/projectdiscovery/gologger v1.1.33
+	github.com/projectdiscovery/gologger v1.1.34
 	github.com/projectdiscovery/mapcidr v1.1.34
 	github.com/projectdiscovery/ratelimit v0.0.51
 	github.com/projectdiscovery/retryablehttp-go v1.0.87
