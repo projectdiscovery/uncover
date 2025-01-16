@@ -206,3 +206,22 @@ func (h googleTestcases) Execute() error {
 	}
 	return expectResultsGreaterThanCount(results, 0)
 }
+
+type odinTestcases struct{}
+
+func (h odinTestcases) Execute() error {
+	token := os.Getenv("ODIN_API_KEY")
+	if token == "" {
+		return errors.New("missing odin api key")
+	}
+	odinToken := fmt.Sprintf(`odin: [%s]`, token)
+	if err := os.WriteFile(ConfigFile, []byte(odinToken), 0644); err != nil {
+		return err
+	}
+	defer os.RemoveAll(ConfigFile)
+	results, err := testutils.RunUncoverAndGetResults(debug, "-odin", "nginx")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}

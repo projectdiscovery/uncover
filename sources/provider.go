@@ -32,6 +32,7 @@ type Provider struct {
 	Publicwww  []string `yaml:"publicwww"`
 	HunterHow  []string `yaml:"hunterhow"`
 	Google     []string `yaml:"google"`
+	Odin       []string `yaml:"odin"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -108,6 +109,9 @@ func (provider *Provider) GetKeys() Keys {
 			keys.GoogleCX = parts[1]
 		}
 	}
+	if len(provider.Odin) > 0 {
+		keys.OdinToken = provider.Odin[rand.Intn(len(provider.Odin))]
+	}
 
 	return keys
 }
@@ -138,6 +142,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.CriminalIP = appendIfExists(provider.CriminalIP, "CRIMINALIP_API_KEY")
 	provider.Publicwww = appendIfExists(provider.Publicwww, "PUBLICWWW_API_KEY")
 	provider.HunterHow = appendIfExists(provider.HunterHow, "HUNTERHOW_API_KEY")
+	provider.Odin = appendIfExists(provider.Odin, "ODIN_API_KEY")
 
 	appendIfAllExists := func(arr []string, env1 string, env2 string) []string {
 		if val1, ok := os.LookupEnv(env1); ok {
@@ -169,6 +174,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.HunterHow) > 0,
 		len(provider.Google) > 0,
 		len(provider.Publicwww) > 0,
+		len(provider.Odin) > 0,
 	)
 }
 
