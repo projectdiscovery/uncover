@@ -96,7 +96,7 @@ func (agent *Agent) query(URL string, session *sources.Session, results chan sou
 				}
 				result.Host = hostname
 				result.Url = record[0]
-				raw, _ := json.Marshal(result)
+				raw, _ := json.Marshal(record)
 				result.Raw = raw
 				results <- result
 				lines = append(lines, trimmedLine)
