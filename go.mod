@@ -9,7 +9,7 @@ require (
 	github.com/projectdiscovery/awesome-search-queries v0.0.0-20241111181020-ad0097bd63a1
 	github.com/projectdiscovery/fdmax v0.0.4
 	github.com/projectdiscovery/goflags v0.1.67
-	github.com/projectdiscovery/gologger v1.1.39
+	github.com/projectdiscovery/gologger v1.1.40
 	github.com/projectdiscovery/mapcidr v1.1.34
 	github.com/projectdiscovery/ratelimit v0.0.66
 	github.com/projectdiscovery/retryablehttp-go v1.0.95
@@ -35,7 +35,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/projectdiscovery/blackrock v0.0.1 // indirect
-	github.com/projectdiscovery/utils v0.4.6
+	github.com/projectdiscovery/utils v0.4.7
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
