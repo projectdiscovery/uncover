@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	URL = "https://api.criminalip.io/v1/banner/search?query=%s&offset=%d"
-	offsetStep        = 10
-    maxOffset         = 9900
+	URL        = "https://api.criminalip.io/v1/banner/search?query=%s&offset=%d"
+	offsetStep = 10
+	maxOffset  = 9900
 )
 
 type Agent struct{}
@@ -46,13 +46,13 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 
-			numberOfResults += len(criminalipResponse.Data.Result)			
+			numberOfResults += len(criminalipResponse.Data.Result)
 
 			nextOffset := currentPage + offsetStep
 
 			if nextOffset > maxOffset {
-                break
-            }
+				break
+			}
 
 			currentPage = nextOffset
 
