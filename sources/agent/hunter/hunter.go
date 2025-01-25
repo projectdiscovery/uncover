@@ -76,7 +76,7 @@ func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *R
 			result.IP = hunterResult.IP
 			result.Port = hunterResult.Port
 			result.Host = hunterResult.Domain
-			raw, _ := json.Marshal(result)
+			raw, _ := json.Marshal(hunterResult)
 			result.Raw = raw
 			results <- result
 		}

@@ -86,7 +86,7 @@ func (agent *Agent) query(URL string, session *sources.Session, results chan sou
 		result.Host = data.Domain
 		result.IP = data.IP
 		result.Port = data.Port
-		raw, _ := json.Marshal(result)
+		raw, _ := json.Marshal(data)
 		result.Raw = raw
 		results <- result
 		lines = append(lines, data.Domain)
