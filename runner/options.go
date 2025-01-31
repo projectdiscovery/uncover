@@ -28,38 +28,38 @@ var (
 
 // Options contains the configuration options for tuning the enumeration process.
 type Options struct {
-	Query              goflags.StringSlice
-	Engine             goflags.StringSlice
-  AwesomeSearchQueries goflags.StringSlice
-	ConfigFile         string
-	ProviderFile       string
-	OutputFile         string
-	OutputFields       string
-	JSON               bool
-	Raw                bool
-	Limit              int
-	Silent             bool
-	Verbose            bool
-	NoColor            bool
-	Timeout            int
-	RateLimit          int
-	RateLimitMinute    int
-	Retries            int
-	Shodan             goflags.StringSlice
-	ShodanIdb          goflags.StringSlice
-	Fofa               goflags.StringSlice
-	Censys             goflags.StringSlice
-	Quake              goflags.StringSlice
-	Netlas             goflags.StringSlice
-	Hunter             goflags.StringSlice
-	ZoomEye            goflags.StringSlice
-	CriminalIP         goflags.StringSlice
-	Publicwww          goflags.StringSlice
-	HunterHow          goflags.StringSlice
-	Google             goflags.StringSlice
-	Odin               goflags.StringSlice
+	Query                goflags.StringSlice
+	Engine               goflags.StringSlice
+	AwesomeSearchQueries goflags.StringSlice
+	ConfigFile           string
+	ProviderFile         string
+	OutputFile           string
+	OutputFields         string
+	JSON                 bool
+	Raw                  bool
+	Limit                int
+	Silent               bool
+	Verbose              bool
+	NoColor              bool
+	Timeout              int
+	RateLimit            int
+	RateLimitMinute      int
+	Retries              int
+	Shodan               goflags.StringSlice
+	ShodanIdb            goflags.StringSlice
+	Fofa                 goflags.StringSlice
+	Censys               goflags.StringSlice
+	Quake                goflags.StringSlice
+	Netlas               goflags.StringSlice
+	Hunter               goflags.StringSlice
+	ZoomEye              goflags.StringSlice
+	CriminalIP           goflags.StringSlice
+	Publicwww            goflags.StringSlice
+	HunterHow            goflags.StringSlice
+	Google               goflags.StringSlice
+	Odin                 goflags.StringSlice
 	BinaryEdge           goflags.StringSlice
-	DisableUpdateCheck bool
+	DisableUpdateCheck   bool
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -70,8 +70,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow,google,odin) (default shodan)", goflags.FileNormalizedStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow,google,binaryedge) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow,google,odin, binaryedge) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 		flagSet.StringSliceVarP(&options.AwesomeSearchQueries, "awesome-search-queries", "asq", nil, "use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')", goflags.FileStringSliceOptions),
 	)
 
@@ -89,7 +88,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.HunterHow, "hunterhow", "hh", nil, "search query for hunterhow (example: -hunterhow 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Google, "google", "gg", nil, "search query for google (example: -google 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Odin, "odin", "od", nil, "search query for odin (example: -odin 'query.txt')", goflags.FileStringSliceOptions),
-    flagSet.StringSliceVarP(&options.BinaryEdge, "binaryedge", "be", nil, "search query for binaryedge (example: -binaryedge 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.BinaryEdge, "binaryedge", "be", nil, "search query for binaryedge (example: -binaryedge 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -161,8 +160,8 @@ func ParseOptions() *Options {
 		len(options.Publicwww),
 		len(options.HunterHow),
 		len(options.Google),
-		len(options.Odin)) {
-    len(options.BinaryEdge)) {
+		len(options.Odin),
+		len(options.BinaryEdge)) {
 		options.Engine = append(options.Engine, "shodan")
 	}
 
@@ -231,8 +230,8 @@ func (options *Options) validateOptions() error {
 		len(options.Publicwww),
 		len(options.HunterHow),
 		len(options.Google),
-		len(options.Odin)) {
-    len(options.BinaryEdge)) {
+		len(options.Odin),
+		len(options.BinaryEdge)) {
 		return errors.New("no query provided")
 	}
 
@@ -256,8 +255,8 @@ func (options *Options) validateOptions() error {
 		len(options.Publicwww),
 		len(options.HunterHow),
 		len(options.Google),
-		len(options.Odin)) {
-    len(options.BinaryEdge)) {
+		len(options.Odin),
+		len(options.BinaryEdge)) {
 		return errors.New("no engine specified")
 	}
 
@@ -298,7 +297,7 @@ func appendAllQueries(options *Options) {
 	appendQuery(options, "hunterhow", options.HunterHow...)
 	appendQuery(options, "google", options.Google...)
 	appendQuery(options, "odin", options.Odin...)
-  appendQuery(options, "binaryedge", options.BinaryEdge...)
+	appendQuery(options, "binaryedge", options.BinaryEdge...)
 }
 
 func (options *Options) useAwesomeSearchQueries(awesomeSearchQueries []string) error {

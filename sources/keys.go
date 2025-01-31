@@ -36,6 +36,6 @@ func (keys Keys) Empty() bool {
 		keys.HunterHowToken == "" &&
 		keys.GoogleKey == "" &&
 		keys.GoogleCX == "" &&
-		keys.OdinToken == ""
+		keys.OdinToken == "" &&
 		keys.BinaryEdgeToken == ""
 }

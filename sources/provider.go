@@ -112,6 +112,7 @@ func (provider *Provider) GetKeys() Keys {
 	}
 	if len(provider.Odin) > 0 {
 		keys.OdinToken = provider.Odin[rand.Intn(len(provider.Odin))]
+	}
 	if len(provider.BinaryEdge) > 0 {
 		keys.BinaryEdgeToken = provider.BinaryEdge[rand.Intn(len(provider.BinaryEdge))]
 	}
