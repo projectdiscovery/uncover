@@ -206,3 +206,21 @@ func (h googleTestcases) Execute() error {
 	}
 	return expectResultsGreaterThanCount(results, 0)
 }
+
+type binaryedgeTestcases struct{}
+
+func (h binaryedgeTestcases) Execute() error {
+	token := os.Getenv("BINARYEDGE_API_KEY")
+	if token == "" {
+		return errors.New("missing binaryedge api key")
+	}
+
+	binaryedgeToken := fmt.Sprintf(`binaryedge: [%s]`, token)
+	_ = os.WriteFile(ConfigFile, []byte(binaryedgeToken), 0644)
+	defer os.RemoveAll(ConfigFile)
+	results, err := testutils.RunUncoverAndGetResults(debug, "-binaryedge", "1.1.1.1")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}

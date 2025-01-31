@@ -32,6 +32,7 @@ type Provider struct {
 	Publicwww  []string `yaml:"publicwww"`
 	HunterHow  []string `yaml:"hunterhow"`
 	Google     []string `yaml:"google"`
+	BinaryEdge []string `yaml:"binaryedge"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -108,6 +109,9 @@ func (provider *Provider) GetKeys() Keys {
 			keys.GoogleCX = parts[1]
 		}
 	}
+	if len(provider.BinaryEdge) > 0 {
+		keys.BinaryEdgeToken = provider.BinaryEdge[rand.Intn(len(provider.BinaryEdge))]
+	}
 
 	return keys
 }
@@ -153,6 +157,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.Fofa = appendIfAllExists(provider.Fofa, "FOFA_EMAIL", "FOFA_KEY")
 	provider.Censys = appendIfAllExists(provider.Censys, "CENSYS_API_ID", "CENSYS_API_SECRET")
 	provider.Google = appendIfAllExists(provider.Google, "GOOGLE_API_KEY", "GOOGLE_API_CX")
+	provider.BinaryEdge = appendIfExists(provider.BinaryEdge, "BINARYEDGE_API_KEY")
 }
 
 // HasKeys returns true if at least one agent/source has keys
@@ -169,6 +174,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.HunterHow) > 0,
 		len(provider.Google) > 0,
 		len(provider.Publicwww) > 0,
+		len(provider.BinaryEdge) > 0,
 	)
 }
 
