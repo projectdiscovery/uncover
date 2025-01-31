@@ -7,6 +7,7 @@ import (
 
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover/sources"
+	"github.com/projectdiscovery/uncover/sources/agent/binaryedge"
 	"github.com/projectdiscovery/uncover/sources/agent/censys"
 	"github.com/projectdiscovery/uncover/sources/agent/criminalip"
 	"github.com/projectdiscovery/uncover/sources/agent/fofa"
@@ -75,6 +76,8 @@ func New(opts *Options) (*Service, error) {
 			s.Agents = append(s.Agents, &hunterhow.Agent{})
 		case "google":
 			s.Agents = append(s.Agents, &google.Agent{})
+		case "binaryedge":
+			s.Agents = append(s.Agents, &binaryedge.Agent{})
 		}
 	}
 	s.Provider = sources.NewProvider()
@@ -179,7 +182,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 // AllAgents returns all supported uncover Agents
 func (s *Service) AllAgents() []string {
 	return []string{
-		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google",
+		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "binaryedge",
 	}
 }
 
