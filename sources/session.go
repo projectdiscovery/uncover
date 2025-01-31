@@ -28,6 +28,7 @@ var DefaultRateLimits = map[string]*ratelimit.Options{
 	"publicwww":  {Key: "publicwww", MaxCount: 1, Duration: time.Minute},
 	"hunterhow":  {Key: "hunterhow", MaxCount: 1, Duration: 3 * time.Second},
 	"google":     {Key: "google", MaxCount: 1, Duration: 3 * time.Second},
+	"odin":       {Key: "odin", MaxCount: 1, Duration: time.Second},
 	"binaryedge": {Key: "binaryedge", MaxCount: 1, Duration: time.Second},
 }
 

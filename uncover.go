@@ -15,11 +15,13 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/hunter"
 	"github.com/projectdiscovery/uncover/sources/agent/hunterhow"
 	"github.com/projectdiscovery/uncover/sources/agent/netlas"
+	"github.com/projectdiscovery/uncover/sources/agent/odin"
 	"github.com/projectdiscovery/uncover/sources/agent/publicwww"
 	"github.com/projectdiscovery/uncover/sources/agent/quake"
 	"github.com/projectdiscovery/uncover/sources/agent/shodan"
 	"github.com/projectdiscovery/uncover/sources/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/sources/agent/zoomeye"
+
 	errorutil "github.com/projectdiscovery/utils/errors"
 	stringsutil "github.com/projectdiscovery/utils/strings"
 )
@@ -76,6 +78,8 @@ func New(opts *Options) (*Service, error) {
 			s.Agents = append(s.Agents, &hunterhow.Agent{})
 		case "google":
 			s.Agents = append(s.Agents, &google.Agent{})
+		case "odin":
+			s.Agents = append(s.Agents, &odin.Agent{})
 		case "binaryedge":
 			s.Agents = append(s.Agents, &binaryedge.Agent{})
 		}
@@ -182,7 +186,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 // AllAgents returns all supported uncover Agents
 func (s *Service) AllAgents() []string {
 	return []string{
-		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "binaryedge",
+		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge",
 	}
 }
 
