@@ -220,6 +220,13 @@ func (h odinTestcases) Execute() error {
 	}
 	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-odin", "nginx")
+
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}
+
 type binaryedgeTestcases struct{}
 
 func (h binaryedgeTestcases) Execute() error {
@@ -233,7 +240,7 @@ func (h binaryedgeTestcases) Execute() error {
 	defer os.RemoveAll(ConfigFile)
 	results, err := testutils.RunUncoverAndGetResults(debug, "-binaryedge", "1.1.1.1")
 
-  if err != nil {
+	if err != nil {
 		return err
 	}
 	return expectResultsGreaterThanCount(results, 0)
