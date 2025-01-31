@@ -30,6 +30,7 @@ var (
 		"criminalip": criminalipTestcases{},
 		"hunterhow":  hunterhowTestcases{},
 		"google":     googleTestcases{},
+		"odin":       odinTestcases{},
 		"binaryedge": binaryedgeTestcases{},
 		// feature tests
 		"output": outputTestcases{},

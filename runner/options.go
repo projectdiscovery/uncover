@@ -57,6 +57,7 @@ type Options struct {
 	Publicwww            goflags.StringSlice
 	HunterHow            goflags.StringSlice
 	Google               goflags.StringSlice
+	Odin                 goflags.StringSlice
 	BinaryEdge           goflags.StringSlice
 	DisableUpdateCheck   bool
 }
@@ -69,7 +70,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow,google,binaryedge) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow,google,odin, binaryedge) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 		flagSet.StringSliceVarP(&options.AwesomeSearchQueries, "awesome-search-queries", "asq", nil, "use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')", goflags.FileStringSliceOptions),
 	)
 
@@ -86,7 +87,8 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.Publicwww, "publicwww", "pw", nil, "search query for publicwww (example: -publicwww 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.HunterHow, "hunterhow", "hh", nil, "search query for hunterhow (example: -hunterhow 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Google, "google", "gg", nil, "search query for google (example: -google 'query.txt')", goflags.FileStringSliceOptions),
-        flagSet.StringSliceVarP(&options.BinaryEdge, "binaryedge", "be", nil, "search query for binaryedge (example: -binaryedge 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Odin, "odin", "od", nil, "search query for odin (example: -odin 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.BinaryEdge, "binaryedge", "be", nil, "search query for binaryedge (example: -binaryedge 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -158,7 +160,8 @@ func ParseOptions() *Options {
 		len(options.Publicwww),
 		len(options.HunterHow),
 		len(options.Google),
-        len(options.BinaryEdge)) {
+		len(options.Odin),
+		len(options.BinaryEdge)) {
 		options.Engine = append(options.Engine, "shodan")
 	}
 
@@ -227,7 +230,8 @@ func (options *Options) validateOptions() error {
 		len(options.Publicwww),
 		len(options.HunterHow),
 		len(options.Google),
-        len(options.BinaryEdge)) {
+		len(options.Odin),
+		len(options.BinaryEdge)) {
 		return errors.New("no query provided")
 	}
 
@@ -251,7 +255,8 @@ func (options *Options) validateOptions() error {
 		len(options.Publicwww),
 		len(options.HunterHow),
 		len(options.Google),
-        len(options.BinaryEdge)) {
+		len(options.Odin),
+		len(options.BinaryEdge)) {
 		return errors.New("no engine specified")
 	}
 
@@ -291,7 +296,8 @@ func appendAllQueries(options *Options) {
 	appendQuery(options, "publicwww", options.Publicwww...)
 	appendQuery(options, "hunterhow", options.HunterHow...)
 	appendQuery(options, "google", options.Google...)
-    appendQuery(options, "binaryedge", options.BinaryEdge...)
+	appendQuery(options, "odin", options.Odin...)
+	appendQuery(options, "binaryedge", options.BinaryEdge...)
 }
 
 func (options *Options) useAwesomeSearchQueries(awesomeSearchQueries []string) error {
