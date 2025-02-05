@@ -16,6 +16,8 @@ type Keys struct {
 	HunterHowToken  string
 	GoogleKey       string
 	GoogleCX        string
+	OdinToken       string
+	BinaryEdgeToken string
 }
 
 func (keys Keys) Empty() bool {
@@ -33,5 +35,7 @@ func (keys Keys) Empty() bool {
 		keys.PublicwwwToken == "" &&
 		keys.HunterHowToken == "" &&
 		keys.GoogleKey == "" &&
-		keys.GoogleCX == ""
+		keys.GoogleCX == "" &&
+		keys.OdinToken == "" &&
+		keys.BinaryEdgeToken == ""
 }

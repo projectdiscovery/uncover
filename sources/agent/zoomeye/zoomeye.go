@@ -3,10 +3,10 @@ package zoomeye
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"errors"
 
@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	URL = "https://api.zoomeye.org/host/search?query=%s&page=%d"
+	URL = "https://api.zoomeye.hk/host/search?query=%s&page=%d"
 )
 
 type Agent struct{}
@@ -25,7 +25,7 @@ func (agent *Agent) Name() string {
 
 func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.ZoomEyeHost != "" {
-		URL = strings.Replace(URL, "zoomeye.org", session.Keys.ZoomEyeHost, 1)
+		URL = strings.Replace(URL, "zoomeye.hk", session.Keys.ZoomEyeHost, 1)
 	}
 
 	if session.Keys.ZoomEyeToken == "" {

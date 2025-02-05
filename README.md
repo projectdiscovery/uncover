@@ -42,7 +42,7 @@
   - **[FOFA](https://fofa.info)**
   - **[Hunter](https://hunter.qianxin.com)**
   - **[Quake](https://quake.360.net/quake/#/index)**
-  - **[Zoomeye](https://www.zoomeye.org)**
+  - **ZoomEye [china](https://zoomeye.org) - [worldwide](https://zoomeye.hk)**
   - **[Netlas](https://netlas.io/)**
   - **[CriminalIP](https://www.criminalip.io)**
   - **[PublicWWW](https://publicwww.com)**
@@ -76,6 +76,7 @@ Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
    -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google) (default shodan)
+   -asq, -awesome-search-queries string[]  use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')
 
 SEARCH-ENGINE:
    -s, -shodan string[]       search query for shodan (example: -shodan 'query.txt')
@@ -141,7 +142,7 @@ hunter:
   - HUNTER_API_KEY_1
   - HUNTER_API_KEY_2
 zoomeye:
-  - ZOOMEYE_API_KEY_1
+  - ZOOMEYE_API_KEY_1:zoomeye.hk
   - ZOOMEYE_API_KEY_2
 netlas:
   - NETLAS_API_KEY_1
@@ -181,7 +182,16 @@ export GOOGLE_API_KEY=xxx
 export GOOGLE_API_CX=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.org/login), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html) and Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create).
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), ZoomEye [china](https://api.zoomeye.org) - [worldwide](https://api.zoomeye.hk), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html) and Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create).
+
+
+### ZoomEye API
+
+ Before conducting any scans, please ensure you are using the correct host to comply with geographical access restrictions of the ZoomEye API:
+
+ - **zoomeye.org** is exclusively for users within China.
+ - **zoomeye.hk** is for users outside China (this is default if no host provided).
+
 
 ## Running Uncover
 
