@@ -32,6 +32,8 @@ type Provider struct {
 	Publicwww  []string `yaml:"publicwww"`
 	HunterHow  []string `yaml:"hunterhow"`
 	Google     []string `yaml:"google"`
+	Odin       []string `yaml:"odin"`
+	BinaryEdge []string `yaml:"binaryedge"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -80,8 +82,8 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.ZoomEye) > 0 {
 		zoomeye := provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
 		parts := strings.Split(zoomeye, ":")
+		keys.ZoomEyeToken = parts[0]
 		if len(parts) == 2 {
-			keys.ZoomEyeToken = parts[0]
 			keys.ZoomEyeHost = parts[1]
 		}
 	}
@@ -107,6 +109,12 @@ func (provider *Provider) GetKeys() Keys {
 			keys.GoogleKey = parts[0]
 			keys.GoogleCX = parts[1]
 		}
+	}
+	if len(provider.Odin) > 0 {
+		keys.OdinToken = provider.Odin[rand.Intn(len(provider.Odin))]
+	}
+	if len(provider.BinaryEdge) > 0 {
+		keys.BinaryEdgeToken = provider.BinaryEdge[rand.Intn(len(provider.BinaryEdge))]
 	}
 
 	return keys
@@ -153,6 +161,8 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.Fofa = appendIfAllExists(provider.Fofa, "FOFA_EMAIL", "FOFA_KEY")
 	provider.Censys = appendIfAllExists(provider.Censys, "CENSYS_API_ID", "CENSYS_API_SECRET")
 	provider.Google = appendIfAllExists(provider.Google, "GOOGLE_API_KEY", "GOOGLE_API_CX")
+	provider.Odin = appendIfExists(provider.Odin, "ODIN_API_KEY")
+	provider.BinaryEdge = appendIfExists(provider.BinaryEdge, "BINARYEDGE_API_KEY")
 }
 
 // HasKeys returns true if at least one agent/source has keys
@@ -169,6 +179,8 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.HunterHow) > 0,
 		len(provider.Google) > 0,
 		len(provider.Publicwww) > 0,
+		len(provider.Odin) > 0,
+		len(provider.BinaryEdge) > 0,
 	)
 }
 

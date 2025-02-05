@@ -83,7 +83,7 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 		return nil
 	}
 	if fofaResponse.Error {
-		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf(fofaResponse.ErrMsg)}
+		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("%s", fofaResponse.ErrMsg)}
 		return nil
 	}
 
@@ -92,7 +92,7 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 		result.IP = fofaResult[0]
 		result.Port, _ = strconv.Atoi(fofaResult[1])
 		result.Host = fofaResult[2]
-		raw, _ := json.Marshal(result)
+		raw, _ := json.Marshal(fofaResult)
 		result.Raw = raw
 		results <- result
 	}

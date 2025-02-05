@@ -12,7 +12,9 @@ import (
 )
 
 const (
-	URL = "https://api.criminalip.io/v1/banner/search?query=%s&offset=%d"
+	URL        = "https://api.criminalip.io/v1/banner/search?query=%s&offset=%d"
+	offsetStep = 10
+	maxOffset  = 9900
 )
 
 type Agent struct{}
@@ -31,7 +33,8 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		defer close(results)
 
 		numberOfResults := 0
-		currentPage := 1
+		currentPage := 0
+
 		for {
 			criminalipRequest := &CriminalIPRequest{
 				Query:  query.Query,
@@ -44,7 +47,14 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			}
 
 			numberOfResults += len(criminalipResponse.Data.Result)
-			currentPage++
+
+			nextOffset := currentPage + offsetStep
+
+			if nextOffset > maxOffset {
+				break
+			}
+
+			currentPage = nextOffset
 
 			if numberOfResults > query.Limit || criminalipResponse.Data.Count == 0 || len(criminalipResponse.Data.Result) == 0 {
 				break
@@ -85,7 +95,7 @@ func (agent *Agent) query(URL string, session *sources.Session, criminalipReques
 			result.IP = criminalipResult.IP
 			result.Port = criminalipResult.Port
 			result.Host = criminalipResult.Domain
-			raw, _ := json.Marshal(result)
+			raw, _ := json.Marshal(criminalipResult)
 			result.Raw = raw
 			results <- result
 		}
