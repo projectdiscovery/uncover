@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	URL  = "https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=%d&page_size=%d"
-	Size = 100
+	URL = "https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=%d&page_size=%d"
 )
 
 type Agent struct{}
@@ -30,7 +29,10 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 
 	go func() {
 		defer close(results)
-
+		var size = 1000
+		if query.Limit < size {
+			size = query.Limit
+		}
 		numberOfResults := 0
 		page := 1
 		for {
@@ -38,7 +40,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				ApiKey:   session.Keys.HunterToken,
 				Search:   query.Query,
 				Page:     page,
-				PageSize: Size,
+				PageSize: size,
 			}
 			hunterResponse := agent.query(URL, session, hunterRequest, results)
 			if hunterResponse == nil {
@@ -51,7 +53,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			if numberOfResults >= query.Limit || hunterResponse.Data.Total == 0 || len(hunterResponse.Data.Arr) == 0 {
 				break
 			}
-
 		}
 	}()
 

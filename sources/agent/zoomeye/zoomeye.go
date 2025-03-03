@@ -1,20 +1,19 @@
 package zoomeye
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strconv"
-	"strings"
-
-	"errors"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
 
 var (
-	URL = "https://api.zoomeye.hk/host/search?query=%s&page=%d"
+	URL = "https://api.zoomeye.org/v2/search"
 )
 
 type Agent struct{}
@@ -24,10 +23,6 @@ func (agent *Agent) Name() string {
 }
 
 func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
-	if session.Keys.ZoomEyeHost != "" {
-		URL = strings.Replace(URL, "zoomeye.hk", session.Keys.ZoomEyeHost, 1)
-	}
-
 	if session.Keys.ZoomEyeToken == "" {
 		return nil, errors.New("empty zoomeye keys")
 	}
@@ -37,11 +32,16 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		defer close(results)
 
 		currentPage := 1
+		pageSize := 10000
+		if query.Limit < pageSize {
+			pageSize = query.Limit
+		}
 		var numberOfResults, totalResults int
 		for {
 			zoomeyeRequest := &ZoomEyeRequest{
-				Query: query.Query,
-				Page:  currentPage,
+				Query:    base64.StdEncoding.EncodeToString([]byte(query.Query)),
+				Page:     currentPage,
+				PageSize: pageSize,
 			}
 
 			zoomeyeResponse := agent.query(URL, session, zoomeyeRequest, results)
@@ -49,13 +49,13 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 			currentPage++
-			numberOfResults += len(zoomeyeResponse.Results)
+			numberOfResults += len(zoomeyeResponse.Data)
 			if totalResults == 0 {
 				totalResults = zoomeyeResponse.Total
 			}
 
 			// query certificates
-			if numberOfResults >= query.Limit || numberOfResults >= totalResults || len(zoomeyeResponse.Results) == 0 {
+			if numberOfResults >= query.Limit || numberOfResults >= totalResults || len(zoomeyeResponse.Data) == 0 {
 				break
 			}
 		}
@@ -65,13 +65,16 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 }
 
 func (agent *Agent) queryURL(session *sources.Session, URL string, zoomeyeRequest *ZoomEyeRequest) (*http.Response, error) {
-	zoomeyeURL := fmt.Sprintf(URL, url.QueryEscape(zoomeyeRequest.Query), zoomeyeRequest.Page)
-
-	request, err := sources.NewHTTPRequest(http.MethodGet, zoomeyeURL, nil)
+	reqBody := &bytes.Buffer{}
+	if err := json.NewEncoder(reqBody).Encode(zoomeyeRequest); err != nil {
+		return nil, fmt.Errorf("could not encode zoomeye request: %s", err)
+	}
+	request, err := sources.NewHTTPRequest(http.MethodPost, URL, reqBody)
 	if err != nil {
 		return nil, err
 	}
 	request.Header.Set("API-KEY", session.Keys.ZoomEyeToken)
+	request.Header.Set("Content-Type", "application/json")
 	return session.Do(request, agent.Name())
 }
 
@@ -89,35 +92,23 @@ func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *
 		return nil
 	}
 
-	for _, zoomeyeResult := range zoomeyeResponse.Results {
+	for _, zoomeyeResult := range zoomeyeResponse.Data {
 		result := sources.Result{Source: agent.Name()}
-		if ip, ok := zoomeyeResult["ip"]; ok {
-			result.IP = ip.(string)
-		}
-		if portinfo, ok := zoomeyeResult["portinfo"]; ok {
-			if port, ok := portinfo.(map[string]interface{}); ok {
-				result.Port = convertPortFromValue(port["port"])
-				if result.Port == 0 {
-					continue
-				}
-				result.Host = port["hostname"].(string)
-				raw, _ := json.Marshal(zoomeyeResult)
-				result.Raw = raw
-				results <- result
-			}
-		} else {
-			raw, _ := json.Marshal(zoomeyeResult)
-			result.Raw = raw
-			results <- result
-		}
+		result.IP = zoomeyeResult.Ip
+		result.Host = zoomeyeResult.Hostname
+		result.Port = zoomeyeResult.Port
+		raw, _ := json.Marshal(zoomeyeResult)
+		result.Raw = raw
+		results <- result
 	}
 
 	return zoomeyeResponse
 }
 
 type ZoomEyeRequest struct {
-	Query string
-	Page  int
+	Query    string `json:"qbase64"`
+	Page     int    `json:"page"`
+	PageSize int    `json:"pagesize"`
 }
 
 func convertPortFromValue(value interface{}) int {

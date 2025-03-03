@@ -3,11 +3,10 @@ package fofa
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
-
-	"errors"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
@@ -15,7 +14,6 @@ import (
 const (
 	URL    = "https://fofa.info/api/v1/search/all?email=%s&key=%s&qbase64=%s&fields=%s&page=%d&size=%d"
 	Fields = "ip,port,host"
-	Size   = 100
 )
 
 type Agent struct{}
@@ -30,7 +28,10 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	}
 
 	results := make(chan sources.Result)
-
+	var size = 1000
+	if query.Limit < size {
+		size = query.Limit
+	}
 	go func() {
 		defer close(results)
 
@@ -40,7 +41,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			fofaRequest := &FofaRequest{
 				Query:  query.Query,
 				Fields: Fields,
-				Size:   Size,
+				Size:   size,
 				Page:   page,
 			}
 			fofaResponse := agent.query(URL, session, fofaRequest, results)
@@ -48,7 +49,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 			size := fofaResponse.Size
-			if size == 0 || numberOfResults > query.Limit || len(fofaResponse.Results) == 0 || numberOfResults > size {
+			if size == 0 || numberOfResults >= query.Limit || len(fofaResponse.Results) == 0 || numberOfResults > size {
 				break
 			}
 			numberOfResults += len(fofaResponse.Results)

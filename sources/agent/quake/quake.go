@@ -8,13 +8,14 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/projectdiscovery/uncover/sources"
+	"github.com/projectdiscovery/gologger"
 	errorutil "github.com/projectdiscovery/utils/errors"
+
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
-	URL  = "https://quake.360.net/api/v3/search/quake_service"
-	Size = 100
+	URL = "https://quake.360.net/api/v3/search/quake_service"
 )
 
 type Agent struct{}
@@ -29,16 +30,20 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	}
 
 	results := make(chan sources.Result)
-
+	var size = 1000
+	if query.Limit < size {
+		size = query.Limit
+	}
 	go func() {
 		defer close(results)
 
 		numberOfResults := 0
 
 		for {
+			gologger.Debug().Msgf("Querying quake for %s,numberOfResults:%d", query.Query, numberOfResults)
 			quakeRequest := &Request{
 				Query:       query.Query,
-				Size:        Size,
+				Size:        size,
 				Start:       numberOfResults,
 				IgnoreCache: true,
 				Include:     []string{"ip", "port", "hostname"},
@@ -48,7 +53,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 
-			if numberOfResults > query.Limit || len(quakeResponse.Data) == 0 {
+			if numberOfResults >= query.Limit || len(quakeResponse.Data) == 0 {
 				break
 			}
 
