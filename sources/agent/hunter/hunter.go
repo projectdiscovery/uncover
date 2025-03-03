@@ -38,8 +38,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		numberOfResults := 0
 		page := 1
 		for {
-			gologger.Debug().Msgf("Querying hunter for %s,numberOfResults:%d", query.Query, numberOfResults)
-
 			hunterRequest := &Request{
 				ApiKey:   session.Keys.HunterToken,
 				Search:   query.Query,
@@ -53,10 +51,12 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 
 			numberOfResults += len(hunterResponse.Data.Arr)
 			page++
+			gologger.Debug().Msgf("Querying hunter for %s,numberOfResults:%d", query.Query, numberOfResults)
 
 			if numberOfResults >= query.Limit || hunterResponse.Data.Total == 0 || len(hunterResponse.Data.Arr) == 0 {
 				break
 			}
+
 		}
 	}()
 

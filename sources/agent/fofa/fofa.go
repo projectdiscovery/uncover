@@ -40,7 +40,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		var numberOfResults int
 		page := 1
 		for {
-			gologger.Debug().Msgf("Querying fofa for %s,numberOfResults:%d", query.Query, numberOfResults)
 			fofaRequest := &FofaRequest{
 				Query:  query.Query,
 				Fields: Fields,
@@ -52,10 +51,12 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 			size := fofaResponse.Size
-			if size == 0 || numberOfResults >= query.Limit || len(fofaResponse.Results) == 0 || numberOfResults > size {
+			numberOfResults += len(fofaResponse.Results)
+			gologger.Debug().Msgf("Querying fofa for %s,numberOfResults:%d", query.Query, numberOfResults)
+			if size == 0 || numberOfResults >= query.Limit || len(fofaResponse.Results) >= query.Limit || len(fofaResponse.Results) == 0 || numberOfResults > size {
 				break
 			}
-			numberOfResults += len(fofaResponse.Results)
+
 			page++
 		}
 	}()

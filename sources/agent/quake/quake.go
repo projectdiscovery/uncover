@@ -40,7 +40,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		numberOfResults := 0
 
 		for {
-			gologger.Debug().Msgf("Querying quake for %s,numberOfResults:%d", query.Query, numberOfResults)
 			quakeRequest := &Request{
 				Query:       query.Query,
 				Size:        size,
@@ -53,12 +52,11 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 
+			numberOfResults += len(quakeResponse.Data)
+			gologger.Debug().Msgf("Querying quake for %s,numberOfResults:%d", query.Query, numberOfResults)
 			if numberOfResults >= query.Limit || len(quakeResponse.Data) == 0 {
 				break
 			}
-
-			numberOfResults += len(quakeResponse.Data)
-
 			// early exit without more results
 			if quakeResponse.Meta.Pagination.Count > 0 && numberOfResults >= quakeResponse.Meta.Pagination.Total {
 				break

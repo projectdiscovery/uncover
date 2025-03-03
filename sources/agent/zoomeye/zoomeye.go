@@ -40,7 +40,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		}
 		var numberOfResults, totalResults int
 		for {
-			gologger.Debug().Msgf("Querying zoomeye for %s,numberOfResults:%d", query.Query, numberOfResults)
 			zoomeyeRequest := &ZoomEyeRequest{
 				Query:    base64.StdEncoding.EncodeToString([]byte(query.Query)),
 				Page:     currentPage,
@@ -56,6 +55,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			if totalResults == 0 {
 				totalResults = zoomeyeResponse.Total
 			}
+			gologger.Debug().Msgf("Querying zoomeye for %s,numberOfResults:%d", query.Query, numberOfResults)
 
 			// query certificates
 			if numberOfResults >= query.Limit || numberOfResults >= totalResults || len(zoomeyeResponse.Data) == 0 {
