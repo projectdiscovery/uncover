@@ -7,10 +7,11 @@ import (
 	"strings"
 
 	"github.com/projectdiscovery/gologger"
-	"github.com/projectdiscovery/uncover"
-	"github.com/projectdiscovery/uncover/sources"
 	errorutil "github.com/projectdiscovery/utils/errors"
 	stringsutil "github.com/projectdiscovery/utils/strings"
+
+	"github.com/projectdiscovery/uncover"
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 // Runner is an instance of the uncover enumeration
@@ -28,11 +29,16 @@ func NewRunner(options *Options) (*Runner, error) {
 	runner := &Runner{options: options}
 	appendAllQueries(options)
 
+	// gologger.Info().Msgf("options.Query: %v", options.Query)
+	// gologger.Info().Msgf("options.NewQuery: %v", options.NewQuery)
+
 	opts := uncover.Options{
-		Agents:  options.Engine,
-		Queries: options.Query,
-		Limit:   options.Limit,
+		Agents:     options.Engine,
+		Queries:    options.Query,
+		Limit:      options.Limit,
+		NewQueries: options.NewQuery,
 	}
+
 	service, err := uncover.New(&opts)
 	if err != nil {
 		return nil, err

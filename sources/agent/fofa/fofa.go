@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/projectdiscovery/gologger"
+
 	"github.com/projectdiscovery/uncover/sources"
 )
 
@@ -38,6 +40,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		var numberOfResults int
 		page := 1
 		for {
+			gologger.Debug().Msgf("Querying fofa for %s,numberOfResults:%d", query.Query, numberOfResults)
 			fofaRequest := &FofaRequest{
 				Query:  query.Query,
 				Fields: Fields,

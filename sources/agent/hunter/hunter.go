@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/projectdiscovery/gologger"
+
 	"github.com/projectdiscovery/uncover/sources"
 )
 
@@ -36,6 +38,8 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		numberOfResults := 0
 		page := 1
 		for {
+			gologger.Debug().Msgf("Querying hunter for %s,numberOfResults:%d", query.Query, numberOfResults)
+
 			hunterRequest := &Request{
 				ApiKey:   session.Keys.HunterToken,
 				Search:   query.Query,

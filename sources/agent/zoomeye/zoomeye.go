@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/projectdiscovery/gologger"
+
 	"github.com/projectdiscovery/uncover/sources"
 )
 
@@ -38,6 +40,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		}
 		var numberOfResults, totalResults int
 		for {
+			gologger.Debug().Msgf("Querying zoomeye for %s,numberOfResults:%d", query.Query, numberOfResults)
 			zoomeyeRequest := &ZoomEyeRequest{
 				Query:    base64.StdEncoding.EncodeToString([]byte(query.Query)),
 				Page:     currentPage,

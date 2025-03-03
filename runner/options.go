@@ -2,23 +2,23 @@ package runner
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"slices"
-
-	"errors"
 
 	awesomesearchqueries "github.com/projectdiscovery/awesome-search-queries"
 	"github.com/projectdiscovery/goflags"
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/gologger/formatter"
 	"github.com/projectdiscovery/gologger/levels"
-	"github.com/projectdiscovery/uncover/sources"
 	errorutil "github.com/projectdiscovery/utils/errors"
 	fileutil "github.com/projectdiscovery/utils/file"
 	folderutil "github.com/projectdiscovery/utils/folder"
 	genericutil "github.com/projectdiscovery/utils/generic"
 	updateutils "github.com/projectdiscovery/utils/update"
+
+	"github.com/projectdiscovery/uncover/sources"
 )
 
 var (
@@ -30,6 +30,7 @@ var (
 type Options struct {
 	Query                goflags.StringSlice
 	Engine               goflags.StringSlice
+	NewQuery             map[string][]string
 	AwesomeSearchQueries goflags.StringSlice
 	ConfigFile           string
 	ProviderFile         string
@@ -279,6 +280,15 @@ func appendQuery(options *Options, name string, queries ...string) {
 			if !slices.Contains(options.Query, query) {
 				options.Query = append(options.Query, query)
 			}
+		}
+		for _, query := range queries {
+			if options.NewQuery == nil {
+				options.NewQuery = make(map[string][]string)
+			}
+			if options.NewQuery[name] == nil {
+				options.NewQuery[name] = []string{}
+			}
+			options.NewQuery[name] = append(options.NewQuery[name], query)
 		}
 	}
 }

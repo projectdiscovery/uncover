@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/projectdiscovery/gologger"
+
 	"github.com/projectdiscovery/uncover/sources"
 	"github.com/projectdiscovery/uncover/sources/agent/binaryedge"
 	"github.com/projectdiscovery/uncover/sources/agent/censys"
@@ -29,11 +30,12 @@ import (
 var DefaultChannelBuffSize = 32
 
 type Options struct {
-	Agents   []string // Uncover Agents to use
-	Queries  []string // Queries to pass to Agents
-	Limit    int
-	MaxRetry int
-	Timeout  int
+	Agents     []string // Uncover Agents to use
+	Queries    []string // Queries to pass to Agents
+	NewQueries map[string][]string
+	Limit      int
+	MaxRetry   int
+	Timeout    int
 	// Note these ratelimits are used as fallback in case agent
 	// ratelimit is not available in DefaultRateLimits
 	RateLimit     uint          // default 30 req
@@ -117,38 +119,46 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 	megaChan := make(chan sources.Result, DefaultChannelBuffSize)
 	// iterate and run all sources
 	wg := &sync.WaitGroup{}
-	for _, q := range s.Options.Queries {
-	agentLabel:
+	for engine, queries := range s.Options.NewQueries {
 		for _, agent := range s.Agents {
+			if agent.Name() != engine {
+				continue
+			}
 			keys := s.Provider.GetKeys()
 			if keys.Empty() && agent.Name() != "shodan-idb" {
 				gologger.Error().Msgf(agent.Name(), "agent given but keys not found")
-				continue agentLabel
+				continue
 			}
-			ch, err := agent.Query(s.Session, &sources.Query{
-				Query: q,
-				Limit: s.Options.Limit,
-			})
-			if err != nil {
-				gologger.Error().Msgf("%s\n", err)
-				continue agentLabel
-			}
-			wg.Add(1)
-			go func(source, relay chan sources.Result, ctx context.Context) {
-				defer wg.Done()
-				for {
-					select {
-					case <-ctx.Done():
-						return
-					case res, ok := <-source:
-						res.Timestamp = time.Now().Unix()
-						if !ok {
-							return
-						}
-						relay <- res
-					}
+			for _, q := range queries {
+				if q == "" {
+					continue
 				}
-			}(ch, megaChan, ctx)
+				ch, err := agent.Query(s.Session, &sources.Query{
+					Query: q,
+					Limit: s.Options.Limit,
+				})
+				if err != nil {
+					gologger.Error().Msgf("%s\n", err)
+					continue
+				}
+				wg.Add(1)
+				go func(source, relay chan sources.Result, ctx context.Context) {
+					defer wg.Done()
+					for {
+						select {
+						case <-ctx.Done():
+							return
+						case res, ok := <-source:
+							res.Timestamp = time.Now().Unix()
+							if !ok {
+								return
+							}
+							relay <- res
+						}
+					}
+				}(ch, megaChan, ctx)
+			}
+
 		}
 	}
 
