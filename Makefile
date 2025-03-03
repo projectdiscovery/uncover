@@ -18,3 +18,5 @@ test:
 	$(GOTEST) $(GOFLAGS) ./...
 tidy:
 	$(GOMOD) tidy
+release:
+	goreleaser release --snapshot -p 2 --clean
