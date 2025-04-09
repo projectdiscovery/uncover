@@ -86,7 +86,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			if result.Host != "" || r.options.OutputFile != "" {
 				searchFor = append(searchFor, result.Host)
 			}
-			if stringsutil.ContainsAny(outData, searchFor...) && !r.outputWriter.findDuplicate(outData, false) {
+			if stringsutil.ContainsAny(outData, searchFor...) && !r.outputWriter.findDuplicate(outData, true) {
 				if r.options.Verbose {
 					// if output is verbose include source name
 					gologger.Info().Label(result.Source).Msg(outData)
