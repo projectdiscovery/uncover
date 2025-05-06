@@ -3,7 +3,7 @@ package onyphe
 type OnypheResponse struct {
 	Error    int      `json:"error"`
 	Results  []Result `json:"results"`
-	Page     int      `json:"page"`
+	Page     string   `json:"page"`
 	PageSize int      `json:"page_size"`
 	Total    int      `json:"total"`
 }
