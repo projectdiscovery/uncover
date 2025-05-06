@@ -34,6 +34,7 @@ type Provider struct {
 	Google     []string `yaml:"google"`
 	Odin       []string `yaml:"odin"`
 	BinaryEdge []string `yaml:"binaryedge"`
+	Onyphe     []string `yaml:"onyphe"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -116,6 +117,9 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.BinaryEdge) > 0 {
 		keys.BinaryEdgeToken = provider.BinaryEdge[rand.Intn(len(provider.BinaryEdge))]
 	}
+	if len(provider.Onyphe) > 0 {
+		keys.OnypheKey = provider.Onyphe[rand.Intn(len(provider.Onyphe))]
+	}
 
 	return keys
 }
@@ -163,6 +167,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.Google = appendIfAllExists(provider.Google, "GOOGLE_API_KEY", "GOOGLE_API_CX")
 	provider.Odin = appendIfExists(provider.Odin, "ODIN_API_KEY")
 	provider.BinaryEdge = appendIfExists(provider.BinaryEdge, "BINARYEDGE_API_KEY")
+	provider.Onyphe = appendIfExists(provider.Onyphe, "ONYPHE_API_KEY")
 }
 
 // HasKeys returns true if at least one agent/source has keys
@@ -181,6 +186,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Publicwww) > 0,
 		len(provider.Odin) > 0,
 		len(provider.BinaryEdge) > 0,
+		len(provider.Onyphe) > 0,
 	)
 }
 

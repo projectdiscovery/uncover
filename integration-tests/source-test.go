@@ -245,3 +245,22 @@ func (h binaryedgeTestcases) Execute() error {
 	}
 	return expectResultsGreaterThanCount(results, 0)
 }
+
+type onypheTestcases struct{}
+
+func (h onypheTestcases) Execute() error {
+	token := os.Getenv("ONYPHE_API_KEY")
+	if token == "" {
+		return errors.New("missing onyphe api key")
+	}
+
+	onypheToken := fmt.Sprintf(`onyphe: [%s]`, token)
+	_ = os.WriteFile(ConfigFile, []byte(onypheToken), 0644)
+	defer os.RemoveAll(ConfigFile)
+	results, err := testutils.RunUncoverAndGetResults(debug, "-onyphe", "google.com")
+
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}
