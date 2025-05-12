@@ -78,11 +78,17 @@ func (agent *Agent) query(session *sources.Session, onypheRequest OnypheRequest,
 		return nil
 	}
 
-	var apiResponse OnypheResponse
-	if err := json.Unmarshal(body, &apiResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
-		return nil
-	}
+    var apiResponse OnypheResponse
+    if err := json.Unmarshal(body, &apiResponse); err != nil {
+        results <- sources.Result{Source: agent.Name(), Error: err}
+        return nil
+    }
+
+    // Check if the API returned an error
+    if apiResponse.Error != 0 {
+        results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("API error code: %d", apiResponse.Error)}
+        return nil
+    }
 
 	for _, result := range apiResponse.Results {
 		results <- sources.Result{
