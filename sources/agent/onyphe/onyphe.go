@@ -102,5 +102,14 @@ func (agent *Agent) queryURL(session *sources.Session, onypheRequest *OnypheRequ
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "bearer "+session.Keys.OnypheKey)
 
-	return session.Do(request, agent.Name())
+	resp, err := session.Do(request, agent.Name())
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	return resp, nil
 }
