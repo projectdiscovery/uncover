@@ -32,6 +32,7 @@ var (
 		"google":     googleTestcases{},
 		"odin":       odinTestcases{},
 		"binaryedge": binaryedgeTestcases{},
+		"onyphe":     onypheTestcases{},
 		// feature tests
 		"output": outputTestcases{},
 	}
