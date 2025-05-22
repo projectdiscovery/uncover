@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/projectdiscovery/gologger"
 	errorutil "github.com/projectdiscovery/utils/errors"
@@ -17,6 +20,8 @@ import (
 const (
 	URL = "https://quake.360.net/api/v3/search/quake_service"
 )
+
+var pageSize = 1000
 
 type Agent struct{}
 
@@ -30,22 +35,25 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	}
 
 	results := make(chan sources.Result)
-	var size = 1000
-	if query.Limit < size {
-		size = query.Limit
+	if query.Limit < pageSize {
+		pageSize = query.Limit
 	}
-	go func() {
+	go func(pageSize int) {
 		defer close(results)
-
 		numberOfResults := 0
-
 		for {
 			quakeRequest := &Request{
 				Query:       query.Query,
-				Size:        size,
+				Size:        pageSize,
 				Start:       numberOfResults,
 				IgnoreCache: true,
-				Include:     []string{"ip", "port", "hostname"},
+				Latest:      true,
+				Exclude: []string{
+					"service.cert",
+					"service.response",
+					"service.http.body",
+					"service.http.favicon.data",
+				},
 			}
 			quakeResponse := agent.query(URL, session, quakeRequest, results)
 			if quakeResponse == nil {
@@ -61,8 +69,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			if quakeResponse.Meta.Pagination.Count > 0 && numberOfResults >= quakeResponse.Meta.Pagination.Total {
 				break
 			}
+			time.Sleep(time.Second * 1)
 		}
-	}()
+	}(pageSize)
 
 	return results, nil
 }
@@ -89,17 +98,43 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 		} else {
 			errx = errx.Msgf("failed to decode quake response: %s", string(respdata))
 		}
+		fmt.Println(errx)
 		results <- sources.Result{Source: agent.Name(), Error: errx}
 		return nil
 	}
 
 	for _, quakeResult := range quakeResponse.Data {
-		result := sources.Result{Source: agent.Name()}
-		result.IP = quakeResult.IP
-		result.Port = quakeResult.Port
-		result.Host = quakeResult.Hostname
 		raw, _ := json.Marshal(quakeResult)
-		result.Raw = raw
+		var appNames []string
+		for _, app := range quakeResult.Components {
+			appNames = append(appNames, app.ProductNameCn)
+		}
+		var urlStr string
+		if len(quakeResult.Service.Http.HttpLoadUrl) > 0 {
+			urlStr = quakeResult.Service.Http.HttpLoadUrl[0]
+		}
+		result := sources.Result{
+			Source:          agent.Name(),
+			IP:              quakeResult.Ip,
+			Port:            quakeResult.Port,
+			Host:            quakeResult.Hostname,
+			Url:             urlStr,
+			Raw:             raw,
+			HtmlTitle:       quakeResult.Service.Http.Title,
+			Domain:          quakeResult.Domain,
+			Province:        quakeResult.Location.ProvinceCn,
+			ConfirmHttps:    false,
+			City:            quakeResult.Location.CityCn,
+			Country:         quakeResult.Location.CountryCn,
+			Asn:             strconv.Itoa(quakeResult.Asn),
+			Location:        "",
+			ServiceProvider: "",
+			Fingerprints:    strings.Join(appNames, ","),
+			Banner:          "",
+			ServiceName:     quakeResult.Service.Name,
+			StatusCode:      quakeResult.Service.Http.StatusCode,
+		}
+
 		results <- result
 	}
 
@@ -111,7 +146,6 @@ func (agent *Agent) queryURL(session *sources.Session, URL string, quakeRequest 
 	if err != nil {
 		return nil, err
 	}
-
 	request, err := sources.NewHTTPRequest(
 		http.MethodPost,
 		URL,

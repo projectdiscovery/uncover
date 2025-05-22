@@ -1,4 +1,5 @@
 package sources
+
 import (
 	"encoding/json"
 	"fmt"
@@ -6,14 +7,28 @@ import (
 )
 
 type Result struct {
-	Timestamp int64  `json:"timestamp"`
-	Source    string `json:"source"`
-	IP        string `json:"ip"`
-	Port      int    `json:"port"`
-	Host      string `json:"host"`
-	Url       string `json:"url"`
-	Raw       []byte `json:"-"`
-	Error     error  `json:"-"`
+	Timestamp       int64  `json:"timestamp"`
+	Source          string `json:"source"`
+	IP              string `json:"ip"`
+	Port            int    `json:"port"`
+	Host            string `json:"host"`
+	Url             string `json:"url"`
+	Raw             []byte `json:"-"`
+	Error           error  `json:"-"`
+	HtmlTitle       string `json:"html_title"`
+	Domain          string `json:"domain"`
+	Province        string `json:"province"`
+	ConfirmHttps    bool   `json:"confirm_https"`
+	City            string `json:"city"`
+	Country         string `json:"country"`
+	Asn             string `json:"asn"`
+	Location        string `json:"location"`
+	ServiceProvider string `json:"service_provider"`
+	Fingerprints    string `json:"fingerprints"`
+	Banner          string `json:"banner"`
+	ServiceName     string `json:"service_name"`
+	StatusCode      int    `json:"status_code"`
+	Honeypot        int    `json:"honeypot"`
 }
 
 func (result *Result) IpPort() string {

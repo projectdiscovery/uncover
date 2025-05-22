@@ -2,10 +2,13 @@ package uncover
 
 import (
 	"context"
-	"sync"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/projectdiscovery/gologger"
+	errorutil "github.com/projectdiscovery/utils/errors"
+	stringsutil "github.com/projectdiscovery/utils/strings"
 
 	"github.com/projectdiscovery/uncover/sources"
 	"github.com/projectdiscovery/uncover/sources/agent/binaryedge"
@@ -22,9 +25,6 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/shodan"
 	"github.com/projectdiscovery/uncover/sources/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/sources/agent/zoomeye"
-
-	errorutil "github.com/projectdiscovery/utils/errors"
-	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
 var DefaultChannelBuffSize = 32
@@ -117,56 +117,57 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 	}
 
 	megaChan := make(chan sources.Result, DefaultChannelBuffSize)
-	// iterate and run all sources
-	wg := &sync.WaitGroup{}
+	g, ctx := errgroup.WithContext(ctx)
+
 	for engine, queries := range s.Options.NewQueries {
 		for _, agent := range s.Agents {
 			if agent.Name() != engine {
 				continue
 			}
-			keys := s.Provider.GetKeys()
-			if keys.Empty() && agent.Name() != "shodan-idb" {
-				gologger.Error().Msgf(agent.Name(), "agent given but keys not found")
-				continue
-			}
-			for _, q := range queries {
-				if q == "" {
-					continue
+			g.Go(func() error {
+				gologger.Debug().Msgf("agent %s running", agent.Name())
+				keys := s.Provider.GetKeys()
+				if keys.Empty() && agent.Name() != "shodan-idb" {
+					gologger.Error().Msgf(agent.Name(), "agent given but keys not found")
+					return nil
 				}
-				ch, err := agent.Query(s.Session, &sources.Query{
-					Query: q,
-					Limit: s.Options.Limit,
-				})
-				if err != nil {
-					gologger.Error().Msgf("%s\n", err)
-					continue
-				}
-				wg.Add(1)
-				go func(source, relay chan sources.Result, ctx context.Context) {
-					defer wg.Done()
-					for {
-						select {
-						case <-ctx.Done():
-							return
-						case res, ok := <-source:
-							res.Timestamp = time.Now().Unix()
-							if !ok {
-								return
-							}
-							relay <- res
-						}
+				for _, q := range queries {
+					ch, err := agent.Query(s.Session, &sources.Query{
+						Query: q,
+						Limit: s.Options.Limit,
+					})
+					if err != nil {
+						gologger.Error().Msgf("error querying %s: %v", agent.Name(), err)
+						continue
 					}
-				}(ch, megaChan, ctx)
-			}
-
+					g.Go(func() error {
+						for {
+							select {
+							case <-ctx.Done():
+								return ctx.Err()
+							case res, ok := <-ch:
+								if res.Error != nil {
+									gologger.Error().Msgf("error querying %s: %v", agent.Name(), res.Error)
+									continue
+								}
+								if !ok {
+									return nil
+								}
+								res.Timestamp = time.Now().Unix()
+								megaChan <- res
+							}
+						}
+					})
+				}
+				return nil
+			})
 		}
 	}
 
-	// close channel when all sources return
-	go func(wg *sync.WaitGroup, megaChan chan sources.Result) {
-		wg.Wait()
-		defer close(megaChan)
-	}(wg, megaChan)
+	go func() {
+		g.Wait()
+		close(megaChan)
+	}()
 
 	return megaChan, nil
 }

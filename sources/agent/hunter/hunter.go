@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/projectdiscovery/gologger"
 
@@ -13,8 +15,10 @@ import (
 )
 
 const (
-	URL = "https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=%d&page_size=%d"
+	URL = "https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=%d&page_size=%d&is_web=3"
 )
+
+var pageSize = 100
 
 type Agent struct{}
 
@@ -28,13 +32,11 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	}
 
 	results := make(chan sources.Result)
-
-	go func() {
+	if query.Limit < pageSize {
+		pageSize = query.Limit
+	}
+	go func(pageSize int) {
 		defer close(results)
-		var size = 1000
-		if query.Limit < size {
-			size = query.Limit
-		}
 		numberOfResults := 0
 		page := 1
 		for {
@@ -42,23 +44,23 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				ApiKey:   session.Keys.HunterToken,
 				Search:   query.Query,
 				Page:     page,
-				PageSize: size,
+				PageSize: pageSize,
 			}
 			hunterResponse := agent.query(URL, session, hunterRequest, results)
 			if hunterResponse == nil {
 				break
 			}
-
 			numberOfResults += len(hunterResponse.Data.Arr)
 			page++
-			gologger.Debug().Msgf("Querying hunter for %s,numberOfResults:%d", query.Query, numberOfResults)
+			gologger.Debug().Msgf("Querying hunter for %s, numberOfResults:%d", query.Query, numberOfResults)
 
-			if numberOfResults >= query.Limit || hunterResponse.Data.Total == 0 || len(hunterResponse.Data.Arr) == 0 {
+			if numberOfResults >= query.Limit || hunterResponse.Data.Total == 0 ||
+				len(hunterResponse.Data.Arr) == 0 || hunterResponse.Data.Total <= pageSize {
 				break
 			}
-
+			time.Sleep(time.Second * 2)
 		}
-	}()
+	}(pageSize)
 
 	return results, nil
 }
@@ -69,24 +71,46 @@ func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *R
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
+	defer resp.Body.Close()
 
 	hunterResponse := &Response{}
 	if err := json.NewDecoder(resp.Body).Decode(hunterResponse); err != nil {
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
+
 	if hunterResponse.Code == http.StatusOK && hunterResponse.Data.Total > 0 {
 		for _, hunterResult := range hunterResponse.Data.Arr {
-			result := sources.Result{Source: agent.Name()}
-			result.IP = hunterResult.IP
-			result.Port = hunterResult.Port
-			result.Host = hunterResult.Domain
 			raw, _ := json.Marshal(hunterResult)
-			result.Raw = raw
+			var appNames []string
+			for _, app := range hunterResult.Component {
+				appNames = append(appNames, app.Name)
+			}
+			result := sources.Result{
+				Source:          agent.Name(),
+				IP:              hunterResult.Ip,
+				Port:            hunterResult.Port,
+				Host:            hunterResult.Domain,
+				Url:             hunterResult.Url,
+				Raw:             raw,
+				HtmlTitle:       hunterResult.WebTitle,
+				Domain:          hunterResult.Domain,
+				Province:        hunterResult.Province,
+				ConfirmHttps:    false,
+				City:            hunterResult.City,
+				Country:         hunterResult.Country,
+				Asn:             "",
+				Location:        "",
+				ServiceProvider: "",
+				Fingerprints:    strings.Join(appNames, ","),
+				Banner:          hunterResult.Banner,
+				ServiceName:     hunterResult.Protocol,
+				StatusCode:      hunterResult.StatusCode,
+				Honeypot:        0,
+			}
 			results <- result
 		}
 	}
-
 	return hunterResponse
 }
 

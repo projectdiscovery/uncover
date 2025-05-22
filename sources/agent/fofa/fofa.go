@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/projectdiscovery/gologger"
 
@@ -14,9 +15,11 @@ import (
 )
 
 const (
-	URL    = "https://fofa.info/api/v1/search/all?email=%s&key=%s&qbase64=%s&fields=%s&page=%d&size=%d"
-	Fields = "ip,port,host"
+	URL    = "https://fofa.info/api/v1/search/all?key=%s&qbase64=%s&fields=%s&page=%d&size=%d"
+	Fields = "host,title,ip,domain,port,country,city,asn,org,link,product,banner,protocol"
 )
+
+var pageSize = 10000
 
 type Agent struct{}
 
@@ -25,16 +28,15 @@ func (agent *Agent) Name() string {
 }
 
 func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
-	if session.Keys.FofaEmail == "" || session.Keys.FofaKey == "" {
+	if session.Keys.FofaKey == "" {
 		return nil, errors.New("empty fofa keys")
 	}
 
 	results := make(chan sources.Result)
-	var size = 1000
-	if query.Limit < size {
-		size = query.Limit
+	if query.Limit < pageSize {
+		pageSize = query.Limit
 	}
-	go func() {
+	go func(pageSize int) {
 		defer close(results)
 
 		var numberOfResults int
@@ -43,30 +45,33 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			fofaRequest := &FofaRequest{
 				Query:  query.Query,
 				Fields: Fields,
-				Size:   size,
+				Size:   pageSize,
 				Page:   page,
 			}
 			fofaResponse := agent.query(URL, session, fofaRequest, results)
 			if fofaResponse == nil {
-				break
-			}
-			size := fofaResponse.Size
-			numberOfResults += len(fofaResponse.Results)
-			gologger.Debug().Msgf("Querying fofa for %s,numberOfResults:%d", query.Query, numberOfResults)
-			if size == 0 || numberOfResults >= query.Limit || len(fofaResponse.Results) >= query.Limit || len(fofaResponse.Results) == 0 || numberOfResults > size {
+				results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("fofa response is nil")}
 				break
 			}
 
+			numberOfResults += len(fofaResponse.Results)
+			gologger.Debug().Msgf("Querying fofa for %s,numberOfResults:%d", query.Query, numberOfResults)
+			if fofaResponse.Size == 0 || numberOfResults >= query.Limit || len(fofaResponse.Results) >= query.Limit ||
+				len(fofaResponse.Results) == 0 || len(fofaResponse.Results) <= pageSize {
+				break
+			}
+			time.Sleep(time.Second * 1)
 			page++
 		}
-	}()
+	}(pageSize)
 
 	return results, nil
 }
 
 func (agent *Agent) queryURL(session *sources.Session, URL string, fofaRequest *FofaRequest) (*http.Response, error) {
 	base64Query := base64.StdEncoding.EncodeToString([]byte(fofaRequest.Query))
-	fofaURL := fmt.Sprintf(URL, session.Keys.FofaEmail, session.Keys.FofaKey, base64Query, Fields, fofaRequest.Page, fofaRequest.Size)
+	fofaURL := fmt.Sprintf(URL, session.Keys.FofaKey, base64Query, Fields, fofaRequest.Page, fofaRequest.Size)
+	// gologger.Debug().Msgf("Fofa URL: %s", fofaURL)
 	request, err := sources.NewHTTPRequest(http.MethodGet, fofaURL, nil)
 	if err != nil {
 		return nil, err
@@ -93,13 +98,29 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 	}
 
 	for _, fofaResult := range fofaResponse.Results {
-		result := sources.Result{Source: agent.Name()}
-		result.IP = fofaResult[0]
-		result.Port, _ = strconv.Atoi(fofaResult[1])
-		result.Host = fofaResult[2]
+		port, _ := strconv.Atoi(fofaResult[4])
 		raw, _ := json.Marshal(fofaResult)
-		result.Raw = raw
-		results <- result
+
+		results <- sources.Result{
+			Source:          agent.Name(),
+			IP:              fofaResult[2],
+			Port:            port,
+			Host:            fofaResult[0],
+			Url:             fofaResult[9],
+			Raw:             raw,
+			HtmlTitle:       fofaResult[1],
+			Domain:          fofaResult[3],
+			Province:        "",
+			ConfirmHttps:    false,
+			City:            fofaResult[6],
+			Country:         fofaResult[5],
+			Asn:             fofaResult[7],
+			Location:        "",
+			ServiceProvider: fofaResult[8],
+			Fingerprints:    fofaResult[10],
+			Banner:          fofaResult[11],
+			ServiceName:     fofaResult[12],
+		}
 	}
 	return fofaResponse
 }

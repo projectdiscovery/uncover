@@ -8,14 +8,16 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/projectdiscovery/gologger"
-
 	"github.com/projectdiscovery/uncover/sources"
 )
 
 var (
-	URL = "https://api.zoomeye.org/v2/search"
+	URL      = "https://api.zoomeye.org/v2/search"
+	fields   = "ip,port,domain,url,hostname,service,title,product,country.name,province.name,city.name,asn,honeypot"
+	pageSize = 1000
 )
 
 type Agent struct{}
@@ -30,11 +32,10 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	}
 	results := make(chan sources.Result)
 
-	go func() {
+	go func(fields string) {
 		defer close(results)
 
 		currentPage := 1
-		pageSize := 10000
 		if query.Limit < pageSize {
 			pageSize = query.Limit
 		}
@@ -44,6 +45,8 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Query:    base64.StdEncoding.EncodeToString([]byte(query.Query)),
 				Page:     currentPage,
 				PageSize: pageSize,
+				Fields:   fields,
+				// Facets:   "product,service",
 			}
 
 			zoomeyeResponse := agent.query(URL, session, zoomeyeRequest, results)
@@ -55,14 +58,15 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			if totalResults == 0 {
 				totalResults = zoomeyeResponse.Total
 			}
-			gologger.Debug().Msgf("Querying zoomeye for %s,numberOfResults:%d", query.Query, numberOfResults)
-
+			gologger.Debug().Msgf("Querying zoomeye for %s, numberOfResults:%d", query.Query, numberOfResults)
 			// query certificates
-			if numberOfResults >= query.Limit || numberOfResults >= totalResults || len(zoomeyeResponse.Data) == 0 {
+			if numberOfResults >= query.Limit || numberOfResults >= totalResults ||
+				len(zoomeyeResponse.Data) == 0 || zoomeyeResponse.Total <= pageSize {
 				break
 			}
+			time.Sleep(time.Second * 1)
 		}
-	}()
+	}(fields)
 
 	return results, nil
 }
@@ -94,14 +98,34 @@ func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
-
 	for _, zoomeyeResult := range zoomeyeResponse.Data {
-		result := sources.Result{Source: agent.Name()}
-		result.IP = zoomeyeResult.Ip
-		result.Host = zoomeyeResult.Hostname
-		result.Port = zoomeyeResult.Port
 		raw, _ := json.Marshal(zoomeyeResult)
-		result.Raw = raw
+		var title string
+		if len(zoomeyeResult.Title) > 0 {
+			title = zoomeyeResult.Title[0]
+		}
+		result := sources.Result{
+			Source:          agent.Name(),
+			IP:              zoomeyeResult.Ip,
+			Port:            zoomeyeResult.Port,
+			Host:            zoomeyeResult.Ip,
+			Url:             zoomeyeResult.Url,
+			Raw:             raw,
+			HtmlTitle:       title,
+			Domain:          zoomeyeResult.Domain,
+			Province:        zoomeyeResult.ProvinceName,
+			ConfirmHttps:    false,
+			City:            zoomeyeResult.CityName,
+			Country:         zoomeyeResult.CountryName,
+			Asn:             zoomeyeResult.Asn,
+			Location:        "",
+			ServiceProvider: "",
+			Fingerprints:    zoomeyeResult.Product,
+			Banner:          zoomeyeResult.Banner,
+			ServiceName:     zoomeyeResult.Service,
+			StatusCode:      0,
+			Honeypot:        zoomeyeResult.Honeypot,
+		}
 		results <- result
 	}
 
@@ -112,6 +136,8 @@ type ZoomEyeRequest struct {
 	Query    string `json:"qbase64"`
 	Page     int    `json:"page"`
 	PageSize int    `json:"pagesize"`
+	// Facets   string `json:"facets"`
+	Fields string `json:"fields"`
 }
 
 func convertPortFromValue(value interface{}) int {

@@ -42,7 +42,7 @@ type ZoomEyeResponse struct {
 		Zipcode             string   `json:"zipcode"`
 		Idc                 int      `json:"idc"`
 		Honeypot            int      `json:"honeypot"`
-		Asn                 int      `json:"asn"`
+		Asn                 string   `json:"asn"`
 		Protocol            string   `json:"protocol"`
 		Ssl                 string   `json:"ssl"`
 		PrimaryIndustry     string   `json:"primary_industry"`
