@@ -2,11 +2,10 @@ package criminalip
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-
-	"errors"
 
 	"github.com/projectdiscovery/uncover/sources"
 )

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/logrusorgru/aurora"
-
 	"github.com/projectdiscovery/uncover/testutils"
 )
 

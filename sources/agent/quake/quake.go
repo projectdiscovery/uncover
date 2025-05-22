@@ -12,9 +12,8 @@ import (
 	"time"
 
 	"github.com/projectdiscovery/gologger"
-	errorutil "github.com/projectdiscovery/utils/errors"
-
 	"github.com/projectdiscovery/uncover/sources"
+	errorutil "github.com/projectdiscovery/utils/errors"
 )
 
 const (

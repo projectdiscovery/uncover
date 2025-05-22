@@ -7,11 +7,10 @@ import (
 	"strings"
 
 	"github.com/projectdiscovery/gologger"
-	errorutil "github.com/projectdiscovery/utils/errors"
-	stringsutil "github.com/projectdiscovery/utils/strings"
-
 	"github.com/projectdiscovery/uncover"
 	"github.com/projectdiscovery/uncover/sources"
+	errorutil "github.com/projectdiscovery/utils/errors"
+	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
 // Runner is an instance of the uncover enumeration

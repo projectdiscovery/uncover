@@ -1,9 +1,9 @@
 package criminalip
 
 type CriminalIPResponse struct {
-	Data responseData `json:"data"`
-	Msg    string     `json:"message"`
-	Status int        `json:"status"`
+	Data   responseData `json:"data"`
+	Msg    string       `json:"message"`
+	Status int          `json:"status"`
 }
 
 type ResponseDataArr struct {
@@ -13,7 +13,7 @@ type ResponseDataArr struct {
 }
 
 type responseData struct {
-	Result       []ResponseDataArr `json:"result"`
-	Count        int               `json:"count"`
-	SearchKeyword string           `json:"search_keyword"`
+	Result        []ResponseDataArr `json:"result"`
+	Count         int               `json:"count"`
+	SearchKeyword string            `json:"search_keyword"`
 }

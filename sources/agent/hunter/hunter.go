@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/projectdiscovery/gologger"
-
 	"github.com/projectdiscovery/uncover/sources"
 )
 

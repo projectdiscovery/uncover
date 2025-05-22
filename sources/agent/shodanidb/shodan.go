@@ -2,11 +2,10 @@ package shodanidb
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-
-	"errors"
 
 	"github.com/projectdiscovery/mapcidr"
 	"github.com/projectdiscovery/uncover/sources"
