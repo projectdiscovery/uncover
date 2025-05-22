@@ -1,12 +1,10 @@
 package zoomeye
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"net/url"
-	"strconv"
-	"strings"
 
 	"errors"
 
@@ -14,20 +12,22 @@ import (
 )
 
 var (
-	URL = "https://api.zoomeye.hk/host/search?query=%s&page=%d"
+	URL = "https://api.zoomeye.ai/v2/search"
 )
 
 type Agent struct{}
+
+type ZoomEyeRequest struct {
+	Query    string
+	Page     int
+	PageSize int
+}
 
 func (agent *Agent) Name() string {
 	return "zoomeye"
 }
 
 func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
-	if session.Keys.ZoomEyeHost != "" {
-		URL = strings.Replace(URL, "zoomeye.hk", session.Keys.ZoomEyeHost, 1)
-	}
-
 	if session.Keys.ZoomEyeToken == "" {
 		return nil, errors.New("empty zoomeye keys")
 	}
@@ -40,8 +40,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		var numberOfResults, totalResults int
 		for {
 			zoomeyeRequest := &ZoomEyeRequest{
-				Query: query.Query,
-				Page:  currentPage,
+				Query:    query.Query,
+				Page:     currentPage,
+				PageSize: 100,
 			}
 
 			zoomeyeResponse := agent.query(URL, session, zoomeyeRequest, results)
@@ -54,7 +55,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				totalResults = zoomeyeResponse.Total
 			}
 
-			// query certificates
 			if numberOfResults >= query.Limit || numberOfResults >= totalResults || len(zoomeyeResponse.Results) == 0 {
 				break
 			}
@@ -65,18 +65,30 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 }
 
 func (agent *Agent) queryURL(session *sources.Session, URL string, zoomeyeRequest *ZoomEyeRequest) (*http.Response, error) {
-	zoomeyeURL := fmt.Sprintf(URL, url.QueryEscape(zoomeyeRequest.Query), zoomeyeRequest.Page)
+	// Encode query to base64
+	queryBase64 := base64.StdEncoding.EncodeToString([]byte(zoomeyeRequest.Query))
 
-	request, err := sources.NewHTTPRequest(http.MethodGet, zoomeyeURL, nil)
+	requestBody := map[string]interface{}{
+		"qbase64":  queryBase64,
+		"page":     zoomeyeRequest.Page,
+		"pagesize": zoomeyeRequest.PageSize,
+	}
+
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return nil, err
+	}
+
+	request, err := sources.NewHTTPRequest(http.MethodPost, URL, bytes.NewReader(jsonBody))
 	if err != nil {
 		return nil, err
 	}
 	request.Header.Set("API-KEY", session.Keys.ZoomEyeToken)
+	request.Header.Set("Content-Type", "application/json")
 	return session.Do(request, agent.Name())
 }
 
 func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *ZoomEyeRequest, results chan sources.Result) *ZoomEyeResponse {
-	// query certificates
 	resp, err := agent.queryURL(session, URL, zoomeyeRequest)
 	if err != nil {
 		results <- sources.Result{Source: agent.Name(), Error: err}
@@ -89,45 +101,17 @@ func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *
 		return nil
 	}
 
-	for _, zoomeyeResult := range zoomeyeResponse.Results {
-		result := sources.Result{Source: agent.Name()}
-		if ip, ok := zoomeyeResult["ip"]; ok {
-			result.IP = ip.(string)
-		}
-		if portinfo, ok := zoomeyeResult["portinfo"]; ok {
-			if port, ok := portinfo.(map[string]interface{}); ok {
-				result.Port = convertPortFromValue(port["port"])
-				if result.Port == 0 {
-					continue
-				}
-				result.Host = port["hostname"].(string)
-				raw, _ := json.Marshal(zoomeyeResult)
-				result.Raw = raw
-				results <- result
-			}
-		} else {
-			raw, _ := json.Marshal(zoomeyeResult)
-			result.Raw = raw
-			results <- result
-		}
+	for _, result := range zoomeyeResponse.Results {
+		sourceResult := sources.Result{Source: agent.Name()}
+
+		sourceResult.IP = result.IP
+		sourceResult.Port = result.Port
+		sourceResult.Host = result.Hostname
+
+		raw, _ := json.Marshal(result)
+		sourceResult.Raw = raw
+		results <- sourceResult
 	}
 
 	return zoomeyeResponse
-}
-
-type ZoomEyeRequest struct {
-	Query string
-	Page  int
-}
-
-func convertPortFromValue(value interface{}) int {
-	switch v := value.(type) {
-	case float64:
-		return int(v)
-	case string:
-		parsed, _ := strconv.Atoi(v)
-		return parsed
-	default:
-		return 0
-	}
 }

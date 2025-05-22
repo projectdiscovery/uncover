@@ -80,12 +80,7 @@ func (provider *Provider) GetKeys() Keys {
 	}
 
 	if len(provider.ZoomEye) > 0 {
-		zoomeye := provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
-		parts := strings.Split(zoomeye, ":")
-		keys.ZoomEyeToken = parts[0]
-		if len(parts) == 2 {
-			keys.ZoomEyeHost = parts[1]
-		}
+		keys.ZoomEyeToken = provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
 	}
 
 	if len(provider.Netlas) > 0 {

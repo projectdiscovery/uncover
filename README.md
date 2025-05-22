@@ -42,7 +42,7 @@
   - **[FOFA](https://fofa.info)**
   - **[Hunter](https://hunter.qianxin.com)**
   - **[Quake](https://quake.360.net/quake/#/index)**
-  - **ZoomEye [china](https://zoomeye.org) - [worldwide](https://zoomeye.hk)**
+  - **ZoomEye (https://www.zoomeye.ai)**
   - **[Netlas](https://netlas.io/)**
   - **[CriminalIP](https://www.criminalip.io)**
   - **[PublicWWW](https://publicwww.com)**
@@ -142,7 +142,7 @@ hunter:
   - HUNTER_API_KEY_1
   - HUNTER_API_KEY_2
 zoomeye:
-  - ZOOMEYE_API_KEY_1:zoomeye.hk
+  - ZOOMEYE_API_KEY_1
   - ZOOMEYE_API_KEY_2
 netlas:
   - NETLAS_API_KEY_1
