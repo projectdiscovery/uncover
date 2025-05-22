@@ -94,6 +94,7 @@ func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
+	defer resp.Body.Close()
 
 	zoomeyeResponse := &ZoomEyeResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(zoomeyeResponse); err != nil {
