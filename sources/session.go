@@ -30,6 +30,7 @@ var DefaultRateLimits = map[string]*ratelimit.Options{
 	"google":     {Key: "google", MaxCount: 1, Duration: 3 * time.Second},
 	"odin":       {Key: "odin", MaxCount: 1, Duration: time.Second},
 	"binaryedge": {Key: "binaryedge", MaxCount: 1, Duration: time.Second},
+	"onyphe":     {Key: "onyphe", MaxCount: 1, Duration: time.Second},
 }
 
 // Session handles session agent sessions
