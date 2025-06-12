@@ -92,7 +92,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.Odin, "odin", "od", nil, "search query for odin (example: -odin 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.BinaryEdge, "binaryedge", "be", nil, "search query for binaryedge (example: -binaryedge 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Onyphe, "onyphe", "on", nil, "search query for onyphe (example: -onyphe 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Driftnet, "driftnet", "df", nil, "search query for drfitnet (example: -driftnet 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Driftnet, "driftnet", "df", nil, "search query for driftnet (example: -driftnet 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",

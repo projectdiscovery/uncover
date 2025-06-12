@@ -166,7 +166,7 @@ google:
 onyphe:
   - ONYPHE_API_KEY_1 
   - ONYPHE_API_KEY_2
-drfitnet:
+driftnet:
   - DRIFTNET_API_KEY_1
   - DRIFTNET_API_KEY_2
 ```
