@@ -101,7 +101,7 @@ ENDPOINT_LOOP:
 
 			if queryError != nil {
 				// Driftnet will return 204 if no results are found for a query
-				if resp.StatusCode == http.StatusNoContent {
+				if resp != nil && resp.StatusCode == http.StatusNoContent {
 					// Try the next endpoint
 					continue ENDPOINT_LOOP
 				}
@@ -110,6 +110,7 @@ ENDPOINT_LOOP:
 				results <- sources.Result{Source: agent.Name(), Error: queryError}
 				return
 			}
+			defer resp.Body.Close()
 
 			// Parse the response
 			driftnetResponse := &DriftnetAPIPaginatedResponse{}
@@ -153,12 +154,13 @@ ENDPOINT_LOOP:
 					}
 
 					result := sources.Result{Source: agent.Name(), IP: ip, Port: portAsInt}
-					result.Raw, _ = json.Marshal(result)
 
 					// Add the host if we have it
 					if len(host) > 0 {
 						result.Host = host
 					}
+
+					result.Raw, _ = json.Marshal(result)
 
 					results <- result
 					// If we reported a result we add this to the count
@@ -214,7 +216,7 @@ func (agent *Agent) queryIPCIDR(session *sources.Session, driftnetRequest *Drift
 
 		if queryError != nil {
 			// Driftnet will return 204 if no results are found for a query
-			if resp.StatusCode == http.StatusNoContent {
+			if resp != nil && resp.StatusCode == http.StatusNoContent {
 				// We might have more CIDRs to search
 				continue
 			}
@@ -222,6 +224,7 @@ func (agent *Agent) queryIPCIDR(session *sources.Session, driftnetRequest *Drift
 			results <- sources.Result{Source: agent.Name(), Error: queryError}
 			return
 		}
+		defer resp.Body.Close()
 
 		driftnetResponse := &DriftnetAPIOpenIPPortResponse{}
 		if err := json.NewDecoder(resp.Body).Decode(driftnetResponse); err != nil {
