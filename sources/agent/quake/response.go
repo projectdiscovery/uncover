@@ -36,6 +36,8 @@ type responseData struct {
 		ResponseHash string `json:"response_hash"`
 		Dns          struct {
 			A           []string `json:"a"`
+			Cname       []string `json:"cname"`
+			AAAA        []string `json:"aaaa"`
 			SupportIpv6 bool     `json:"support_ipv6"`
 		} `json:"dns,omitempty"`
 		Name     string `json:"name"`

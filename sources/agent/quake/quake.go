@@ -39,19 +39,18 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	}
 	go func(pageSize int) {
 		defer close(results)
-		numberOfResults := 0
+		count := 0
 		for {
 			quakeRequest := &Request{
 				Query:       query.Query,
 				Size:        pageSize,
-				Start:       numberOfResults,
+				Start:       count,
 				IgnoreCache: true,
 				Latest:      true,
 				Exclude: []string{
 					"service.cert",
 					"service.response",
 					"service.http.body",
-					"service.http.favicon.data",
 				},
 			}
 			quakeResponse := agent.query(URL, session, quakeRequest, results)
@@ -59,13 +58,13 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 
-			numberOfResults += len(quakeResponse.Data)
-			gologger.Debug().Msgf("Querying quake for %s,numberOfResults:%d", query.Query, numberOfResults)
-			if numberOfResults >= query.Limit || len(quakeResponse.Data) == 0 {
+			count += len(quakeResponse.Data)
+			gologger.Debug().Msgf("Querying quake for %s,count:%d", query.Query, count)
+			if count >= query.Limit || len(quakeResponse.Data) == 0 {
 				break
 			}
 			// early exit without more results
-			if quakeResponse.Meta.Pagination.Count > 0 && numberOfResults >= quakeResponse.Meta.Pagination.Total {
+			if quakeResponse.Meta.Pagination.Count > 0 && count >= quakeResponse.Meta.Pagination.Total {
 				break
 			}
 			time.Sleep(time.Second * 1)
@@ -112,6 +111,11 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 		if len(quakeResult.Service.Http.HttpLoadUrl) > 0 {
 			urlStr = quakeResult.Service.Http.HttpLoadUrl[0]
 		}
+		var imageURL string
+		if len(quakeResult.Images) > 0 {
+			imageURL = quakeResult.Images[0].S3Url
+		}
+
 		result := sources.Result{
 			Source:          agent.Name(),
 			IP:              quakeResult.Ip,
@@ -126,12 +130,26 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 			City:            quakeResult.Location.CityCn,
 			Country:         quakeResult.Location.CountryCn,
 			Asn:             strconv.Itoa(quakeResult.Asn),
-			Location:        "",
 			ServiceProvider: "",
-			Fingerprints:    strings.Join(appNames, ","),
+			Fingerprints:    strings.ToLower(strings.Join(appNames, ",")),
 			Banner:          "",
 			ServiceName:     quakeResult.Service.Name,
 			StatusCode:      quakeResult.Service.Http.StatusCode,
+			Honeypot:        0,
+			FaviconURL:      quakeResult.Service.Http.Favicon.S3Url,
+			FaviconHash:     quakeResult.Service.Http.Favicon.Hash,
+			ResponseHeaders: quakeResult.Service.Http.ResponseHeaders,
+			Server:          quakeResult.Service.Http.Server,
+			Org:             quakeResult.Org,
+			ISP:             quakeResult.Location.Isp,
+			ImageURL:        imageURL,
+			ICPLicence:      quakeResult.Service.Http.Icp.MainLicence.Licence,
+			ICPUnit:         quakeResult.Service.Http.Icp.MainLicence.Unit,
+			DNSResp: sources.DNSResp{
+				Cname: quakeResult.Service.Dns.Cname,
+				A:     quakeResult.Service.Dns.A,
+				AAAA:  quakeResult.Service.Dns.AAAA,
+			},
 		}
 
 		results <- result

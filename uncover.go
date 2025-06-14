@@ -4,12 +4,7 @@ import (
 	"context"
 	"time"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/projectdiscovery/gologger"
-	errorutil "github.com/projectdiscovery/utils/errors"
-	stringsutil "github.com/projectdiscovery/utils/strings"
-
 	"github.com/projectdiscovery/uncover/sources"
 	"github.com/projectdiscovery/uncover/sources/agent/binaryedge"
 	"github.com/projectdiscovery/uncover/sources/agent/censys"
@@ -25,6 +20,9 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/shodan"
 	"github.com/projectdiscovery/uncover/sources/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/sources/agent/zoomeye"
+	errorutil "github.com/projectdiscovery/utils/errors"
+	stringsutil "github.com/projectdiscovery/utils/strings"
+	"golang.org/x/sync/errgroup"
 )
 
 var DefaultChannelBuffSize = 32

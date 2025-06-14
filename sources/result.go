@@ -6,6 +6,11 @@ import (
 	"net"
 )
 
+type DNSResp struct {
+	Cname []string `json:"cname"`
+	A     []string `json:"a"`
+	AAAA  []string `json:"aaaa"`
+}
 type Result struct {
 	Timestamp       int64  `json:"timestamp"`
 	Source          string `json:"source"`
@@ -29,6 +34,17 @@ type Result struct {
 	ServiceName     string `json:"service_name"`
 	StatusCode      int    `json:"status_code"`
 	Honeypot        int    `json:"honeypot"`
+	//0614
+	FaviconURL      string  `json:"favicon_url"`
+	FaviconHash     string  `json:"favicon_hash"`
+	ResponseHeaders string  `json:"response_headers"`
+	Server          string  `json:"server"`
+	Org             string  `json:"org"`
+	ISP             string  `json:"isp"`
+	ImageURL        string  `json:"image_url"`
+	ICPLicence      string  `json:"icp_licence"` // ICP 备案号
+	ICPUnit         string  `json:"icp_unit"`    // ICP 备案单位
+	DNSResp         DNSResp `json:"dns_resp"`    // DNS 解析结果
 }
 
 func (result *Result) IpPort() string {
