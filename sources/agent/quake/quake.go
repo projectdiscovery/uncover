@@ -121,6 +121,7 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 			IP:              quakeResult.Ip,
 			Port:            quakeResult.Port,
 			Host:            quakeResult.Hostname,
+			
 			Url:             urlStr,
 			Raw:             raw,
 			HtmlTitle:       quakeResult.Service.Http.Title,
