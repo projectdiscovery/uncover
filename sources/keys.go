@@ -19,6 +19,7 @@ type Keys struct {
 	OdinToken       string
 	BinaryEdgeToken string
 	OnypheKey       string
+	DriftnetToken   string
 }
 
 func (keys Keys) Empty() bool {
@@ -39,5 +40,6 @@ func (keys Keys) Empty() bool {
 		keys.GoogleCX == "" &&
 		keys.OdinToken == "" &&
 		keys.BinaryEdgeToken == "" &&
-		keys.OnypheKey == ""
+		keys.OnypheKey == "" &&
+		keys.DriftnetToken == ""
 }
