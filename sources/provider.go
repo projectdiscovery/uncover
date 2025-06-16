@@ -141,6 +141,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.CriminalIP = appendIfExists(provider.CriminalIP, "CRIMINALIP_API_KEY")
 	provider.Publicwww = appendIfExists(provider.Publicwww, "PUBLICWWW_API_KEY")
 	provider.HunterHow = appendIfExists(provider.HunterHow, "HUNTERHOW_API_KEY")
+	provider.ZoomEye = appendIfExists(provider.ZoomEye, "ZOOMEYE_API_KEY")
 
 	appendIfAllExists := func(arr []string, env1 string, env2 string) []string {
 		if val1, ok := os.LookupEnv(env1); ok {
@@ -152,7 +153,6 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 		}
 		return arr
 	}
-	provider.ZoomEye = appendIfAllExists(provider.ZoomEye, "ZOOMEYE_API_KEY", "ZOOMEYE_HOST")
 	provider.Fofa = appendIfAllExists(provider.Fofa, "FOFA_EMAIL", "FOFA_KEY")
 	provider.Censys = appendIfAllExists(provider.Censys, "CENSYS_API_ID", "CENSYS_API_SECRET")
 	provider.Google = appendIfAllExists(provider.Google, "GOOGLE_API_KEY", "GOOGLE_API_CX")
