@@ -35,6 +35,7 @@ type Provider struct {
 	Odin       []string `yaml:"odin"`
 	BinaryEdge []string `yaml:"binaryedge"`
 	Onyphe     []string `yaml:"onyphe"`
+	Driftnet   []string `yaml:"driftnet"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -120,6 +121,9 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.Onyphe) > 0 {
 		keys.OnypheKey = provider.Onyphe[rand.Intn(len(provider.Onyphe))]
 	}
+	if len(provider.Driftnet) > 0 {
+		keys.DriftnetToken = provider.Driftnet[rand.Intn(len(provider.Driftnet))]
+	}
 
 	return keys
 }
@@ -150,6 +154,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.CriminalIP = appendIfExists(provider.CriminalIP, "CRIMINALIP_API_KEY")
 	provider.Publicwww = appendIfExists(provider.Publicwww, "PUBLICWWW_API_KEY")
 	provider.HunterHow = appendIfExists(provider.HunterHow, "HUNTERHOW_API_KEY")
+	provider.Driftnet = appendIfExists(provider.Driftnet, "DRIFTNET_API_KEY")
 
 	appendIfAllExists := func(arr []string, env1 string, env2 string) []string {
 		if val1, ok := os.LookupEnv(env1); ok {
@@ -187,6 +192,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Odin) > 0,
 		len(provider.BinaryEdge) > 0,
 		len(provider.Onyphe) > 0,
+		len(provider.Driftnet) > 0,
 	)
 }
 
