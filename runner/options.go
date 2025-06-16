@@ -45,6 +45,7 @@ type Options struct {
 	RateLimit            int
 	RateLimitMinute      int
 	Retries              int
+	Proxy                string
 	Shodan               goflags.StringSlice
 	ShodanIdb            goflags.StringSlice
 	Fofa                 goflags.StringSlice
@@ -102,6 +103,7 @@ func ParseOptions() *Options {
 		flagSet.IntVarP(&options.RateLimit, "rate-limit", "rl", 0, "maximum number of http requests to send per second"),
 		flagSet.IntVarP(&options.RateLimitMinute, "rate-limit-minute", "rlm", 0, "maximum number of requests to send per minute"),
 		flagSet.IntVar(&options.Retries, "retry", 2, "number of times to retry a failed request"),
+		flagSet.StringVar(&options.Proxy, "proxy", "", "http proxy to use with uncover"),
 	)
 
 	flagSet.CreateGroup("update", "Update",
