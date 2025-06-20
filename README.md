@@ -42,13 +42,14 @@
   - **[FOFA](https://fofa.info)**
   - **[Hunter](https://hunter.qianxin.com)**
   - **[Quake](https://quake.360.net/quake/#/index)**
-  - **ZoomEye [china](https://zoomeye.org) - [worldwide](https://zoomeye.hk)**
+  - **ZoomEye (https://www.zoomeye.ai)**
   - **[Netlas](https://netlas.io/)**
   - **[CriminalIP](https://www.criminalip.io)**
   - **[PublicWWW](https://publicwww.com)**
   - **[HunterHow](https://hunter.how)**
   - **[Google](https://www.google.com)**
   - **[Onyphe](https://www.onyphe.io/)**
+  - **[Driftnet](https://driftnet.io)**
 - Multiple API key input support
 - Automatic API key randomization
 - **stdin** / **stdout** support for input
@@ -76,7 +77,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google,driftnet) (default shodan)
    -asq, -awesome-search-queries string[]  use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')
 
 SEARCH-ENGINE:
@@ -93,6 +94,7 @@ SEARCH-ENGINE:
    -hh, -hunterhow string[]   search query for hunterhow (example: -hunterhow 'query.txt')
    -gg, -google string[]       search query for google (example: -google 'query.txt')
    -on, -onyphe string[]      search query for onyphe (example: -onyphe 'query.txt')
+   -df, -driftnet string[]    search query for driftnet (example: -driftnet 'query.txt')
 
 CONFIG:
    -pc, -provider string         provider configuration file (default "$CONFIG/uncover/provider-config.yaml")
@@ -101,6 +103,7 @@ CONFIG:
    -rl, -rate-limit int          maximum number of http requests to send per second
    -rlm, -rate-limit-minute int  maximum number of requests to send per minute
    -retry int                    number of times to retry a failed request (default 2)
+   -proxy string                 http proxy to use with uncover
 
 OUTPUT:
    -o, -output string  output file to write found results
@@ -144,7 +147,7 @@ hunter:
   - HUNTER_API_KEY_1
   - HUNTER_API_KEY_2
 zoomeye:
-  - ZOOMEYE_API_KEY_1:zoomeye.hk
+  - ZOOMEYE_API_KEY_1
   - ZOOMEYE_API_KEY_2
 netlas:
   - NETLAS_API_KEY_1
@@ -164,6 +167,9 @@ google:
 onyphe:
   - ONYPHE_API_KEY_1 
   - ONYPHE_API_KEY_2
+driftnet:
+  - DRIFTNET_API_KEY_1
+  - DRIFTNET_API_KEY_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -186,10 +192,10 @@ export HUNTERHOW_API_KEY=xxx
 export GOOGLE_API_KEY=xxx
 export GOOGLE_API_CX=xxx
 export ONYPHE_API_KEY=xxx
+export DRIFTNET_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), ZoomEye [china](https://api.zoomeye.org) - [worldwide](https://api.zoomeye.hk), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create) and [Onyphe](https://search.onyphe.io/signup)
-
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), ZoomEye [china](https://api.zoomeye.org) - [worldwide](https://api.zoomeye.hk), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup) and [Driftnet](https://driftnet.io/auth?state=signup).
 
 ### ZoomEye API
 
@@ -276,7 +282,7 @@ uncover -q dorks.txt
 **uncover** supports multiple search engine, as default **shodan** is used, `-e` flag can be used to run same query against any or all search engines.
 
 ```console
-echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas,criminalip
+echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas,criminalip,driftnet
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
@@ -308,7 +314,7 @@ echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas,criminalip
 
 
 ```console
-uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira' -zoomeye 'app:"Atlassian JIRA"' -netlas 'jira' -criminalip 'Jira'
+uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira' -zoomeye 'app:"Atlassian JIRA"' -netlas 'jira' -criminalip 'Jira' -driftnet 'field=product-tag:jira'
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
@@ -372,6 +378,42 @@ echo 51.83.59.99/24 | uncover
 51.83.59.3:465
 51.83.59.3:587
 51.83.59.3:993
+```
+
+### Open Ports for **IP/CIDR**
+
+**uncover** supports using [driftnet](https://driftnet.io) API for a fast lookup of open ports for given IP/CIDR input.
+
+```console
+echo 8.8.8.8/20 | uncover -e driftnet
+
+  __  ______  _________ _   _____  _____
+ / / / / __ \/ ___/ __ \ | / / _ \/ ___/
+/ /_/ / / / / /__/ /_/ / |/ /  __/ /
+\__,_/_/ /_/\___/\____/|___/\___/_/ v0.0.9
+
+
+    projectdiscovery.io
+
+[WRN] Use with caution. You are responsible for your actions
+[WRN] Developers assume no liability and are not responsible for any misuse or damage.
+[WRN] By using uncover, you also agree to the terms of the APIs used.
+
+...
+8.8.4.4:443
+8.8.4.4:53
+8.8.4.4:853
+8.8.6.29:443
+8.8.6.40:443
+8.8.6.70:443
+8.8.6.94:443
+8.8.11.1:22
+8.8.11.253:22
+8.8.11.64:443
+8.8.8.8:443
+8.8.8.8:53
+8.8.8.8:853
+...
 ```
 
 ### Field Format

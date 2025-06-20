@@ -10,6 +10,7 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/binaryedge"
 	"github.com/projectdiscovery/uncover/sources/agent/censys"
 	"github.com/projectdiscovery/uncover/sources/agent/criminalip"
+	"github.com/projectdiscovery/uncover/sources/agent/driftnet"
 	"github.com/projectdiscovery/uncover/sources/agent/fofa"
 	"github.com/projectdiscovery/uncover/sources/agent/google"
 	"github.com/projectdiscovery/uncover/sources/agent/hunter"
@@ -39,6 +40,7 @@ type Options struct {
 	// ratelimit is not available in DefaultRateLimits
 	RateLimit     uint          // default 30 req
 	RateLimitUnit time.Duration // default unit
+	Proxy         string        // http proxy to use with uncover
 }
 
 // Service handler of all uncover Agents
@@ -85,6 +87,8 @@ func New(opts *Options) (*Service, error) {
 			s.Agents = append(s.Agents, &binaryedge.Agent{})
 		case "onyphe":
 			s.Agents = append(s.Agents, &onyphe.Agent{})
+		case "driftnet":
+			s.Agents = append(s.Agents, &driftnet.Agent{})
 		}
 	}
 	s.Provider = sources.NewProvider()
@@ -98,7 +102,7 @@ func New(opts *Options) (*Service, error) {
 	}
 
 	var err error
-	s.Session, err = sources.NewSession(&s.Keys, opts.MaxRetry, opts.Timeout, 10, opts.Agents, opts.RateLimitUnit)
+	s.Session, err = sources.NewSession(&s.Keys, opts.MaxRetry, opts.Timeout, 10, opts.Agents, opts.RateLimitUnit, opts.Proxy)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +193,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 // AllAgents returns all supported uncover Agents
 func (s *Service) AllAgents() []string {
 	return []string{
-		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe",
+		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet",
 	}
 }
 
