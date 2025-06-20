@@ -42,7 +42,7 @@ type Session struct {
 	RateLimits *ratelimit.MultiLimiter
 }
 
-func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, duration time.Duration) (*Session, error) {
+func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, duration time.Duration, proxy string) (*Session, error) {
 	Transport := &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 100,
@@ -50,7 +50,14 @@ func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, 
 			InsecureSkipVerify: true,
 		},
 		ResponseHeaderTimeout: time.Duration(timeout) * time.Second,
-		Proxy:                 http.ProxyFromEnvironment,
+		Proxy: func(req *http.Request) (*url.URL, error) {
+			if proxy != "" {
+				if proxyURL, err := url.Parse(proxy); err == nil {
+					return http.ProxyURL(proxyURL)(req)
+				}
+			}
+			return http.ProxyFromEnvironment(req)
+		},
 	}
 
 	httpclient := &http.Client{
