@@ -40,6 +40,7 @@ type Options struct {
 	// ratelimit is not available in DefaultRateLimits
 	RateLimit     uint          // default 30 req
 	RateLimitUnit time.Duration // default unit
+	Proxy         string        // http proxy to use with uncover
 }
 
 // Service handler of all uncover Agents
@@ -101,7 +102,7 @@ func New(opts *Options) (*Service, error) {
 	}
 
 	var err error
-	s.Session, err = sources.NewSession(&s.Keys, opts.MaxRetry, opts.Timeout, 10, opts.Agents, opts.RateLimitUnit)
+	s.Session, err = sources.NewSession(&s.Keys, opts.MaxRetry, opts.Timeout, 10, opts.Agents, opts.RateLimitUnit, opts.Proxy)
 	if err != nil {
 		return nil, err
 	}

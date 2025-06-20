@@ -103,6 +103,7 @@ CONFIG:
    -rl, -rate-limit int          maximum number of http requests to send per second
    -rlm, -rate-limit-minute int  maximum number of requests to send per minute
    -retry int                    number of times to retry a failed request (default 2)
+   -proxy string                 http proxy to use with uncover
 
 OUTPUT:
    -o, -output string  output file to write found results
