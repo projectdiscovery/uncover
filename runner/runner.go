@@ -32,6 +32,7 @@ func NewRunner(options *Options) (*Runner, error) {
 		Agents:  options.Engine,
 		Queries: options.Query,
 		Limit:   options.Limit,
+		Proxy:   options.Proxy,
 	}
 	service, err := uncover.New(&opts)
 	if err != nil {

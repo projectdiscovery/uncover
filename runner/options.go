@@ -45,6 +45,7 @@ type Options struct {
 	RateLimit            int
 	RateLimitMinute      int
 	Retries              int
+	Proxy                string
 	Shodan               goflags.StringSlice
 	ShodanIdb            goflags.StringSlice
 	Fofa                 goflags.StringSlice
@@ -60,6 +61,7 @@ type Options struct {
 	Odin                 goflags.StringSlice
 	BinaryEdge           goflags.StringSlice
 	Onyphe               goflags.StringSlice
+	Driftnet             goflags.StringSlice
 	DisableUpdateCheck   bool
 }
 
@@ -71,7 +73,7 @@ func ParseOptions() *Options {
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&options.Query, "query", "q", nil, "search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')", goflags.FileStringSliceOptions),
-		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow,google,odin,binaryedge,onyphe) (default shodan)", goflags.FileNormalizedStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Engine, "engine", "e", nil, "search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow,google,odin,binaryedge,onyphe,driftnet) (default shodan)", goflags.FileNormalizedStringSliceOptions),
 		flagSet.StringSliceVarP(&options.AwesomeSearchQueries, "awesome-search-queries", "asq", nil, "use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')", goflags.FileStringSliceOptions),
 	)
 
@@ -91,6 +93,7 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.Odin, "odin", "od", nil, "search query for odin (example: -odin 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.BinaryEdge, "binaryedge", "be", nil, "search query for binaryedge (example: -binaryedge 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Onyphe, "onyphe", "on", nil, "search query for onyphe (example: -onyphe 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.StringSliceVarP(&options.Driftnet, "driftnet", "df", nil, "search query for driftnet (example: -driftnet 'query.txt')", goflags.FileStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -100,6 +103,7 @@ func ParseOptions() *Options {
 		flagSet.IntVarP(&options.RateLimit, "rate-limit", "rl", 0, "maximum number of http requests to send per second"),
 		flagSet.IntVarP(&options.RateLimitMinute, "rate-limit-minute", "rlm", 0, "maximum number of requests to send per minute"),
 		flagSet.IntVar(&options.Retries, "retry", 2, "number of times to retry a failed request"),
+		flagSet.StringVar(&options.Proxy, "proxy", "", "http proxy to use with uncover"),
 	)
 
 	flagSet.CreateGroup("update", "Update",
@@ -164,7 +168,8 @@ func ParseOptions() *Options {
 		len(options.Google),
 		len(options.Odin),
 		len(options.BinaryEdge),
-		len(options.Onyphe)) {
+		len(options.Onyphe),
+		len(options.Driftnet)) {
 		options.Engine = append(options.Engine, "shodan")
 	}
 
@@ -235,7 +240,8 @@ func (options *Options) validateOptions() error {
 		len(options.Google),
 		len(options.Odin),
 		len(options.BinaryEdge),
-		len(options.Onyphe)) {
+		len(options.Onyphe),
+		len(options.Driftnet)) {
 		return errors.New("no query provided")
 	}
 
@@ -261,7 +267,8 @@ func (options *Options) validateOptions() error {
 		len(options.Google),
 		len(options.Odin),
 		len(options.BinaryEdge),
-		len(options.Onyphe)) {
+		len(options.Onyphe),
+		len(options.Driftnet)) {
 		return errors.New("no engine specified")
 	}
 
@@ -304,6 +311,7 @@ func appendAllQueries(options *Options) {
 	appendQuery(options, "odin", options.Odin...)
 	appendQuery(options, "binaryedge", options.BinaryEdge...)
 	appendQuery(options, "onyphe", options.Onyphe...)
+	appendQuery(options, "driftnet", options.Driftnet...)
 }
 
 func (options *Options) useAwesomeSearchQueries(awesomeSearchQueries []string) error {
