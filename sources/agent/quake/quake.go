@@ -117,11 +117,11 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 		}
 
 		result := sources.Result{
-			Source:          agent.Name(),
-			IP:              quakeResult.Ip,
-			Port:            quakeResult.Port,
-			Host:            quakeResult.Hostname,
-			
+			Source: agent.Name(),
+			IP:     quakeResult.Ip,
+			Port:   quakeResult.Port,
+			Host:   quakeResult.Hostname,
+
 			Url:             urlStr,
 			Raw:             raw,
 			HtmlTitle:       quakeResult.Service.Http.Title,
