@@ -28,9 +28,6 @@ func NewRunner(options *Options) (*Runner, error) {
 	runner := &Runner{options: options}
 	appendAllQueries(options)
 
-	// gologger.Info().Msgf("options.Query: %v", options.Query)
-	// gologger.Info().Msgf("options.NewQuery: %v", options.NewQuery)
-
 	opts := uncover.Options{
 		Agents:     options.Engine,
 		Queries:    options.Query,
@@ -75,6 +72,8 @@ func (r *Runner) Run(ctx context.Context) error {
 		case r.options.Raw:
 			gologger.Verbose().Label(result.Source).Msgf("%s\n", result.RawData())
 			r.outputWriter.WriteString(result.RawData())
+		case r.options.CSV:
+			r.outputWriter.WriteCSVData(result)
 		default:
 			port := fmt.Sprint(result.Port)
 			replacer := strings.NewReplacer(

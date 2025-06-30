@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 
 	lru "github.com/hashicorp/golang-lru"
@@ -15,6 +16,7 @@ type OutputWriter struct {
 	cache   *lru.Cache
 	writers []io.Writer
 	sync.RWMutex
+	headerWritten bool
 }
 
 func NewOutputWriter() (*OutputWriter, error) {
@@ -67,6 +69,74 @@ func (o *OutputWriter) WriteJsonData(data sources.Result) {
 		return
 	}
 	o.Write([]byte(data.JSON()))
+}
+
+
+// WriteCSVData writes the result taken as input in CSV format
+func (o *OutputWriter) WriteCSVData(data sources.Result) {
+    key := fmt.Sprintf("%s:%d", data.IP, data.Port)
+    if o.findDuplicate(key, true) {
+        return
+    }
+
+    // 写入表头（仅第一次）
+    if !o.headerWritten {
+        o.writeCSVHeader()
+        o.headerWritten = true
+    }
+
+    // 构造 CSV 数据行
+    var b strings.Builder
+    _, err := fmt.Fprintf(&b,
+        "%d,%s,%s,%d,%s,%s,%s,%s,%s,%s,%v,%s,%s,%s,%s,%s,%s,%d,%v,%s,%s,%s,%s,%s\n",
+        data.Timestamp,
+        data.Source,
+        data.IP,
+        data.Port,
+        data.Host,
+        data.Url,
+        data.HtmlTitle,
+        data.Domain,
+        data.Province,
+        data.City,
+        data.Country,
+        data.Asn,
+        data.Location,
+        data.ServiceProvider,
+        data.Fingerprints,
+        data.Banner,
+        data.ServiceName,
+        data.StatusCode,
+        data.Honeypot,
+        data.FaviconHash,
+        data.Server,
+        data.Org,
+        data.ISP,
+        data.ICPUnit,
+        // data.DNSResp.String(),
+    )
+    if err != nil {
+        return
+    }
+
+    o.Lock()
+    defer o.Unlock()
+
+    for _, w := range o.writers {
+        _, _ = w.Write([]byte(b.String()))
+    }
+}
+
+// writeCSVHeader writes the header row once
+func (o *OutputWriter) writeCSVHeader() {
+    o.Lock()
+    defer o.Unlock()
+
+    header := "Timestamp,Source,IP,Port,Host,Url,HtmlTitle,Domain,Province,City,Country,Asn,Location,ServiceProvider,Fingerprints,Banner,ServiceName,StatusCode,Honeypot,Server,Org,ISP,ICPUnit\n"
+
+    for _, w := range o.writers {
+        _, _ = w.Write([]byte(header))
+    }
 }
 
 // Close closes the output writers

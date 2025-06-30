@@ -11,6 +11,15 @@ type DNSResp struct {
 	A     []string `json:"a"`
 	AAAA  []string `json:"aaaa"`
 }
+
+func (d *DNSResp) String() string {
+	result, err := json.Marshal(d)
+	if err != nil {
+		return fmt.Sprintf("DNSResp{Error: %v}", err)
+	}
+	return string(result)
+}
+
 type Result struct {
 	Timestamp       int64  `json:"timestamp"`
 	Source          string `json:"source"`
@@ -60,6 +69,11 @@ func (result *Result) RawData() string {
 }
 
 func (result *Result) JSON() string {
+	data, _ := json.Marshal(result)
+	return string(data)
+}
+
+func (result *Result) CSV() string {
 	data, _ := json.Marshal(result)
 	return string(data)
 }
