@@ -31,6 +31,7 @@ type Options struct {
 	Agents     []string // Uncover Agents to use
 	Queries    []string // Queries to pass to Agents
 	NewQueries map[string][]string
+	SaveBody   bool
 	Limit      int
 	MaxRetry   int
 	Timeout    int

@@ -51,9 +51,10 @@ type Result struct {
 	Org             string  `json:"org"`
 	ISP             string  `json:"isp"`
 	ImageURL        string  `json:"image_url"`
-	ICPLicence      string  `json:"icp_licence"` // ICP 备案号
-	ICPUnit         string  `json:"icp_unit"`    // ICP 备案单位
-	DNSResp         DNSResp `json:"dns_resp"`    // DNS 解析结果
+	ICPLicence      string  `json:"icp_licence"`             // ICP 备案号
+	ICPUnit         string  `json:"icp_unit"`                // ICP 备案单位
+	DNSResp         DNSResp `json:"dns_resp"`                // DNS 解析结果
+	ResponseBody    string  `json:"response_body"` // HTTP 响应体
 }
 
 func (result *Result) IpPort() string {

@@ -1,7 +1,5 @@
 package quake
 
-import "time"
-
 type responseData struct {
 	Components []struct {
 		ProductLevel   string   `json:"product_level"`
@@ -86,6 +84,7 @@ type responseData struct {
 				} `json:"iframe,omitempty"`
 			} `json:"link,omitempty"`
 			HttpLoadCount   int           `json:"http_load_count"`
+			Body            string        `json:"body"`
 			MetaKeywords    string        `json:"meta_keywords"`
 			Title           string        `json:"title"`
 			DataSources     int           `json:"data_sources"`
@@ -95,11 +94,11 @@ type responseData struct {
 			HtmlHash        string        `json:"html_hash"`
 			ResponseHeaders string        `json:"response_headers"`
 			Icp             struct {
-				Licence     string    `json:"licence"`
-				UpdateTime  time.Time `json:"update_time"`
-				IsExpired   bool      `json:"is_expired"`
-				LeaderName  string    `json:"leader_name"`
-				Domain      string    `json:"domain"`
+				Licence string `json:"licence"`
+				// UpdateTime  time.Time `json:"update_time"`
+				IsExpired   bool   `json:"is_expired"`
+				LeaderName  string `json:"leader_name"`
+				Domain      string `json:"domain"`
 				MainLicence struct {
 					Licence string `json:"licence"`
 					Unit    string `json:"unit"`
@@ -219,9 +218,9 @@ type responseData struct {
 							FingerprintSha1        string   `json:"fingerprint_sha1"`
 							SpkiSubjectFingerprint string   `json:"spki_subject_fingerprint"`
 							Validity               struct {
-								Length int       `json:"length"`
-								Start  time.Time `json:"start"`
-								End    time.Time `json:"end"`
+								Length int `json:"length"`
+								// Start  time.Time `json:"start"`
+								// End    time.Time `json:"end"`
 							} `json:"validity"`
 							ValidationLevel   string `json:"validation_level"`
 							UnknownExtensions []struct {
@@ -335,10 +334,10 @@ type responseData struct {
 		SceneEn     string    `json:"scene_en"`
 		Radius      float64   `json:"radius"`
 	} `json:"location"`
-	Time   time.Time `json:"time"`
-	Asn    int       `json:"asn"`
-	Id     string    `json:"id"`
-	OsName string    `json:"os_name,omitempty"`
+	// Time   time.Time `json:"time"`
+	Asn    int    `json:"asn"`
+	Id     string `json:"id"`
+	OsName string `json:"os_name,omitempty"`
 }
 
 type pagination struct {

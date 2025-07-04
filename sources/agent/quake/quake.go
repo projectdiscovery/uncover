@@ -13,14 +13,13 @@ import (
 
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover/sources"
-	errorutil "github.com/projectdiscovery/utils/errors"
 )
 
 const (
 	URL = "https://quake.360.net/api/v3/search/quake_service"
 )
 
-var pageSize = 1000
+var pageSize = 100
 
 type Agent struct{}
 
@@ -32,7 +31,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	if session.Keys.QuakeToken == "" {
 		return nil, errors.New("empty quake keys")
 	}
-
 	results := make(chan sources.Result)
 	if query.Limit < pageSize {
 		pageSize = query.Limit
@@ -50,7 +48,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Exclude: []string{
 					"service.cert",
 					"service.response",
-					"service.http.body",
+					// "service.http.body",
 				},
 			}
 			quakeResponse := agent.query(URL, session, quakeRequest, results)
@@ -68,6 +66,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 			time.Sleep(time.Second * 1)
+
 		}
 	}(pageSize)
 
@@ -88,16 +87,8 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 		return nil
 	}
 	if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(quakeResponse); err != nil {
-		errx := errorutil.NewWithErr(err)
-		// quake has different json format for error messages try to unmarshal it in map and print map
-		var errMap map[string]interface{}
-		if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(&errMap); err == nil {
-			errx = errx.Msgf("failed to decode quake response: %v", errMap)
-		} else {
-			errx = errx.Msgf("failed to decode quake response: %s", string(respdata))
-		}
-		fmt.Println(errx)
-		results <- sources.Result{Source: agent.Name(), Error: errx}
+		gologger.Error().Msgf("Failed to decode quake response: %v", err)
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 
@@ -117,11 +108,10 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 		}
 
 		result := sources.Result{
-			Source: agent.Name(),
-			IP:     quakeResult.Ip,
-			Port:   quakeResult.Port,
-			Host:   quakeResult.Hostname,
-
+			Source:          agent.Name(),
+			IP:              quakeResult.Ip,
+			Port:            quakeResult.Port,
+			Host:            quakeResult.Hostname,
 			Url:             urlStr,
 			Raw:             raw,
 			HtmlTitle:       quakeResult.Service.Http.Title,
@@ -151,6 +141,7 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 				A:     quakeResult.Service.Dns.A,
 				AAAA:  quakeResult.Service.Dns.AAAA,
 			},
+			ResponseBody: quakeResult.Service.Http.Body,
 		}
 
 		results <- result
