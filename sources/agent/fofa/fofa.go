@@ -46,6 +46,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Fields: Fields,
 				Size:   Size,
 				Page:   page,
+				Full:   query.Full,
 			}
 			fofaResponse := agent.query(URL, session, fofaRequest, results)
 			if fofaResponse == nil {
