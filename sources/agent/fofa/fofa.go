@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/projectdiscovery/gologger"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -13,10 +15,12 @@ import (
 )
 
 const (
-	URL    = "https://fofa.info/api/v1/search/all?email=%s&key=%s&qbase64=%s&fields=%s&page=%d&size=%d"
-	Fields = "ip,port,host"
-	Size   = 100
+	URL = "https://fofa.info/api/v1/search/all?key=%s&qbase64=%s&fields=%s&page=%d&size=%d&full=%t"
 )
+
+var Size = 100
+
+var Fields = "ip,port,host"
 
 type Agent struct{}
 
@@ -61,7 +65,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 
 func (agent *Agent) queryURL(session *sources.Session, URL string, fofaRequest *FofaRequest) (*http.Response, error) {
 	base64Query := base64.StdEncoding.EncodeToString([]byte(fofaRequest.Query))
-	fofaURL := fmt.Sprintf(URL, session.Keys.FofaEmail, session.Keys.FofaKey, base64Query, Fields, fofaRequest.Page, fofaRequest.Size)
+	fofaURL := fmt.Sprintf(URL, session.Keys.FofaKey, base64Query, Fields, fofaRequest.Page, fofaRequest.Size, fofaRequest.Full)
 	request, err := sources.NewHTTPRequest(http.MethodGet, fofaURL, nil)
 	if err != nil {
 		return nil, err
@@ -79,7 +83,20 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 	fofaResponse := &FofaResponse{}
 
 	if err := json.NewDecoder(resp.Body).Decode(fofaResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		result := sources.Result{Source: agent.Name()}
+		defer func(Body io.ReadCloser) {
+			bodyCloseErr := Body.Close()
+			if bodyCloseErr != nil {
+				gologger.Info().Msgf("response body close error : %v", bodyCloseErr)
+			}
+		}(resp.Body)
+		respBodyData, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil
+		}
+		raw, _ := json.Marshal(respBodyData)
+		result.Raw = raw
+		results <- result
 		return nil
 	}
 	if fofaResponse.Error {
@@ -104,5 +121,5 @@ type FofaRequest struct {
 	Fields string
 	Page   int
 	Size   int
-	Full   string
+	Full   bool
 }

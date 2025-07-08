@@ -41,6 +41,7 @@ type Options struct {
 	RateLimit     uint          // default 30 req
 	RateLimitUnit time.Duration // default unit
 	Proxy         string        // http proxy to use with uncover
+	Full          bool          // (fofa use) default search for data within one year, specify true to search all data
 }
 
 // Service handler of all uncover Agents
