@@ -82,12 +82,11 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 		return nil
 	}
 	fofaResponse := &FofaResponse{}
-
+	RespBodyByBodyBytes, _ := io.ReadAll(resp.Body)
 	if err := json.NewDecoder(resp.Body).Decode(fofaResponse); err != nil {
 		result := sources.Result{Source: agent.Name()}
 		defer func(Body io.ReadCloser) {
-			bodyCloseErr := Body.Close()
-			if bodyCloseErr != nil {
+			if bodyCloseErr := Body.Close(); bodyCloseErr != nil {
 				gologger.Info().Msgf("response body close error : %v", bodyCloseErr)
 			}
 		}(resp.Body)
@@ -95,7 +94,7 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 		if err != nil {
 			return nil
 		}
-		raw, _ := json.Marshal(respBodyData)
+		raw, _ := json.Marshal(RespBodyByBodyBytes)
 		result.Raw = raw
 		results <- result
 		return nil
