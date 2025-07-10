@@ -3,13 +3,12 @@ package fofa
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/projectdiscovery/gologger"
 	"io"
 	"net/http"
 	"strconv"
-
-	"errors"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
@@ -18,7 +17,7 @@ const (
 	URL = "https://fofa.info/api/v1/search/all?key=%s&qbase64=%s&fields=%s&page=%d&size=%d&full=%t"
 )
 
-var Size = 100
+var Size = 20
 
 var Fields = "ip,port,host"
 
@@ -52,12 +51,12 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			if fofaResponse == nil {
 				break
 			}
-			size := fofaResponse.Size
-			if size == 0 || numberOfResults > query.Limit || len(fofaResponse.Results) == 0 || numberOfResults > size {
-				break
-			}
 			numberOfResults += len(fofaResponse.Results)
 			page++
+			size := fofaResponse.Size
+			if size == 0 || numberOfResults >= query.Limit || len(fofaResponse.Results) == 0 || numberOfResults > size {
+				break
+			}
 		}
 	}()
 
@@ -90,10 +89,6 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 				gologger.Info().Msgf("response body close error : %v", bodyCloseErr)
 			}
 		}(resp.Body)
-		respBodyData, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil
-		}
 		raw, _ := json.Marshal(RespBodyByBodyBytes)
 		result.Raw = raw
 		results <- result
