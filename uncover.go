@@ -41,7 +41,12 @@ type Options struct {
 	RateLimit     uint          // default 30 req
 	RateLimitUnit time.Duration // default unit
 	Proxy         string        // http proxy to use with uncover
-	Full          bool          // (fofa use) default search for data within one year, specify true to search all data
+	Full          bool          // Used for fofa query of full data
+	StatusCode    string        // Used for hunter to query the content of a specified status code list
+	PortFilter    bool          // Used for Hunter data filtering
+	IsWeb         int           // Used for Hunter filtering asset types
+	StartTime     string        // Used for hunter filtering start time
+	EndTime       string        // Used for hunter filtering end time
 }
 
 // Service handler of all uncover Agents
@@ -134,8 +139,14 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 				continue agentLabel
 			}
 			ch, err := agent.Query(s.Session, &sources.Query{
-				Query: q,
-				Limit: s.Options.Limit,
+				Query:      q,
+				Limit:      s.Options.Limit,
+				Full:       s.Options.Full,
+				StatusCode: s.Options.StatusCode,
+				PortFilter: s.Options.PortFilter,
+				IsWeb:      s.Options.IsWeb,
+				StartTime:  s.Options.StartTime,
+				EndTime:    s.Options.EndTime,
 			})
 			if err != nil {
 				gologger.Error().Msgf("%s\n", err)
