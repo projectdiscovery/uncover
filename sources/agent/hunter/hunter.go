@@ -5,15 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/projectdiscovery/gologger"
+	"io"
 	"net/http"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
-	URL  = "https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=%d&page_size=%d"
-	Size = 100
+	URL = "https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=%d&page_size=%d&is_web=%d&start_time=%s&end_time=%s"
 )
+
+var Size = 20
 
 type Agent struct{}
 
@@ -35,10 +38,15 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		page := 1
 		for {
 			hunterRequest := &Request{
-				ApiKey:   session.Keys.HunterToken,
-				Search:   query.Query,
-				Page:     page,
-				PageSize: Size,
+				ApiKey:     session.Keys.HunterToken,
+				Search:     query.Query,
+				Page:       page,
+				PageSize:   Size,
+				StatusCode: query.StatusCode,
+				PortFilter: query.PortFilter,
+				IsWeb:      query.IsWeb,
+				StartTime:  query.StartTime,
+				EndTime:    query.EndTime,
 			}
 			hunterResponse := agent.query(URL, session, hunterRequest, results)
 			if hunterResponse == nil {
@@ -66,8 +74,17 @@ func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *R
 	}
 
 	hunterResponse := &Response{}
+	RespBodyByBodyBytes, _ := io.ReadAll(resp.Body)
 	if err := json.NewDecoder(resp.Body).Decode(hunterResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		result := sources.Result{Source: agent.Name()}
+		defer func(Body io.ReadCloser) {
+			if bodyCloseErr := Body.Close(); bodyCloseErr != nil {
+				gologger.Info().Msgf("response body close error : %v", bodyCloseErr)
+			}
+		}(resp.Body)
+		raw, _ := json.Marshal(RespBodyByBodyBytes)
+		result.Raw = raw
+		results <- result
 		return nil
 	}
 	if hunterResponse.Code == http.StatusOK && hunterResponse.Data.Total > 0 {
@@ -87,7 +104,7 @@ func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *R
 
 func (agent *Agent) queryURL(session *sources.Session, URL string, hunterRequest *Request) (*http.Response, error) {
 	base64Query := base64.URLEncoding.EncodeToString([]byte(hunterRequest.Search))
-	hunterURL := fmt.Sprintf(URL, hunterRequest.ApiKey, base64Query, hunterRequest.Page, hunterRequest.PageSize)
+	hunterURL := fmt.Sprintf(URL, hunterRequest.ApiKey, base64Query, hunterRequest.Page, hunterRequest.PageSize, hunterRequest.IsWeb, hunterRequest.StartTime, hunterRequest.EndTime)
 	request, err := sources.NewHTTPRequest(http.MethodGet, hunterURL, nil)
 	if err != nil {
 		return nil, err
