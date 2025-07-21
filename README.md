@@ -195,14 +195,7 @@ export ONYPHE_API_KEY=xxx
 export DRIFTNET_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), ZoomEye [china](https://api.zoomeye.org) - [worldwide](https://api.zoomeye.hk), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup) and [Driftnet](https://driftnet.io/auth?state=signup).
-
-### ZoomEye API
-
- Before conducting any scans, please ensure you are using the correct host to comply with geographical access restrictions of the ZoomEye API:
-
- - **zoomeye.org** is exclusively for users within China.
- - **zoomeye.hk** is for users outside China (this is default if no host provided).
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.ai), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup) and [Driftnet](https://driftnet.io/auth?state=signup).
 
 
 ## Running Uncover
