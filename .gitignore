@@ -1,2 +1,4 @@
-
 provider-config.yaml
+*.md
+uncover
+uncover.exe
