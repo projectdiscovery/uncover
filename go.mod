@@ -3,6 +3,7 @@ module github.com/projectdiscovery/uncover
 go 1.23.0
 
 require (
+	github.com/censys/censys-sdk-go v0.19.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
@@ -63,6 +64,7 @@ require (
 	github.com/dlclark/regexp2 v1.11.4 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
+	github.com/ericlagergren/decimal v0.0.0-20221120152707-495c53812d05 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/gaissmai/bart v0.17.8 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect

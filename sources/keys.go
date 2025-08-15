@@ -2,7 +2,7 @@ package sources
 
 type Keys struct {
 	CensysToken     string
-	CensysSecret    string
+	CensysOrgId     string
 	Shodan          string
 	FofaEmail       string
 	FofaKey         string
@@ -22,7 +22,7 @@ type Keys struct {
 }
 
 func (keys Keys) Empty() bool {
-	return keys.CensysSecret == "" &&
+	return keys.CensysOrgId == "" &&
 		keys.CensysToken == "" &&
 		keys.Shodan == "" &&
 		keys.FofaEmail == "" &&

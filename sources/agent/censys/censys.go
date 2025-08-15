@@ -1,18 +1,18 @@
 package censys
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
 
 	"errors"
 
+	censyssdkgo "github.com/censys/censys-sdk-go"
+	"github.com/censys/censys-sdk-go/models/components"
+	"github.com/censys/censys-sdk-go/models/operations"
 	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
-	URL        = "https://search.censys.io/api/v2/hosts/search?q=%s&per_page=%d&virtual_hosts=INCLUDE"
 	MaxPerPage = 100
 )
 
@@ -23,9 +23,10 @@ func (agent *Agent) Name() string {
 }
 
 func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
-	if session.Keys.CensysToken == "" || session.Keys.CensysSecret == "" {
+	if session.Keys.CensysToken == "" || session.Keys.CensysOrgId == "" {
 		return nil, errors.New("empty censys keys")
 	}
+
 	results := make(chan sources.Result)
 
 	go func() {
@@ -39,76 +40,82 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				PerPage: MaxPerPage,
 				Cursor:  nextCursor,
 			}
-			censysResponse := agent.query(URL, session, censysRequest, results)
+			censysResponse := agent.query(session, censysRequest, results)
 			if censysResponse == nil {
 				break
 			}
-			nextCursor = censysResponse.Results.Links.Next
-			if nextCursor == "" || numberOfResults > query.Limit || len(censysResponse.Results.Hits) == 0 {
+			hasNextCursor := false
+			if censysResponse.ResponseEnvelopeSearchQueryResponse.Result != nil && censysResponse.ResponseEnvelopeSearchQueryResponse.Result.NextPageToken != "" {
+				hasNextCursor = true
+			}
+
+			if hasNextCursor || numberOfResults > query.Limit || len(censysResponse.ResponseEnvelopeSearchQueryResponse.Result.Hits) == 0 {
 				break
 			}
-			numberOfResults += len(censysResponse.Results.Hits)
+			nextCursor = censysResponse.ResponseEnvelopeSearchQueryResponse.Result.NextPageToken
+			numberOfResults += len(censysResponse.ResponseEnvelopeSearchQueryResponse.Result.Hits)
 		}
 	}()
 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string, censysRequest *CensysRequest) (*http.Response, error) {
-	censysURL := fmt.Sprintf(URL, url.QueryEscape(censysRequest.Query), censysRequest.PerPage)
-	if censysRequest.Cursor != "" {
-		censysURL += fmt.Sprintf("&cursor=%s", censysRequest.Cursor)
-	}
-	request, err := sources.NewHTTPRequest(http.MethodGet, censysURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	request.Header.Set("Accept", "application/json")
-	request.SetBasicAuth(session.Keys.CensysToken, session.Keys.CensysSecret)
-	return session.Do(request, agent.Name())
+func (agent *Agent) queryURL(session *sources.Session, censysRequest *CensysRequest) (*operations.V3GlobaldataSearchQueryResponse, error) {
+	ctx := context.Background()
+
+	s := censyssdkgo.New(
+		censyssdkgo.WithOrganizationID(session.Keys.CensysOrgId),
+		censyssdkgo.WithSecurity(session.Keys.CensysToken),
+		censyssdkgo.WithClient(
+			session.Client.HTTPClient,
+		),
+	)
+
+	return s.GlobalData.Search(ctx, operations.V3GlobaldataSearchQueryRequest{
+		SearchQueryInputBody: components.SearchQueryInputBody{
+			PageSize:  censyssdkgo.Int64(int64(censysRequest.PerPage)),
+			Query:     censysRequest.Query,
+			PageToken: &censysRequest.Cursor,
+		},
+	})
+
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, censysRequest *CensysRequest, results chan sources.Result) *CensysResponse {
+func (agent *Agent) query(session *sources.Session, censysRequest *CensysRequest, results chan sources.Result) *operations.V3GlobaldataSearchQueryResponse {
 	// query certificates
-	resp, err := agent.queryURL(session, URL, censysRequest)
+	resp, err := agent.queryURL(session, censysRequest)
 	if err != nil {
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		// httputil.DrainResponseBody(resp)
 		return nil
 	}
 
-	censysResponse := &CensysResponse{}
-	if err := json.NewDecoder(resp.Body).Decode(censysResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
-		return nil
-	}
+	if result := resp.ResponseEnvelopeSearchQueryResponse.Result; result != nil {
+		for _, censysResult := range result.Hits {
 
-	for _, censysResult := range censysResponse.Results.Hits {
-		result := sources.Result{Source: agent.Name()}
-		if ip, ok := censysResult["ip"]; ok {
-			result.IP = ip.(string)
-		}
-		if name, ok := censysResult["name"]; ok {
-			result.Host = name.(string)
-		}
-		if services, ok := censysResult["services"]; ok {
-			for _, serviceData := range services.([]interface{}) {
-				if serviceData, ok := serviceData.(map[string]interface{}); ok {
-					result.Port = int(serviceData["port"].(float64))
-					raw, _ := json.Marshal(censysResult)
-					result.Raw = raw
-					results <- result
+			for _, host := range censysResult.WebpropertyV1.Resource.Endpoints {
+				result := sources.Result{Source: agent.Name()}
+				if host.IP != nil {
+					result.IP = *host.IP
 				}
+				if host.Hostname != nil {
+					result.Host = *host.Hostname
+				}
+				if host.Port != nil {
+					result.Port = *host.Port
+				}
+				if host.HTTP != nil && host.HTTP.URI != nil {
+					result.Url = *host.HTTP.URI
+				}
+				raw, _ := json.Marshal(host)
+				result.Raw = raw
+				results <- result
 			}
-		} else {
-			raw, _ := json.Marshal(censysResult)
-			result.Raw = raw
-			// only ip
-			results <- result
+
 		}
 	}
 
-	return censysResponse
+	return resp
 }
 
 type CensysRequest struct {

@@ -135,8 +135,8 @@ shodan:
   - SHODAN_API_KEY_1
   - SHODAN_API_KEY_2
 censys:
-  - CENSYS_API_ID_1:CENSYS_API_SECRET_1
-  - CENSYS_API_ID_2:CENSYS_API_SECRET_2
+  - CENSYS_API_TOKEN_1:CENSYS_ORGANIZATION_ID_1
+  - CENSYS_API_TOKEN_2:CENSYS_ORGANIZATION_ID_2
 fofa:
   - FOFA_EMAIL_1:FOFA_KEY_1
   - FOFA_EMAIL_2:FOFA_KEY_2
@@ -178,8 +178,8 @@ alternatively you can also set the API key as environment variable in your bash 
 
 ```yaml
 export SHODAN_API_KEY=xxx
-export CENSYS_API_ID=xxx
-export CENSYS_API_SECRET=xxx
+export CENSYS_API_TOKEN=xxx
+export CENSYS_ORGANIZATION_ID=xxx
 export FOFA_EMAIL=xxx
 export FOFA_KEY=xxx
 export QUAKE_TOKEN=xxx
@@ -195,7 +195,7 @@ export ONYPHE_API_KEY=xxx
 export DRIFTNET_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), ZoomEye [china](https://api.zoomeye.org) - [worldwide](https://api.zoomeye.hk), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup) and [Driftnet](https://driftnet.io/auth?state=signup).
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://docs.censys.com/reference/get-started), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), ZoomEye [china](https://api.zoomeye.org) - [worldwide](https://api.zoomeye.hk), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup) and [Driftnet](https://driftnet.io/auth?state=signup).
 
 ### ZoomEye API
 
