@@ -117,7 +117,7 @@ func (s *Session) Do(request *retryablehttp.Request, source string) (*http.Respo
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		requestURL, _ := url.QueryUnescape(request.URL.String())
+		requestURL, _ := url.QueryUnescape(request.String())
 		return resp, fmt.Errorf("unexpected status code %d received from %s", resp.StatusCode, requestURL)
 	}
 	return resp, nil

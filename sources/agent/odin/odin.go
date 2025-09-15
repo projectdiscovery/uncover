@@ -90,7 +90,9 @@ func (agent *Agent) query(session *sources.Session, odinReq *OdinRequest, result
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var odinResp OdinResponse
 	if err := json.NewDecoder(resp.Body).Decode(&odinResp); err != nil {
