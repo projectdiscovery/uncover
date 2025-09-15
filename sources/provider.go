@@ -123,7 +123,6 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.GreyNoise) > 0 {
 		keys.GreyNoiseKey = provider.GreyNoise[rand.Intn(len(provider.GreyNoise))]
 	}
-	gologger.Info().Msgf("DEBUG: In GetKeys, provider.GreyNoise: %v, keys.GreyNoiseKey: %s", provider.GreyNoise, keys.GreyNoiseKey)
 
 	return keys
 }
@@ -174,7 +173,6 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.BinaryEdge = appendIfExists(provider.BinaryEdge, "BINARYEDGE_API_KEY")
 	provider.Onyphe = appendIfExists(provider.Onyphe, "ONYPHE_API_KEY")
 	provider.GreyNoise = appendIfExists(provider.GreyNoise, "GREYNOISE_API_KEY")
-	gologger.Info().Msgf("DEBUG: After appendIfExists, provider.GreyNoise: %v", provider.GreyNoise)
 }
 
 // HasKeys returns true if at least one agent/source has keys
