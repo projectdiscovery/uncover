@@ -31,7 +31,7 @@ type InternetScannerIntelligence struct {
 	Classification string   `json:"classification"`
 	FirstSeen      string   `json:"first_seen"`
 	LastSeen       string   `json:"last_seen"`
-	LastSeenTS     []string `json:"last_seen_timestamp"`
+	LastSeenTS     string   `json:"last_seen_timestamp"`
 	Found          bool     `json:"found"`
 	Actor          string   `json:"actor"`
 	Bot            bool     `json:"bot"`
