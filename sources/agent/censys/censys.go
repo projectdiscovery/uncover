@@ -27,6 +27,15 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		return nil, errors.New("empty censys keys")
 	}
 
+	// Create the Censys SDK client once
+	s := censyssdkgo.New(
+		censyssdkgo.WithOrganizationID(session.Keys.CensysOrgId),
+		censyssdkgo.WithSecurity(session.Keys.CensysToken),
+		censyssdkgo.WithClient(
+			session.Client.HTTPClient,
+		),
+	)
+
 	results := make(chan sources.Result)
 
 	go func() {
@@ -40,7 +49,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				PerPage: MaxPerPage,
 				Cursor:  nextCursor,
 			}
-			censysResponse := agent.query(session, censysRequest, results)
+			censysResponse := agent.query(session, s, censysRequest, results)
 			if censysResponse == nil {
 				break
 			}
@@ -49,7 +58,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				hasNextCursor = true
 			}
 
-			if hasNextCursor || numberOfResults > query.Limit || len(censysResponse.ResponseEnvelopeSearchQueryResponse.Result.Hits) == 0 {
+			if !hasNextCursor || numberOfResults > query.Limit || len(censysResponse.ResponseEnvelopeSearchQueryResponse.Result.Hits) == 0 {
 				break
 			}
 			nextCursor = censysResponse.ResponseEnvelopeSearchQueryResponse.Result.NextPageToken
@@ -60,16 +69,8 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *sources.Session, censysRequest *CensysRequest) (*operations.V3GlobaldataSearchQueryResponse, error) {
+func (agent *Agent) queryURL(s *censyssdkgo.SDK, censysRequest *CensysRequest) (*operations.V3GlobaldataSearchQueryResponse, error) {
 	ctx := context.Background()
-
-	s := censyssdkgo.New(
-		censyssdkgo.WithOrganizationID(session.Keys.CensysOrgId),
-		censyssdkgo.WithSecurity(session.Keys.CensysToken),
-		censyssdkgo.WithClient(
-			session.Client.HTTPClient,
-		),
-	)
 
 	return s.GlobalData.Search(ctx, operations.V3GlobaldataSearchQueryRequest{
 		SearchQueryInputBody: components.SearchQueryInputBody{
@@ -78,12 +79,11 @@ func (agent *Agent) queryURL(session *sources.Session, censysRequest *CensysRequ
 			PageToken: &censysRequest.Cursor,
 		},
 	})
-
 }
 
-func (agent *Agent) query(session *sources.Session, censysRequest *CensysRequest, results chan sources.Result) *operations.V3GlobaldataSearchQueryResponse {
+func (agent *Agent) query(session *sources.Session, s *censyssdkgo.SDK, censysRequest *CensysRequest, results chan sources.Result) *operations.V3GlobaldataSearchQueryResponse {
 	// query certificates
-	resp, err := agent.queryURL(session, censysRequest)
+	resp, err := agent.queryURL(s, censysRequest)
 	if err != nil {
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		// httputil.DrainResponseBody(resp)
