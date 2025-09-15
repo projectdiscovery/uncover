@@ -42,7 +42,7 @@ type InternetScannerIntelligence struct {
 	VPNService     string   `json:"vpn_service"`
 
 	Metadata Metadata `json:"metadata"`
-	Tags     Tags     `json:"tags"`
+	Tags     []Tag    `json:"tags"`
 	RawData  RawData  `json:"raw_data"`
 }
 
@@ -75,7 +75,7 @@ type Metadata struct {
 }
 
 // Tags describes malware/actor classification
-type Tags struct {
+type Tag struct {
 	ID             string   `json:"id"`
 	Slug           string   `json:"slug"`
 	Name           string   `json:"name"`
@@ -107,17 +107,17 @@ type RawData struct {
 	} `json:"hassh"`
 
 	HTTP struct {
-		MD5            string     `json:"md5"`
-		CookieKeys     [][]string `json:"cookie_keys"`
-		RequestAuth    [][]string `json:"request_authorization"`
-		RequestCookies [][]string `json:"request_cookies"`
-		RequestHeader  [][]string `json:"request_header"`
-		Method         [][]string `json:"method"`
-		RequestOrigin  [][]string `json:"request_origin"`
-		Host           [][]string `json:"host"`
-		URI            []string   `json:"uri"`
-		Path           []string   `json:"path"`
-		UserAgent      []string   `json:"useragent"`
+		MD5            string   `json:"md5"`
+		CookieKeys     []string `json:"cookie_keys"`
+		RequestAuth    []string `json:"request_authorization"`
+		RequestCookies []string `json:"request_cookies"`
+		RequestHeader  []string `json:"request_header"`
+		Method         []string `json:"method"`
+		RequestOrigin  []string `json:"request_origin"`
+		Host           []string `json:"host"`
+		URI            []string `json:"uri"`
+		Path           []string `json:"path"`
+		UserAgent      []string `json:"useragent"`
 	} `json:"http"`
 
 	TLS struct {
@@ -126,7 +126,7 @@ type RawData struct {
 	} `json:"tls"`
 
 	SSH struct {
-		Key [][]string `json:"key"`
+		Key []string `json:"key"`
 	} `json:"ssh"`
 
 	Source struct {
