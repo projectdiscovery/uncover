@@ -46,7 +46,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Query:      query.Query,
 				Size:       pageSize,
 				Scroll:     scrollToken,
-				Quick:      false,
 				ExcludeRaw: true,
 			}
 
@@ -112,9 +111,6 @@ func (agent *Agent) query(session *sources.Session, request *Request) (*Response
 	}
 	if request.Scroll != "" {
 		params.Set("scroll", request.Scroll)
-	}
-	if request.Quick {
-		params.Set("quick", "true")
 	}
 	if request.ExcludeRaw {
 		params.Set("exclude_raw", "true")
