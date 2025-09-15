@@ -19,6 +19,7 @@ type Keys struct {
 	BinaryEdgeToken string
 	OnypheKey       string
 	DriftnetToken   string
+	GreyNoiseKey    string
 }
 
 func (keys Keys) Empty() bool {
@@ -39,5 +40,6 @@ func (keys Keys) Empty() bool {
 		keys.OdinToken == "" &&
 		keys.BinaryEdgeToken == "" &&
 		keys.OnypheKey == "" &&
-		keys.DriftnetToken == ""
+		keys.DriftnetToken == "" &&
+		keys.GreyNoiseKey == ""
 }
