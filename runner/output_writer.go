@@ -74,7 +74,7 @@ func (o *OutputWriter) Close() {
 	// Iterate over the writers and close the file writers
 	for _, writer := range o.writers {
 		if fileWriter, ok := writer.(*os.File); ok {
-			fileWriter.Close()
+			_ = fileWriter.Close()
 		}
 	}
 }

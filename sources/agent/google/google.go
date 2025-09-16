@@ -84,7 +84,9 @@ func (agent *Agent) query(session *sources.Session, googleRequest *Request, resu
 			results <- sources.Result{Source: agent.Name(), Error: errGzip}
 			return nil
 		}
-		defer gzipReader.Close()
+		defer func() {
+			_ = gzipReader.Close()
+		}()
 
 		if errDecode := json.NewDecoder(gzipReader).Decode(&apiResponse); errDecode != nil {
 			results <- sources.Result{Source: agent.Name(), Error: errDecode}

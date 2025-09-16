@@ -23,7 +23,9 @@ func (h censysTestcases) Execute() error {
 	}
 	censysToken := fmt.Sprintf(`censys: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(censysToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-censys", "'services.software.vendor=Grafana'")
 	if err != nil {
 		return err
@@ -40,7 +42,9 @@ func (h shodanTestcases) Execute() error {
 	}
 	shodanToken := fmt.Sprintf(`shodan: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(shodanToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-shodan", "'title:\"Grafana\"'")
 	if err != nil {
 		return err
@@ -65,7 +69,9 @@ func (h zoomeyeTestcases) Execute() error {
 	}
 	zoomeyeToken := fmt.Sprintf(`zoomeye: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(zoomeyeToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-zoomeye", "'app:\"Atlassian JIRA\"'")
 	if err != nil {
 		return err
@@ -82,7 +88,9 @@ func (h fofaTestcases) Execute() error {
 	}
 	fofaToken := fmt.Sprintf(`fofa: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(fofaToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-fofa", "'app=Grafana'")
 	if err != nil {
 		return err
@@ -109,7 +117,9 @@ func (h quakeTestcases) Execute() error {
 	}
 	quakeToken := fmt.Sprintf(`quake: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(quakeToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-quake", "'Grafana'")
 	if err != nil {
 		return err
@@ -126,7 +136,9 @@ func (h netlasTestcases) Execute() error {
 	}
 	netlasToken := fmt.Sprintf(`netlas: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(netlasToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-netlas", "'Grafana'")
 	if err != nil {
 		return err
@@ -143,7 +155,9 @@ func (h criminalipTestcases) Execute() error {
 	}
 	criminalipToken := fmt.Sprintf(`criminalip: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(criminalipToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-criminalip", "'Grafana'")
 	if err != nil {
 		return err
@@ -160,7 +174,9 @@ func (h hunterhowTestcases) Execute() error {
 	}
 	hunterhowApiKey := fmt.Sprintf(`hunterhow: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(hunterhowApiKey), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-hunterhow", "'web.body=\"ElasticJob\"'")
 	if err != nil {
 		return err
@@ -199,7 +215,9 @@ func (h googleTestcases) Execute() error {
 	}
 	googleToken := fmt.Sprintf(`google: [%s,%s]`, token, engineId)
 	_ = os.WriteFile(ConfigFile, []byte(googleToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-google", "site:*.hackerone.com")
 	if err != nil {
 		return err
@@ -218,7 +236,9 @@ func (h odinTestcases) Execute() error {
 	if err := os.WriteFile(ConfigFile, []byte(odinToken), 0644); err != nil {
 		return err
 	}
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-odin", "nginx")
 
 	if err != nil {
@@ -237,7 +257,9 @@ func (h binaryedgeTestcases) Execute() error {
 
 	binaryedgeToken := fmt.Sprintf(`binaryedge: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(binaryedgeToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-binaryedge", "1.1.1.1")
 
 	if err != nil {
@@ -256,7 +278,9 @@ func (h onypheTestcases) Execute() error {
 
 	onypheToken := fmt.Sprintf(`onyphe: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(onypheToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() {
+		_ = os.RemoveAll(ConfigFile)
+	}()
 	results, err := testutils.RunUncoverAndGetResults(debug, "-onyphe", "google.com")
 
 	if err != nil {

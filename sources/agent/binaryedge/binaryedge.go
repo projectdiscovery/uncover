@@ -41,7 +41,9 @@ func (agent *Agent) query(session *sources.Session, searchQuery string, results 
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var apiResponse BinaryedgeResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
