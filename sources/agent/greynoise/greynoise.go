@@ -112,11 +112,14 @@ func (agent *Agent) query(session *sources.Session, request *Request) (*Response
 	if request.Scroll != "" {
 		params.Set("scroll", request.Scroll)
 	}
+	path := "/v3/gnql"
 	if request.ExcludeRaw {
-		params.Set("exclude_raw", "true")
+		path = "/v3/gnql/metadata"
 	}
 
-	fullURL := URL
+	baseURL, _ := url.Parse(URL)
+	baseURL.Path = path
+	fullURL := baseURL.String()
 	if enc := params.Encode(); enc != "" {
 		fullURL = fullURL + "?" + enc
 	}
