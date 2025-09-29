@@ -1,5 +1,7 @@
 package greynoise
 
+import "encoding/json"
+
 // Response represents the GNQL API response
 type Response struct {
 	RequestMetadata RequestMetadata `json:"request_metadata"`
@@ -31,7 +33,7 @@ type InternetScannerIntelligence struct {
 	Classification string   `json:"classification"`
 	FirstSeen      string   `json:"first_seen"`
 	LastSeen       string   `json:"last_seen"`
-	LastSeenTS     string   `json:"last_seen_timestamp"`
+	LastSeenTS     []string `json:"last_seen_timestamp,omitempty"`
 	Found          bool     `json:"found"`
 	Actor          string   `json:"actor"`
 	Bot            bool     `json:"bot"`
@@ -41,9 +43,9 @@ type InternetScannerIntelligence struct {
 	VPN            bool     `json:"vpn"`
 	VPNService     string   `json:"vpn_service"`
 
-	Metadata Metadata `json:"metadata"`
-	Tags     []Tag    `json:"tags"`
-	RawData  RawData  `json:"raw_data"`
+	Metadata Metadata        `json:"metadata"`
+	Tags     json.RawMessage `json:"tags,omitempty"`
+	RawData  RawData         `json:"raw_data"`
 }
 
 // Metadata contains host/network info
@@ -107,17 +109,17 @@ type RawData struct {
 	} `json:"hassh"`
 
 	HTTP struct {
-		MD5            string   `json:"md5"`
-		CookieKeys     []string `json:"cookie_keys"`
-		RequestAuth    []string `json:"request_authorization"`
-		RequestCookies []string `json:"request_cookies"`
-		RequestHeader  []string `json:"request_header"`
-		Method         []string `json:"method"`
-		RequestOrigin  []string `json:"request_origin"`
-		Host           []string `json:"host"`
-		URI            []string `json:"uri"`
-		Path           []string `json:"path"`
-		UserAgent      []string `json:"useragent"`
+		MD5            string     `json:"md5"`
+		CookieKeys     [][]string `json:"cookie_keys"`
+		RequestAuth    [][]string `json:"request_authorization"`
+		RequestCookies [][]string `json:"request_cookies"`
+		RequestHeader  [][]string `json:"request_header"`
+		Method         [][]string `json:"method"`
+		RequestOrigin  [][]string `json:"request_origin"`
+		Host           [][]string `json:"host"`
+		URI            []string   `json:"uri"`
+		Path           []string   `json:"path"`
+		UserAgent      []string   `json:"useragent"`
 	} `json:"http"`
 
 	TLS struct {
@@ -126,7 +128,7 @@ type RawData struct {
 	} `json:"tls"`
 
 	SSH struct {
-		Key []string `json:"key"`
+		Key [][]string `json:"key"`
 	} `json:"ssh"`
 
 	Source struct {

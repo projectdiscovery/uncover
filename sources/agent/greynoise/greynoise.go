@@ -5,18 +5,33 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 
+	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
 	URL = "https://api.greynoise.io/v3/gnql"
 )
+
+var (
+	ErrUnauthorized = errors.New("unauthorized: invalid or missing API key")
+	ErrPlanLimited  = errors.New("forbidden: plan limitations (GNQL not enabled for this plan)")
+	ErrRateLimited  = errors.New("rate limited: too many requests")
+)
+
+func retryAfterHint(h http.Header) string {
+	ra := h.Get("Retry-After")
+	if strings.TrimSpace(ra) == "" {
+		return ""
+	}
+	return ra
+}
 
 type Agent struct{}
 
@@ -46,7 +61,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Query:      query.Query,
 				Size:       pageSize,
 				Scroll:     scrollToken,
-				ExcludeRaw: true,
+				ExcludeRaw: false,
 			}
 
 			apiResponse, err := agent.query(session, req)
@@ -59,22 +74,60 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			}
 
 			for _, item := range apiResponse.Data {
-				host := firstNonEmpty(
-					item.InternetScannerIntelligence.Metadata.Domain,
-					item.InternetScannerIntelligence.Metadata.RDNS,
-				)
+				hosts := collectHostnamesFromItem(item)
+				ports := collectPortsFromItem(item)
 
-				r := sources.Result{
-					Source: agent.Name(),
-					IP:     item.IP,
-					Host:   host,
+				emit := func(h string, p int) {
+					r := sources.Result{
+						Source: agent.Name(),
+						IP:     item.IP,
+						Host:   h,
+						Port:   p,
+					}
+					if raw, err := json.Marshal(item); err == nil {
+						r.Raw = raw
+					}
+					results <- r
+					total++
 				}
-				if raw, err := json.Marshal(item); err == nil {
-					r.Raw = raw
-				}
-				results <- r
 
-				total++
+				switch {
+				case len(hosts) == 0 && len(ports) == 0:
+					emit("", 0)
+
+				case len(hosts) == 0 && len(ports) > 0:
+					for _, p := range ports {
+						emit("", p)
+						if query.Limit > 0 && total >= query.Limit {
+							done = true
+							break
+						}
+					}
+
+				case len(hosts) > 0 && len(ports) == 0:
+					for _, h := range hosts {
+						emit(h, 0)
+						if query.Limit > 0 && total >= query.Limit {
+							done = true
+							break
+						}
+					}
+
+				default:
+					for _, h := range hosts {
+						for _, p := range ports {
+							emit(h, p)
+							if query.Limit > 0 && total >= query.Limit {
+								done = true
+								break
+							}
+						}
+						if done {
+							break
+						}
+					}
+				}
+
 				if query.Limit > 0 && total >= query.Limit {
 					done = true
 					break
@@ -142,24 +195,35 @@ func (agent *Agent) query(session *sources.Session, request *Request) (*Response
 		b, _ := io.ReadAll(resp.Body)
 		msg := strings.TrimSpace(string(b))
 
-		if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusNotFound {
-			return nil, fmt.Errorf(
-				"GreyNoise GNQL request failed: status=%d. Your API key may not include GNQL access (Enterprise key required). body=%s",
-				resp.StatusCode, msg,
-			)
+		switch resp.StatusCode {
+		case http.StatusUnauthorized:
+			return nil, fmt.Errorf("%w (status=%d): %s", ErrUnauthorized, resp.StatusCode, msg)
+		case http.StatusForbidden:
+			return nil, fmt.Errorf("%w (status=%d): %s", ErrPlanLimited, resp.StatusCode, msg)
+		case http.StatusNotFound:
+			return nil, fmt.Errorf("not found (status=%d): %s", resp.StatusCode, msg)
+		case http.StatusTooManyRequests:
+			ra := retryAfterHint(resp.Header)
+			if ra != "" {
+				return nil, fmt.Errorf("%w (status=%d, retry-after=%s): %s", ErrRateLimited, resp.StatusCode, ra, msg)
+			}
+			return nil, fmt.Errorf("%w (status=%d): %s", ErrRateLimited, resp.StatusCode, msg)
+		default:
+			if resp.StatusCode >= 500 {
+				return nil, fmt.Errorf("server error (status=%d): %s", resp.StatusCode, msg)
+			}
+			return nil, fmt.Errorf("request failed (status=%d): %s", resp.StatusCode, msg)
 		}
-
-		return nil, fmt.Errorf("greynoise GNQL request failed: status=%d body=%s", resp.StatusCode, msg)
 	}
 
 	var apiResponse Response
 	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
-		fmt.Fprintf(os.Stderr, "DEBUG: GreyNoise decode error status=%d: %v\n", resp.StatusCode, err)
+		gologger.Error().Msgf("greynoise decode error (status=%d): %v", resp.StatusCode, err)
 		return nil, err
 	}
 
-	fmt.Fprintf(os.Stderr,
-		"DEBUG: GNQL count=%d complete=%v scroll=%s data=%d msg=%s\n",
+	gologger.Debug().Msgf(
+		"GNQL count=%d complete=%v scroll=%s data=%d msg=%s",
 		apiResponse.RequestMetadata.Count,
 		apiResponse.RequestMetadata.Complete,
 		short(apiResponse.RequestMetadata.Scroll, 12),
@@ -170,13 +234,89 @@ func (agent *Agent) query(session *sources.Session, request *Request) (*Response
 	return &apiResponse, nil
 }
 
-func firstNonEmpty(vs ...string) string {
-	for _, v := range vs {
-		if strings.TrimSpace(v) != "" {
-			return v
+func collectPortsFromItem(it GNQLItem) []int {
+	ports := make(map[int]struct{})
+
+	for _, s := range it.InternetScannerIntelligence.RawData.Scan {
+		if s.Port > 0 {
+			ports[s.Port] = struct{}{}
 		}
 	}
-	return ""
+
+	for _, j := range it.InternetScannerIntelligence.RawData.JA3 {
+		if j.Port > 0 {
+			ports[j.Port] = struct{}{}
+		}
+	}
+
+	for _, h := range it.InternetScannerIntelligence.RawData.HASSH {
+		if h.Port > 0 {
+			ports[h.Port] = struct{}{}
+		}
+	}
+
+	for _, host := range flattenHTTPHosts(it.InternetScannerIntelligence.RawData.HTTP.Host) {
+		if i := strings.LastIndex(host, ":"); i > 0 && i < len(host)-1 {
+			if p, err := strconv.Atoi(host[i+1:]); err == nil && p > 0 {
+				ports[p] = struct{}{}
+			}
+		}
+	}
+
+	out := make([]int, 0, len(ports))
+	for p := range ports {
+		out = append(out, p)
+	}
+	return out
+}
+
+func collectHostnamesFromItem(it GNQLItem) []string {
+	uniq := make(map[string]struct{})
+
+	add := func(h string) {
+		h = strings.TrimSpace(strings.ToLower(h))
+		if h == "" {
+			return
+		}
+		if i := strings.LastIndex(h, ":"); i > 0 && i < len(h)-1 {
+			if !(strings.HasPrefix(h, "[") && strings.Contains(h, "]")) {
+				h = h[:i]
+			}
+		}
+		if net.ParseIP(h) != nil {
+			return
+		}
+		h = strings.TrimSuffix(h, ".")
+		if h == "" {
+			return
+		}
+		uniq[h] = struct{}{}
+	}
+
+	add(it.InternetScannerIntelligence.Metadata.Domain)
+	add(it.InternetScannerIntelligence.Metadata.RDNS)
+	add(it.InternetScannerIntelligence.Metadata.RDNSParent)
+
+	for _, h := range flattenHTTPHosts(it.InternetScannerIntelligence.RawData.HTTP.Host) {
+		add(h)
+	}
+
+	out := make([]string, 0, len(uniq))
+	for h := range uniq {
+		out = append(out, h)
+	}
+	return out
+}
+
+func flattenHTTPHosts(rows [][]string) []string {
+	if len(rows) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(rows)*2)
+	for _, row := range rows {
+		out = append(out, row...)
+	}
+	return out
 }
 
 func short(s string, max int) string {
