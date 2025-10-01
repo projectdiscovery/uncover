@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
@@ -103,7 +104,9 @@ func (agent *Agent) query(session *sources.Session, onypheRequest OnypheRequest,
 }
 
 func (agent *Agent) queryURL(session *sources.Session, onypheRequest *OnypheRequest) (*http.Response, error) {
-	urlWithQuery := fmt.Sprintf(URLTemplate, url.QueryEscape(onypheRequest.Query), onypheRequest.Page)
+	escapedQuery := url.QueryEscape(onypheRequest.Query)
+	escapedQuery = strings.ReplaceAll(escapedQuery, "%22", "\"")
+	urlWithQuery := fmt.Sprintf(URLTemplate, escapedQuery, onypheRequest.Page)
 
 	request, err := sources.NewHTTPRequest(http.MethodGet, urlWithQuery, nil)
 	if err != nil {
