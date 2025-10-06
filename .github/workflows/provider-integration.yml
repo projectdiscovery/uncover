@@ -13,7 +13,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.22.x
+          go-version: 1.24.x
 
       - name: Check out code
         uses: actions/checkout@v3
@@ -21,7 +21,7 @@ jobs:
       - name: Integration Tests
         env:
           GH_ACTION: true
-          CENSYS_API_KEY: ${{secrets.CENSYS_API_SECRET}}
+          CENSYS_API_KEY: ${{secrets.CENSYS_ORGANIZATION_ID}}
           FOFA_API_KEY: ${{secrets.FOFA_KEY}}
           SHODAN_API_KEY: ${{secrets.SHODAN_API_KEY}}
           ZOOMEYE_API_KEY: ${{secrets.ZOOMEYE_API_KEY}}

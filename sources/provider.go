@@ -56,7 +56,7 @@ func (provider *Provider) GetKeys() Keys {
 		parts := strings.Split(censysKeys, ":")
 		if len(parts) == 2 {
 			keys.CensysToken = parts[0]
-			keys.CensysSecret = parts[1]
+			keys.CensysOrgId = parts[1]
 		}
 	}
 
@@ -163,7 +163,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 		return arr
 	}
 	provider.Fofa = appendIfAllExists(provider.Fofa, "FOFA_EMAIL", "FOFA_KEY")
-	provider.Censys = appendIfAllExists(provider.Censys, "CENSYS_API_ID", "CENSYS_API_SECRET")
+	provider.Censys = appendIfAllExists(provider.Censys, "CENSYS_API_TOKEN", "CENSYS_ORGANIZATION_ID")
 	provider.Google = appendIfAllExists(provider.Google, "GOOGLE_API_KEY", "GOOGLE_API_CX")
 	provider.Odin = appendIfExists(provider.Odin, "ODIN_API_KEY")
 	provider.BinaryEdge = appendIfExists(provider.BinaryEdge, "BINARYEDGE_API_KEY")
