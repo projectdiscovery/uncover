@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/projectdiscovery/gologger"
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/projectdiscovery/gologger"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
@@ -17,9 +18,15 @@ const (
 	URL = "https://fofa.info/api/v1/search/all?key=%s&qbase64=%s&fields=%s&page=%d&size=%d&full=%t"
 )
 
-var Size = 20
+var (
+	// Size is the number of results to return per page
+	Size = 100
+	// Fields is the fields to return in the results
+	Fields = "ip,port,host"
 
-var Fields = "ip,port,host"
+	// if Full is true results from more than one year will be returned
+	Full = false
+)
 
 type Agent struct{}
 
@@ -45,7 +52,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Fields: Fields,
 				Size:   Size,
 				Page:   page,
-				Full:   query.Full,
+				Full:   Full,
 			}
 			fofaResponse := agent.query(URL, session, fofaRequest, results)
 			if fofaResponse == nil {

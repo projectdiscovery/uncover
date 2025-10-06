@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/projectdiscovery/gologger"
 	"io"
 	"net/http"
+
+	"github.com/projectdiscovery/gologger"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
@@ -16,7 +17,14 @@ const (
 	URL = "https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=%d&page_size=%d&is_web=%d&start_time=%s&end_time=%s"
 )
 
-var Size = 20
+var (
+	Size       = 100
+	StatusCode = ""
+	PortFilter = false
+	IsWeb      = 0
+	StartTime  = ""
+	EndTime    = ""
+)
 
 type Agent struct{}
 
@@ -42,11 +50,11 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Search:     query.Query,
 				Page:       page,
 				PageSize:   Size,
-				StatusCode: query.StatusCode,
-				PortFilter: query.PortFilter,
-				IsWeb:      query.IsWeb,
-				StartTime:  query.StartTime,
-				EndTime:    query.EndTime,
+				StatusCode: StatusCode,
+				PortFilter: PortFilter,
+				IsWeb:      IsWeb,
+				StartTime:  StartTime,
+				EndTime:    EndTime,
 			}
 			hunterResponse := agent.query(URL, session, hunterRequest, results)
 			if hunterResponse == nil {
