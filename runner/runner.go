@@ -89,10 +89,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			}
 			if stringsutil.ContainsAny(outData, searchFor...) && !r.outputWriter.findDuplicate(outData, false) {
 				if r.options.Verbose {
-					// if output is verbose include source name
 					gologger.Info().Label(result.Source).Msg(outData)
-				} else {
-					gologger.DefaultLogger.Print().Msg(outData)
 				}
 				r.outputWriter.WriteString(outData)
 			}
