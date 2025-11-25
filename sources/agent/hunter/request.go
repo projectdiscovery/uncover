@@ -9,5 +9,6 @@ type Request struct {
 	Page       int    `json:"page"`
 	PageSize   int    `json:"page_size"`
 	IsWeb      int    `json:"is_web"`
+	PortFilter bool   `json:"port_filter"`
 	StatusCode string `json:"status_code"`
 }
