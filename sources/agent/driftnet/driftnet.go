@@ -110,7 +110,9 @@ ENDPOINT_LOOP:
 				results <- sources.Result{Source: agent.Name(), Error: queryError}
 				return
 			}
-			defer resp.Body.Close()
+			defer func() {
+				_ = resp.Body.Close()
+			}()
 
 			// Parse the response
 			driftnetResponse := &DriftnetAPIPaginatedResponse{}
@@ -224,7 +226,9 @@ func (agent *Agent) queryIPCIDR(session *sources.Session, driftnetRequest *Drift
 			results <- sources.Result{Source: agent.Name(), Error: queryError}
 			return
 		}
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		driftnetResponse := &DriftnetAPIOpenIPPortResponse{}
 		if err := json.NewDecoder(resp.Body).Decode(driftnetResponse); err != nil {

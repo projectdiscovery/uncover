@@ -2,7 +2,7 @@ package sources
 
 type Keys struct {
 	CensysToken     string
-	CensysSecret    string
+	CensysOrgId     string
 	Shodan          string
 	FofaEmail       string
 	FofaKey         string
@@ -19,10 +19,11 @@ type Keys struct {
 	BinaryEdgeToken string
 	OnypheKey       string
 	DriftnetToken   string
+	GreyNoiseKey    string
 }
 
 func (keys Keys) Empty() bool {
-	return keys.CensysSecret == "" &&
+	return keys.CensysOrgId == "" &&
 		keys.CensysToken == "" &&
 		keys.Shodan == "" &&
 		keys.FofaEmail == "" &&
@@ -39,5 +40,6 @@ func (keys Keys) Empty() bool {
 		keys.OdinToken == "" &&
 		keys.BinaryEdgeToken == "" &&
 		keys.OnypheKey == "" &&
-		keys.DriftnetToken == ""
+		keys.DriftnetToken == "" &&
+		keys.GreyNoiseKey == ""
 }

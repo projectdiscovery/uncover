@@ -13,6 +13,7 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/driftnet"
 	"github.com/projectdiscovery/uncover/sources/agent/fofa"
 	"github.com/projectdiscovery/uncover/sources/agent/google"
+	"github.com/projectdiscovery/uncover/sources/agent/greynoise"
 	"github.com/projectdiscovery/uncover/sources/agent/hunter"
 	"github.com/projectdiscovery/uncover/sources/agent/hunterhow"
 	"github.com/projectdiscovery/uncover/sources/agent/netlas"
@@ -89,6 +90,8 @@ func New(opts *Options) (*Service, error) {
 			s.Agents = append(s.Agents, &onyphe.Agent{})
 		case "driftnet":
 			s.Agents = append(s.Agents, &driftnet.Agent{})
+		case "greynoise":
+			s.Agents = append(s.Agents, &greynoise.Agent{})
 		}
 	}
 	s.Provider = sources.NewProvider()
@@ -193,7 +196,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 // AllAgents returns all supported uncover Agents
 func (s *Service) AllAgents() []string {
 	return []string{
-		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet",
+		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise",
 	}
 }
 

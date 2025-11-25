@@ -32,6 +32,7 @@ var DefaultRateLimits = map[string]*ratelimit.Options{
 	"binaryedge": {Key: "binaryedge", MaxCount: 1, Duration: time.Second},
 	"onyphe":     {Key: "onyphe", MaxCount: 1, Duration: time.Second},
 	"driftnet":   {Key: "driftnet", MaxCount: 5, Duration: time.Second},
+	"greynoise":  {Key: "greynoise", MaxCount: 1, Duration: time.Second},
 }
 
 // Session handles session agent sessions
@@ -117,7 +118,7 @@ func (s *Session) Do(request *retryablehttp.Request, source string) (*http.Respo
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		requestURL, _ := url.QueryUnescape(request.URL.String())
+		requestURL, _ := url.QueryUnescape(request.String())
 		return resp, fmt.Errorf("unexpected status code %d received from %s", resp.StatusCode, requestURL)
 	}
 	return resp, nil
