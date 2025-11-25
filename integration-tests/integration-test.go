@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/logrusorgru/aurora"
-
 	"github.com/projectdiscovery/uncover/testutils"
 )
 
@@ -33,6 +32,7 @@ var (
 		"odin":       odinTestcases{},
 		"binaryedge": binaryedgeTestcases{},
 		"onyphe":     onypheTestcases{},
+		"greynoise":  greynoiseTestcases{},
 		// feature tests
 		"output": outputTestcases{},
 	}

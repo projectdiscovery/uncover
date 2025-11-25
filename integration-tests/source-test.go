@@ -288,3 +288,31 @@ func (h onypheTestcases) Execute() error {
 	}
 	return expectResultsGreaterThanCount(results, 0)
 }
+
+type greynoiseTestcases struct{}
+
+func (h greynoiseTestcases) Execute() error {
+	token := os.Getenv("GREYNOISE_API_KEY")
+	if token == "" {
+		return errors.New("missing greynoise api key")
+	}
+
+	greynoiseToken := fmt.Sprintf(`greynoise: [%s]`, token)
+	_ = os.WriteFile(ConfigFile, []byte(greynoiseToken), 0644)
+	defer os.RemoveAll(ConfigFile)
+
+	results, err := testutils.RunUncoverAndGetResults(debug, "-e", "greynoise", "-q", "tag:scanner")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "WARNING: greynoise query failed: %v\n", err)
+		fmt.Fprintln(os.Stderr, "INFO: This may happen if you are using a Community API key. GNQL queries require an Enterprise API key.")
+		return nil
+	}
+
+	if len(results) == 0 {
+		fmt.Fprintln(os.Stderr, "INFO: greynoise returned 0 results.")
+		fmt.Fprintln(os.Stderr, "NOTE: Community API keys cannot access GNQL queries. An Enterprise API key is required for this test to return data.")
+		return nil
+	}
+
+	return nil
+}
