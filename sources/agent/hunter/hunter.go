@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/projectdiscovery/gologger"
-
 	"github.com/projectdiscovery/uncover/sources"
 )
 
@@ -80,19 +79,15 @@ func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *R
 		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
+	defer func(Body io.ReadCloser) {
+		if bodyCloseErr := Body.Close(); bodyCloseErr != nil {
+			gologger.Info().Msgf("response body close error : %v", bodyCloseErr)
+		}
+	}(resp.Body)
 
 	hunterResponse := &Response{}
-	RespBodyByBodyBytes, _ := io.ReadAll(resp.Body)
 	if err := json.NewDecoder(resp.Body).Decode(hunterResponse); err != nil {
-		result := sources.Result{Source: agent.Name()}
-		defer func(Body io.ReadCloser) {
-			if bodyCloseErr := Body.Close(); bodyCloseErr != nil {
-				gologger.Info().Msgf("response body close error : %v", bodyCloseErr)
-			}
-		}(resp.Body)
-		raw, _ := json.Marshal(RespBodyByBodyBytes)
-		result.Raw = raw
-		results <- result
+		results <- sources.Result{Source: agent.Name(), Error: err}
 		return nil
 	}
 	if hunterResponse.Code == http.StatusOK && hunterResponse.Data.Total > 0 {
