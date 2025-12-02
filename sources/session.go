@@ -1,11 +1,14 @@
 package sources
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/projectdiscovery/ratelimit"
@@ -122,4 +125,16 @@ func (s *Session) Do(request *retryablehttp.Request, source string) (*http.Respo
 		return resp, fmt.Errorf("unexpected status code %d received from %s", resp.StatusCode, requestURL)
 	}
 	return resp, nil
+}
+
+func ReadBody(resp *http.Response) (*bytes.Buffer, error) {
+	defer resp.Body.Close()
+	body := bytes.Buffer{}
+	_, err := io.Copy(&body, resp.Body)
+	if err != nil {
+		if !strings.Contains(err.Error(), "tls: user canceled") {
+			return nil, err
+		}
+	}
+	return &body, nil
 }

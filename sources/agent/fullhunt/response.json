@@ -1,0 +1,18 @@
+{
+  "domain":"projectdiscovery.io",
+  "hosts":
+  [
+    "cdn.projectdiscovery.io", "log.projectdiscovery.io", "nuclei.projectdiscovery.io","jenkins.projectdiscovery.io", "nexus.projectdiscovery.io","apollo.projectdiscovery.io","chaos.projectdiscovery.io","projectdiscovery.io","api.projectdiscovery.io","dns.projectdiscovery.io","careers.projectdiscovery.io","www.projectdiscovery.io","blog.projectdiscovery.io"
+  ],
+  "message":"",
+  "metadata":
+  {
+    "all_results_count":13,
+    "available_results_for_user":13,
+    "domain":"projectdiscovery.io",
+    "last_scanned":1649051519,
+    "max_results_for_user":3000,
+    "timestamp":1702747286,"user_plan":"free"
+  },
+  "status":200
+}

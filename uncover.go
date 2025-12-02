@@ -13,18 +13,23 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/daydaymap"
 	"github.com/projectdiscovery/uncover/sources/agent/driftnet"
 	"github.com/projectdiscovery/uncover/sources/agent/fofa"
+	"github.com/projectdiscovery/uncover/sources/agent/github"
 	"github.com/projectdiscovery/uncover/sources/agent/google"
 	"github.com/projectdiscovery/uncover/sources/agent/greynoise"
 	"github.com/projectdiscovery/uncover/sources/agent/hunter"
 	"github.com/projectdiscovery/uncover/sources/agent/hunterhow"
+	ip138_spider "github.com/projectdiscovery/uncover/sources/agent/ip138-spider"
 	"github.com/projectdiscovery/uncover/sources/agent/netlas"
 	"github.com/projectdiscovery/uncover/sources/agent/odin"
 	"github.com/projectdiscovery/uncover/sources/agent/onyphe"
 	"github.com/projectdiscovery/uncover/sources/agent/publicwww"
 	"github.com/projectdiscovery/uncover/sources/agent/quake"
+	rapiddns_spider "github.com/projectdiscovery/uncover/sources/agent/rapiddns-spider"
 	"github.com/projectdiscovery/uncover/sources/agent/shodan"
 	"github.com/projectdiscovery/uncover/sources/agent/shodanidb"
+	sitedossier_spider "github.com/projectdiscovery/uncover/sources/agent/sitedossier-spider"
 	"github.com/projectdiscovery/uncover/sources/agent/zoomeye"
+	"github.com/projectdiscovery/uncover/sources/agent/zone0"
 
 	errorutil "github.com/projectdiscovery/utils/errors"
 	stringsutil "github.com/projectdiscovery/utils/strings"
@@ -95,6 +100,16 @@ func New(opts *Options) (*Service, error) {
 			s.Agents = append(s.Agents, &greynoise.Agent{})
 		case "daydaymap":
 			s.Agents = append(s.Agents, &daydaymap.Agent{})
+		case "github":
+			s.Agents = append(s.Agents, &github.Agent{})
+		case "ip138-spider":
+			s.Agents = append(s.Agents, &ip138_spider.Agent{})
+		case "rapiddns-spider":
+			s.Agents = append(s.Agents, &rapiddns_spider.Agent{})
+		case "sitedossier-spider":
+			s.Agents = append(s.Agents, &sitedossier_spider.Agent{})
+		case "zone0":
+			s.Agents = append(s.Agents, &zone0.Agent{})
 		}
 	}
 	s.Provider = sources.NewProvider()
@@ -199,7 +214,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 // AllAgents returns all supported uncover Agents
 func (s *Service) AllAgents() []string {
 	return []string{
-		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise", "daydaymap",
+		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise", "daydaymap", "github", "ip138-spider", "rapiddns-spider", "sitedossier-spider", "zone0",
 	}
 }
 

@@ -38,6 +38,8 @@ type Provider struct {
 	Driftnet   []string `yaml:"driftnet"`
 	GreyNoise  []string `yaml:"greynoise"`
 	Daydaymap  []string `yaml:"daydaymap"`
+	Github     []string `yaml:"github"`
+	Zone0      []string `yaml:"zone0"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -127,6 +129,12 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.Daydaymap) > 0 {
 		keys.Daydaymap = provider.Daydaymap[rand.Intn(len(provider.Daydaymap))]
 	}
+	if len(provider.Github) > 0 {
+		keys.GithubToken = provider.Github[rand.Intn(len(provider.Github))]
+	}
+	if len(provider.Zone0) > 0 {
+		keys.Zone0Token = provider.Zone0[rand.Intn(len(provider.Zone0))]
+	}
 
 	return keys
 }
@@ -160,6 +168,8 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.ZoomEye = appendIfExists(provider.ZoomEye, "ZOOMEYE_API_KEY")
 	provider.Driftnet = appendIfExists(provider.Driftnet, "DRIFTNET_API_KEY")
 	provider.Daydaymap = appendIfExists(provider.Daydaymap, "DAYDAYMAP_API_KEY")
+	provider.Github = appendIfExists(provider.Github, "GITHUB_TOKEN")
+	provider.Zone0 = appendIfExists(provider.Zone0, "ZONE0_API_KEY")
 
 	appendIfAllExists := func(arr []string, env1 string, env2 string) []string {
 		if val1, ok := os.LookupEnv(env1); ok {
@@ -200,6 +210,8 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Driftnet) > 0,
 		len(provider.GreyNoise) > 0,
 		len(provider.Daydaymap) > 0,
+		len(provider.Github) > 0,
+		len(provider.Zone0) > 0,
 	)
 }
 
