@@ -112,7 +112,7 @@ func (agent *Agent) query(URL string, session *sources.Session, daydaymapRequest
 	}
 
 	// Check response code
-	if daydaymapResponse.Code != 200 {
+	if daydaymapResponse.Code != http.StatusOK {
 		results <- sources.Result{
 			Source: agent.Name(),
 			Error:  fmt.Errorf("API error (code %d): %s", daydaymapResponse.Code, daydaymapResponse.Msg),
