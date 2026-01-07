@@ -37,6 +37,7 @@ type Provider struct {
 	Onyphe     []string `yaml:"onyphe"`
 	Driftnet   []string `yaml:"driftnet"`
 	GreyNoise  []string `yaml:"greynoise"`
+	Daydaymap  []string `yaml:"daydaymap"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -123,6 +124,9 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.GreyNoise) > 0 {
 		keys.GreyNoiseKey = provider.GreyNoise[rand.Intn(len(provider.GreyNoise))]
 	}
+	if len(provider.Daydaymap) > 0 {
+		keys.Daydaymap = provider.Daydaymap[rand.Intn(len(provider.Daydaymap))]
+	}
 
 	return keys
 }
@@ -155,6 +159,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.HunterHow = appendIfExists(provider.HunterHow, "HUNTERHOW_API_KEY")
 	provider.ZoomEye = appendIfExists(provider.ZoomEye, "ZOOMEYE_API_KEY")
 	provider.Driftnet = appendIfExists(provider.Driftnet, "DRIFTNET_API_KEY")
+	provider.Daydaymap = appendIfExists(provider.Daydaymap, "DAYDAYMAP_API_KEY")
 
 	appendIfAllExists := func(arr []string, env1 string, env2 string) []string {
 		if val1, ok := os.LookupEnv(env1); ok {
@@ -194,6 +199,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Onyphe) > 0,
 		len(provider.Driftnet) > 0,
 		len(provider.GreyNoise) > 0,
+		len(provider.Daydaymap) > 0,
 	)
 }
 
