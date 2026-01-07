@@ -67,7 +67,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			if numberOfResults >= query.Limit || hunterResponse.Data.Total == 0 || len(hunterResponse.Data.Arr) == 0 {
 				break
 			}
-
 		}
 	}()
 
@@ -83,13 +82,14 @@ func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *R
 
 	hunterResponse := &Response{}
 	RespBodyByBodyBytes, _ := io.ReadAll(resp.Body)
-	if err := json.NewDecoder(resp.Body).Decode(hunterResponse); err != nil {
+	defer func(Body io.ReadCloser) {
+		if bodyCloseErr := Body.Close(); bodyCloseErr != nil {
+			gologger.Info().Msgf("response body close error : %v", bodyCloseErr)
+		}
+	}(resp.Body)
+
+	if err := json.Unmarshal(RespBodyByBodyBytes, hunterResponse); err != nil {
 		result := sources.Result{Source: agent.Name()}
-		defer func(Body io.ReadCloser) {
-			if bodyCloseErr := Body.Close(); bodyCloseErr != nil {
-				gologger.Info().Msgf("response body close error : %v", bodyCloseErr)
-			}
-		}(resp.Body)
 		raw, _ := json.Marshal(RespBodyByBodyBytes)
 		result.Raw = raw
 		results <- result
