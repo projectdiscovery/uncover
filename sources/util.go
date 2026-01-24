@@ -3,6 +3,7 @@ package sources
 import (
 	"io"
 	"net/url"
+	"os"
 
 	"github.com/projectdiscovery/retryablehttp-go"
 )
@@ -22,4 +23,10 @@ func GetHostname(u string) (string, error) {
 		return "", err
 	}
 	return parsedURL.Hostname(), nil
+}
+func GetEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }

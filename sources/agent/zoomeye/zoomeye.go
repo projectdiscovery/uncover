@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"errors"
-
 	"github.com/projectdiscovery/uncover/sources"
 )
 
 var (
-	URL = "https://api.zoomeye.ai/v2/search"
+	Host = sources.GetEnv("ZOOMEYE_HOST", "zoomeye.ai")
+	URL  = fmt.Sprintf("https://api.%s/v2/search", Host)
 )
 
 type Agent struct{}
