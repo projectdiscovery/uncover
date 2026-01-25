@@ -89,7 +89,7 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 	}
 	fofaResponse := &FofaResponse{}
 	RespBodyByBodyBytes, _ := io.ReadAll(resp.Body)
-	if err := json.NewDecoder(resp.Body).Decode(fofaResponse); err != nil {
+	if err := json.Unmarshal(RespBodyByBodyBytes, fofaResponse); err != nil {
 		result := sources.Result{Source: agent.Name()}
 		defer func(Body io.ReadCloser) {
 			if bodyCloseErr := Body.Close(); bodyCloseErr != nil {
