@@ -50,6 +50,7 @@
   - **[Google](https://www.google.com)**
   - **[Onyphe](https://www.onyphe.io/)**
   - **[Driftnet](https://driftnet.io)**
+  - **[NerdyData](https://www.nerdydata.com/?utm_source=projectdiscovery/uncover)**
 - Multiple API key input support
 - Automatic API key randomization
 - **stdin** / **stdout** support for input
@@ -170,6 +171,9 @@ onyphe:
 driftnet:
   - DRIFTNET_API_KEY_1
   - DRIFTNET_API_KEY_2
+nerdydata:
+  - NERDYDATA_API_KEY_1
+  - NERDYDATA_API_KEY_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -193,9 +197,10 @@ export GOOGLE_API_KEY=xxx
 export GOOGLE_API_CX=xxx
 export ONYPHE_API_KEY=xxx
 export DRIFTNET_API_KEY=xxx
+export NERDYDATA_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.ai), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup) and [Driftnet](https://driftnet.io/auth?state=signup).
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.ai), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup), [Driftnet](https://driftnet.io/auth?state=signup) and [NerdyData](https://nerdydata.com/register).
 
 ## Running Uncover
 

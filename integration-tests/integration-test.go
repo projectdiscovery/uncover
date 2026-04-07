@@ -33,6 +33,7 @@ var (
 		"binaryedge": binaryedgeTestcases{},
 		"onyphe":     onypheTestcases{},
 		"greynoise":  greynoiseTestcases{},
+		"nerdydata":  nerdydataTestcases{},
 		// feature tests
 		"output": outputTestcases{},
 	}
