@@ -1,6 +1,7 @@
 package nerdydata
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,7 +28,10 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	go func() {
 		defer close(results)
 
+		ctx := context.Background()
 		const maxRetries = 5
+		const baseBackoff = 30 * time.Second
+		const maxBackoff = 960 * time.Second
 		numberOfResults := 0
 		nextPage := ""
 
@@ -50,7 +54,16 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				}
 				// 202 = server-side timeout; back off and retry with same cursor
 				resp.Body.Close()
-				time.Sleep(time.Duration(30*(1<<attempt)) * time.Second)
+				backoff := baseBackoff * (1 << attempt)
+				if backoff > maxBackoff {
+					backoff = maxBackoff
+				}
+				select {
+				case <-time.After(backoff):
+				case <-ctx.Done():
+					results <- sources.Result{Source: agent.Name(), Error: ctx.Err()}
+					return
+				}
 			}
 			if resp.StatusCode == http.StatusAccepted {
 				resp.Body.Close()
