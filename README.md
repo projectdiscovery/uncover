@@ -42,7 +42,7 @@
   - **[FOFA](https://fofa.info)**
   - **[Hunter](https://hunter.qianxin.com)**
   - **[Quake](https://quake.360.net/quake/#/index)**
-  - **ZoomEye (https://www.zoomeye.ai)**
+  - **[ZoomEye](https://www.zoomeye.ai)**
   - **[Netlas](https://netlas.io/)**
   - **[CriminalIP](https://www.criminalip.io)**
   - **[PublicWWW](https://publicwww.com)**
@@ -200,7 +200,7 @@ export DRIFTNET_API_KEY=xxx
 export NERDYDATA_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.ai), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup), [Driftnet](https://driftnet.io/auth?state=signup) and [NerdyData](https://nerdydata.com/register).
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.ai), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup), [Driftnet](https://driftnet.io/auth?state=signup) and [NerdyData](https://www.nerdydata.com/api?utm_source=projectdiscovery/uncover).
 
 ## Running Uncover
 
