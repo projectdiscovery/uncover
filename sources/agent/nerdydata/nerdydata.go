@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
@@ -26,6 +27,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	go func() {
 		defer close(results)
 
+		const maxRetries = 5
 		numberOfResults := 0
 		nextPage := ""
 
@@ -35,16 +37,28 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Page:  nextPage,
 			}
 
-			resp, err := agent.queryURL(session, nerdydataRequest.buildURL(), session.Keys.NerdyDataToken)
-			if err != nil {
-				results <- sources.Result{Source: agent.Name(), Error: err}
-				return
-			}
-
-			if resp.StatusCode == http.StatusAccepted {
-				// 202 = server-side timeout; retry with same cursor
+			var resp *http.Response
+			var err error
+			for attempt := 0; attempt < maxRetries; attempt++ {
+				resp, err = agent.queryURL(session, nerdydataRequest.buildURL(), session.Keys.NerdyDataToken)
+				if err != nil {
+					results <- sources.Result{Source: agent.Name(), Error: err}
+					return
+				}
+				if resp.StatusCode != http.StatusAccepted {
+					break
+				}
+				// 202 = server-side timeout; back off and retry with same cursor
 				resp.Body.Close()
-				continue
+				time.Sleep(time.Duration(30*(1<<attempt)) * time.Second)
+			}
+			if resp.StatusCode == http.StatusAccepted {
+				resp.Body.Close()
+				results <- sources.Result{
+					Source: agent.Name(),
+					Error:  fmt.Errorf("server returned 202 after %d retries", maxRetries),
+				}
+				return
 			}
 
 			if resp.StatusCode != http.StatusOK {
