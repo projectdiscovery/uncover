@@ -1,7 +1,6 @@
 package nerdydata
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -28,7 +27,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	go func() {
 		defer close(results)
 
-		ctx := context.Background()
 		const maxRetries = 5
 		const baseBackoff = 30 * time.Second
 		const maxBackoff = 960 * time.Second
@@ -58,12 +56,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				if backoff > maxBackoff {
 					backoff = maxBackoff
 				}
-				select {
-				case <-time.After(backoff):
-				case <-ctx.Done():
-					results <- sources.Result{Source: agent.Name(), Error: ctx.Err()}
-					return
-				}
+				time.Sleep(backoff)
 			}
 			if resp.StatusCode == http.StatusAccepted {
 				resp.Body.Close()
