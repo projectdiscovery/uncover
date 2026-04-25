@@ -1,6 +1,7 @@
 package hunter
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -31,7 +32,7 @@ func (agent *Agent) Name() string {
 	return "hunter"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.HunterToken == "" {
 		return nil, errors.New("empty hunter keys")
 	}
@@ -44,6 +45,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		numberOfResults := 0
 		page := 1
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			hunterRequest := &Request{
 				ApiKey:     session.Keys.HunterToken,
 				Search:     query.Query,
@@ -55,7 +59,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				StartTime:  StartTime,
 				EndTime:    EndTime,
 			}
-			hunterResponse := agent.query(URL, session, hunterRequest, results)
+			hunterResponse := agent.query(ctx, URL, session, hunterRequest, results)
 			if hunterResponse == nil {
 				break
 			}
@@ -73,10 +77,10 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *Request, results chan sources.Result) *Response {
-	resp, err := agent.queryURL(session, URL, hunterRequest)
+func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, hunterRequest *Request, results chan sources.Result) *Response {
+	resp, err := agent.queryURL(ctx, session, URL, hunterRequest)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 	defer func(Body io.ReadCloser) {
@@ -87,7 +91,7 @@ func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *R
 
 	hunterResponse := &Response{}
 	if err := json.NewDecoder(resp.Body).Decode(hunterResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 	if hunterResponse.Code == http.StatusOK && hunterResponse.Data.Total > 0 {
@@ -98,17 +102,19 @@ func (agent *Agent) query(URL string, session *sources.Session, hunterRequest *R
 			result.Host = hunterResult.Domain
 			raw, _ := json.Marshal(hunterResult)
 			result.Raw = raw
-			results <- result
+			if !sources.SendResult(ctx, results, result) {
+				return hunterResponse
+			}
 		}
 	}
 
 	return hunterResponse
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string, hunterRequest *Request) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string, hunterRequest *Request) (*http.Response, error) {
 	base64Query := base64.URLEncoding.EncodeToString([]byte(hunterRequest.Search))
 	hunterURL := fmt.Sprintf(URL, hunterRequest.ApiKey, base64Query, hunterRequest.Page, hunterRequest.PageSize, hunterRequest.IsWeb, hunterRequest.StartTime, hunterRequest.EndTime)
-	request, err := sources.NewHTTPRequest(http.MethodGet, hunterURL, nil)
+	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, hunterURL, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package zoomeye
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
@@ -27,7 +28,7 @@ func (agent *Agent) Name() string {
 	return "zoomeye"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.ZoomEyeToken == "" {
 		return nil, errors.New("empty zoomeye keys")
 	}
@@ -39,13 +40,16 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		currentPage := 1
 		var numberOfResults, totalResults int
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			zoomeyeRequest := &ZoomEyeRequest{
 				Query:    query.Query,
 				Page:     currentPage,
 				PageSize: 100,
 			}
 
-			zoomeyeResponse := agent.query(URL, session, zoomeyeRequest, results)
+			zoomeyeResponse := agent.query(ctx, URL, session, zoomeyeRequest, results)
 			if zoomeyeResponse == nil {
 				break
 			}
@@ -64,8 +68,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string, zoomeyeRequest *ZoomEyeRequest) (*http.Response, error) {
-	// Encode query to base64
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string, zoomeyeRequest *ZoomEyeRequest) (*http.Response, error) {
 	queryBase64 := base64.StdEncoding.EncodeToString([]byte(zoomeyeRequest.Query))
 
 	requestBody := map[string]interface{}{
@@ -79,7 +82,7 @@ func (agent *Agent) queryURL(session *sources.Session, URL string, zoomeyeReques
 		return nil, err
 	}
 
-	request, err := sources.NewHTTPRequest(http.MethodPost, URL, bytes.NewReader(jsonBody))
+	request, err := sources.NewHTTPRequest(ctx, http.MethodPost, URL, bytes.NewReader(jsonBody))
 	if err != nil {
 		return nil, err
 	}
@@ -88,10 +91,10 @@ func (agent *Agent) queryURL(session *sources.Session, URL string, zoomeyeReques
 	return session.Do(request, agent.Name())
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *ZoomEyeRequest, results chan sources.Result) *ZoomEyeResponse {
-	resp, err := agent.queryURL(session, URL, zoomeyeRequest)
+func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, zoomeyeRequest *ZoomEyeRequest, results chan sources.Result) *ZoomEyeResponse {
+	resp, err := agent.queryURL(ctx, session, URL, zoomeyeRequest)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 	defer func() {
@@ -100,7 +103,7 @@ func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *
 
 	zoomeyeResponse := &ZoomEyeResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(zoomeyeResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
@@ -113,7 +116,9 @@ func (agent *Agent) query(URL string, session *sources.Session, zoomeyeRequest *
 
 		raw, _ := json.Marshal(result)
 		sourceResult.Raw = raw
-		results <- sourceResult
+		if !sources.SendResult(ctx, results, sourceResult) {
+			return zoomeyeResponse
+		}
 	}
 
 	return zoomeyeResponse

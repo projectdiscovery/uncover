@@ -2,6 +2,7 @@ package quake
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,7 +24,7 @@ func (agent *Agent) Name() string {
 	return "quake"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.QuakeToken == "" {
 		return nil, errors.New("empty quake keys")
 	}
@@ -36,6 +37,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		numberOfResults := 0
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			quakeRequest := &Request{
 				Query:       query.Query,
 				Size:        Size,
@@ -43,7 +47,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				IgnoreCache: true,
 				Include:     []string{"ip", "port", "hostname"},
 			}
-			quakeResponse := agent.query(URL, session, quakeRequest, results)
+			quakeResponse := agent.query(ctx, URL, session, quakeRequest, results)
 			if quakeResponse == nil {
 				break
 			}
@@ -54,7 +58,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 
 			numberOfResults += len(quakeResponse.Data)
 
-			// early exit without more results
 			if quakeResponse.Meta.Pagination.Count > 0 && numberOfResults >= quakeResponse.Meta.Pagination.Total {
 				break
 			}
@@ -64,29 +67,28 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Request, results chan sources.Result) *Response {
-	resp, err := agent.queryURL(session, URL, quakeRequest)
+func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, quakeRequest *Request, results chan sources.Result) *Response {
+	resp, err := agent.queryURL(ctx, session, URL, quakeRequest)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
 	quakeResponse := &Response{}
 	respdata, err := io.ReadAll(resp.Body)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("%v: %v", err, string(respdata))}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: fmt.Errorf("%v: %v", err, string(respdata))})
 		return nil
 	}
 	if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(quakeResponse); err != nil {
 		errx := errorutil.NewWithErr(err)
-		// quake has different json format for error messages try to unmarshal it in map and print map
 		var errMap map[string]interface{}
 		if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(&errMap); err == nil {
 			errx = errx.Msgf("failed to decode quake response: %v", errMap)
 		} else {
 			errx = errx.Msgf("failed to decode quake response: %s", string(respdata))
 		}
-		results <- sources.Result{Source: agent.Name(), Error: errx}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: errx})
 		return nil
 	}
 
@@ -97,19 +99,22 @@ func (agent *Agent) query(URL string, session *sources.Session, quakeRequest *Re
 		result.Host = quakeResult.Hostname
 		raw, _ := json.Marshal(quakeResult)
 		result.Raw = raw
-		results <- result
+		if !sources.SendResult(ctx, results, result) {
+			return quakeResponse
+		}
 	}
 
 	return quakeResponse
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string, quakeRequest *Request) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string, quakeRequest *Request) (*http.Response, error) {
 	body, err := json.Marshal(quakeRequest)
 	if err != nil {
 		return nil, err
 	}
 
 	request, err := sources.NewHTTPRequest(
+		ctx,
 		http.MethodPost,
 		URL,
 		bytes.NewReader(body),

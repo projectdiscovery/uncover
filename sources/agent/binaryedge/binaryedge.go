@@ -1,6 +1,7 @@
 package binaryedge
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,7 +22,7 @@ func (agent *Agent) Name() string {
 	return "binaryedge"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.BinaryEdgeToken == "" {
 		return nil, errors.New("empty binaryedge token")
 	}
@@ -29,16 +30,16 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	results := make(chan sources.Result)
 	go func() {
 		defer close(results)
-		agent.query(session, query.Query, results)
+		agent.query(ctx, session, query.Query, results)
 	}()
 
 	return results, nil
 }
 
-func (agent *Agent) query(session *sources.Session, searchQuery string, results chan sources.Result) {
-	resp, err := agent.queryURL(session, URL, searchQuery)
+func (agent *Agent) query(ctx context.Context, session *sources.Session, searchQuery string, results chan sources.Result) {
+	resp, err := agent.queryURL(ctx, session, URL, searchQuery)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return
 	}
 	defer func() {
@@ -47,7 +48,7 @@ func (agent *Agent) query(session *sources.Session, searchQuery string, results 
 
 	var apiResponse BinaryedgeResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return
 	}
 
@@ -61,14 +62,16 @@ func (agent *Agent) query(session *sources.Session, searchQuery string, results 
 			if raw, err := json.Marshal(item); err == nil {
 				output.Raw = raw
 			}
-			results <- output
+			if !sources.SendResult(ctx, results, output) {
+				return
+			}
 		}
 	}
 }
 
-func (agent *Agent) queryURL(session *sources.Session, baseURL, searchQuery string) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, baseURL, searchQuery string) (*http.Response, error) {
 	urlWithQuery := fmt.Sprintf(baseURL, url.QueryEscape(searchQuery))
-	request, err := sources.NewHTTPRequest(http.MethodGet, urlWithQuery, nil)
+	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, urlWithQuery, nil)
 	if err != nil {
 		return nil, err
 	}

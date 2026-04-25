@@ -1,6 +1,7 @@
 package fofa
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -18,13 +19,9 @@ const (
 )
 
 var (
-	// Size is the number of results to return per page
-	Size = 100
-	// Fields is the fields to return in the results
+	Size   = 100
 	Fields = "ip,port,host"
-
-	// if Full is true results from more than one year will be returned
-	Full = false
+	Full   = false
 )
 
 type Agent struct{}
@@ -33,7 +30,7 @@ func (agent *Agent) Name() string {
 	return "fofa"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.FofaEmail == "" || session.Keys.FofaKey == "" {
 		return nil, errors.New("empty fofa keys")
 	}
@@ -46,6 +43,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		var numberOfResults int
 		page := 1
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			fofaRequest := &FofaRequest{
 				Query:  query.Query,
 				Fields: Fields,
@@ -53,7 +53,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				Page:   page,
 				Full:   Full,
 			}
-			fofaResponse := agent.query(URL, session, fofaRequest, results)
+			fofaResponse := agent.query(ctx, URL, session, fofaRequest, results)
 			if fofaResponse == nil {
 				break
 			}
@@ -69,10 +69,10 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string, fofaRequest *FofaRequest) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string, fofaRequest *FofaRequest) (*http.Response, error) {
 	base64Query := base64.StdEncoding.EncodeToString([]byte(fofaRequest.Query))
 	fofaURL := fmt.Sprintf(URL, session.Keys.FofaKey, base64Query, Fields, fofaRequest.Page, fofaRequest.Size, fofaRequest.Full)
-	request, err := sources.NewHTTPRequest(http.MethodGet, fofaURL, nil)
+	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, fofaURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -80,10 +80,10 @@ func (agent *Agent) queryURL(session *sources.Session, URL string, fofaRequest *
 	return session.Do(request, agent.Name())
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *FofaRequest, results chan sources.Result) *FofaResponse {
-	resp, err := agent.queryURL(session, URL, fofaRequest)
+func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, fofaRequest *FofaRequest, results chan sources.Result) *FofaResponse {
+	resp, err := agent.queryURL(ctx, session, URL, fofaRequest)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 	defer func(Body io.ReadCloser) {
@@ -94,11 +94,11 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 
 	fofaResponse := &FofaResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(fofaResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 	if fofaResponse.Error {
-		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("%s", fofaResponse.ErrMsg)}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: fmt.Errorf("%s", fofaResponse.ErrMsg)})
 		return nil
 	}
 
@@ -109,7 +109,9 @@ func (agent *Agent) query(URL string, session *sources.Session, fofaRequest *Fof
 		result.Host = fofaResult[2]
 		raw, _ := json.Marshal(fofaResult)
 		result.Raw = raw
-		results <- result
+		if !sources.SendResult(ctx, results, result) {
+			return fofaResponse
+		}
 	}
 	return fofaResponse
 }
