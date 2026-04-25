@@ -37,6 +37,7 @@ type Provider struct {
 	Onyphe     []string `yaml:"onyphe"`
 	Driftnet   []string `yaml:"driftnet"`
 	GreyNoise  []string `yaml:"greynoise"`
+	NerdyData  []string `yaml:"nerdydata"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -123,6 +124,9 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.GreyNoise) > 0 {
 		keys.GreyNoiseKey = provider.GreyNoise[rand.Intn(len(provider.GreyNoise))]
 	}
+	if len(provider.NerdyData) > 0 {
+		keys.NerdyDataToken = provider.NerdyData[rand.Intn(len(provider.NerdyData))]
+	}
 
 	return keys
 }
@@ -173,6 +177,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.BinaryEdge = appendIfExists(provider.BinaryEdge, "BINARYEDGE_API_KEY")
 	provider.Onyphe = appendIfExists(provider.Onyphe, "ONYPHE_API_KEY")
 	provider.GreyNoise = appendIfExists(provider.GreyNoise, "GREYNOISE_API_KEY")
+	provider.NerdyData = appendIfExists(provider.NerdyData, "NERDYDATA_API_KEY")
 }
 
 // HasKeys returns true if at least one agent/source has keys
@@ -194,6 +199,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.Onyphe) > 0,
 		len(provider.Driftnet) > 0,
 		len(provider.GreyNoise) > 0,
+		len(provider.NerdyData) > 0,
 	)
 }
 

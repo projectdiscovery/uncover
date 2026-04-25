@@ -289,6 +289,23 @@ func (h onypheTestcases) Execute() error {
 	return expectResultsGreaterThanCount(results, 0)
 }
 
+type nerdydataTestcases struct{}
+
+func (h nerdydataTestcases) Execute() error {
+	token := os.Getenv("NERDYDATA_API_KEY")
+	if token == "" {
+		return errors.New("missing NerdyData api key")
+	}
+	nerdydataToken := fmt.Sprintf(`nerdydata: [%s]`, token)
+	_ = os.WriteFile(ConfigFile, []byte(nerdydataToken), 0644)
+	defer func() { _ = os.RemoveAll(ConfigFile) }()
+	results, err := testutils.RunUncoverAndGetResults(debug, "-nerdydata", "jquery")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}
+
 type greynoiseTestcases struct{}
 
 func (h greynoiseTestcases) Execute() error {
