@@ -1,6 +1,7 @@
 package shodan
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -21,7 +22,7 @@ func (agent *Agent) Name() string {
 	return "shodan"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.Shodan == "" {
 		return nil, errors.New("empty shodan keys")
 	}
@@ -33,12 +34,15 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		currentPage := 1
 		var numberOfResults, totalResults int
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			shodanRequest := &ShodanRequest{
 				Query: query.Query,
 				Page:  currentPage,
 			}
 
-			shodanResponse := agent.query(URL, session, shodanRequest, results)
+			shodanResponse := agent.query(ctx, URL, session, shodanRequest, results)
 			if shodanResponse == nil {
 				break
 			}
@@ -48,7 +52,6 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				totalResults = shodanResponse.Total
 			}
 
-			// query certificates
 			if numberOfResults > query.Limit || numberOfResults > totalResults || len(shodanResponse.Results) == 0 {
 				break
 			}
@@ -58,26 +61,25 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string, shodanRequest *ShodanRequest) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string, shodanRequest *ShodanRequest) (*http.Response, error) {
 	shodanURL := fmt.Sprintf(URL, session.Keys.Shodan, url.QueryEscape(shodanRequest.Query), shodanRequest.Page)
-	request, err := sources.NewHTTPRequest(http.MethodGet, shodanURL, nil)
+	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, shodanURL, nil)
 	if err != nil {
 		return nil, err
 	}
 	return session.Do(request, agent.Name())
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, shodanRequest *ShodanRequest, results chan sources.Result) *ShodanResponse {
-	// query certificates
-	resp, err := agent.queryURL(session, URL, shodanRequest)
+func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, shodanRequest *ShodanRequest, results chan sources.Result) *ShodanResponse {
+	resp, err := agent.queryURL(ctx, session, URL, shodanRequest)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
 	shodanResponse := &ShodanResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(shodanResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
@@ -89,7 +91,6 @@ func (agent *Agent) query(URL string, session *sources.Session, shodanRequest *S
 		if ip, ok := shodanResult["ip_str"]; ok {
 			result.IP = ip.(string)
 		}
-		// has hostnames?
 		if hostnames, ok := shodanResult["hostnames"]; ok {
 			if _, ok := hostnames.([]interface{}); ok {
 				for _, hostname := range hostnames.([]interface{}) {
@@ -98,12 +99,15 @@ func (agent *Agent) query(URL string, session *sources.Session, shodanRequest *S
 			}
 			raw, _ := json.Marshal(shodanResult)
 			result.Raw = raw
-			results <- result
+			if !sources.SendResult(ctx, results, result) {
+				return shodanResponse
+			}
 		} else {
 			raw, _ := json.Marshal(shodanResult)
 			result.Raw = raw
-			// only ip
-			results <- result
+			if !sources.SendResult(ctx, results, result) {
+				return shodanResponse
+			}
 		}
 	}
 

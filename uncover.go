@@ -138,7 +138,7 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 				gologger.Error().Msgf(agent.Name(), "agent given but keys not found")
 				continue agentLabel
 			}
-			ch, err := agent.Query(s.Session, &sources.Query{
+			ch, err := agent.Query(ctx, s.Session, &sources.Query{
 				Query: q,
 				Limit: s.Options.Limit,
 			})

@@ -1,6 +1,7 @@
 package publicwww
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"errors"
@@ -22,7 +23,7 @@ func (agent *Agent) Name() string {
 	return "publicwww"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.PublicwwwToken == "" {
 		return nil, errors.New("empty publicwww keys")
 	}
@@ -35,6 +36,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		numberOfResults := 0
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			publicwwwRequest := &Request{
 				Query: query.Query,
 			}
@@ -43,7 +47,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 
-			publicwwwResponse := agent.query(publicwwwRequest.buildURL(session.Keys.PublicwwwToken), session, results)
+			publicwwwResponse := agent.query(ctx, publicwwwRequest.buildURL(session.Keys.PublicwwwToken), session, results)
 			if publicwwwResponse == nil {
 				break
 			}
@@ -59,16 +63,16 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, results chan sources.Result) []string {
-	resp, err := agent.queryURL(session, URL)
+func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, results chan sources.Result) []string {
+	resp, err := agent.queryURL(ctx, session, URL)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 	content := string(body)
@@ -82,7 +86,9 @@ func (agent *Agent) query(URL string, session *sources.Session, results chan sou
 			if err == io.EOF {
 				break
 			}
-			results <- sources.Result{Source: agent.Name(), Error: err}
+			if !sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err}) {
+				return lines
+			}
 		}
 
 		result := sources.Result{Source: agent.Name()}
@@ -91,14 +97,18 @@ func (agent *Agent) query(URL string, session *sources.Session, results chan sou
 			if trimmedLine != "" {
 				hostname, err := sources.GetHostname(record[0])
 				if err != nil {
-					results <- sources.Result{Source: agent.Name(), Error: err}
+					if !sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err}) {
+						return lines
+					}
 					continue
 				}
 				result.Host = hostname
 				result.Url = record[0]
 				raw, _ := json.Marshal(record)
 				result.Raw = raw
-				results <- result
+				if !sources.SendResult(ctx, results, result) {
+					return lines
+				}
 				lines = append(lines, trimmedLine)
 			}
 		}
@@ -107,8 +117,9 @@ func (agent *Agent) query(URL string, session *sources.Session, results chan sou
 	return lines
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string) (*http.Response, error) {
 	request, err := sources.NewHTTPRequest(
+		ctx,
 		http.MethodGet,
 		URL,
 		nil,
