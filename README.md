@@ -78,7 +78,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google,driftnet) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,nerdydata,publicwww,hunterhow,google,driftnet) (default shodan)
    -asq, -awesome-search-queries string[]  use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')
 
 SEARCH-ENGINE:
@@ -91,9 +91,10 @@ SEARCH-ENGINE:
    -ze, -zoomeye string[]     search query for zoomeye (example: -zoomeye 'query.txt')
    -ne, -netlas string[]      search query for netlas (example: -netlas 'query.txt')
    -cl, -criminalip string[]  search query for criminalip (example: -criminalip 'query.txt')
+   -nd, -nerdydata string[]   search query for NerdyData (example: -nerdydata 'query.txt')
    -pw, -publicwww string[]   search query for publicwww (example: -publicwww 'query.txt')
    -hh, -hunterhow string[]   search query for hunterhow (example: -hunterhow 'query.txt')
-   -gg, -google string[]       search query for google (example: -google 'query.txt')
+   -gg, -google string[]      search query for google (example: -google 'query.txt')
    -on, -onyphe string[]      search query for onyphe (example: -onyphe 'query.txt')
    -df, -driftnet string[]    search query for driftnet (example: -driftnet 'query.txt')
 
