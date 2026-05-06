@@ -64,10 +64,10 @@ func (o *OutputWriter) WriteString(data string) {
 // WriteJsonData writes the result taken as input in JSON format
 func (o *OutputWriter) WriteJsonData(data sources.Result) {
 	var key string
-	if data.IP != "" || data.Port != 0 {
+	if data.IP != "" && data.Port != 0 {
 		key = fmt.Sprintf("%s:%d", data.IP, data.Port)
 	} else {
-		key = data.Host + "|" + data.Url
+		key = fmt.Sprintf("%q|%d|%q|%q", data.IP, data.Port, data.Host, data.Url)
 	}
 	if o.findDuplicate(key, true) {
 		return
