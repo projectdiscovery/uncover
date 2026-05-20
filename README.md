@@ -80,7 +80,6 @@ Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
    -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,nerdydata,publicwww,hunterhow,google,driftnet,daydaymap) (default shodan)
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google,driftnet,daydaymap) (default shodan)
    -asq, -awesome-search-queries string[]  use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')
 
 SEARCH-ENGINE:
