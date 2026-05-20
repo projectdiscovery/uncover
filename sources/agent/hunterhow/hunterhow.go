@@ -1,6 +1,7 @@
 package hunterhow
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -20,7 +21,7 @@ func (agent *Agent) Name() string {
 	return "hunterhow"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.HunterHowToken == "" {
 		return nil, errors.New("empty hunterhow keys")
 	}
@@ -31,13 +32,15 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		defer close(results)
 
 		numberOfResults := 0
-
 		pageQuery := 1
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			hunterhowRequest := &Request{
 				Query:    query.Query,
-				PageSize: Size, // max size is 100
+				PageSize: Size,
 				Page:     pageQuery,
 			}
 
@@ -45,7 +48,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 
-			hunterhowResponse := agent.query(hunterhowRequest.buildURL(session.Keys.HunterHowToken), session, results)
+			hunterhowResponse := agent.query(ctx, hunterhowRequest.buildURL(session.Keys.HunterHowToken), session, results)
 			if hunterhowResponse == nil {
 				break
 			}
@@ -62,21 +65,21 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, results chan sources.Result) []string {
-	resp, err := agent.queryURL(session, URL)
+func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, results chan sources.Result) []string {
+	resp, err := agent.queryURL(ctx, session, URL)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
 	var apiResponse Response
 	err = json.NewDecoder(resp.Body).Decode(&apiResponse)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 	if apiResponse.Code != http.StatusOK {
-		results <- sources.Result{Source: agent.Name(), Error: errors.New(apiResponse.Message)}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: errors.New(apiResponse.Message)})
 		return nil
 	}
 
@@ -88,15 +91,18 @@ func (agent *Agent) query(URL string, session *sources.Session, results chan sou
 		result.Port = data.Port
 		raw, _ := json.Marshal(data)
 		result.Raw = raw
-		results <- result
+		if !sources.SendResult(ctx, results, result) {
+			return lines
+		}
 		lines = append(lines, data.Domain)
 	}
 
 	return lines
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string) (*http.Response, error) {
 	request, err := sources.NewHTTPRequest(
+		ctx,
 		http.MethodGet,
 		URL,
 		nil,

@@ -10,6 +10,7 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/binaryedge"
 	"github.com/projectdiscovery/uncover/sources/agent/censys"
 	"github.com/projectdiscovery/uncover/sources/agent/criminalip"
+	"github.com/projectdiscovery/uncover/sources/agent/daydaymap"
 	"github.com/projectdiscovery/uncover/sources/agent/driftnet"
 	"github.com/projectdiscovery/uncover/sources/agent/fofa"
 	"github.com/projectdiscovery/uncover/sources/agent/google"
@@ -93,6 +94,8 @@ func New(opts *Options) (*Service, error) {
 			s.Agents = append(s.Agents, &driftnet.Agent{})
 		case "greynoise":
 			s.Agents = append(s.Agents, &greynoise.Agent{})
+		case "daydaymap":
+			s.Agents = append(s.Agents, &daydaymap.Agent{})
 		case "nerdydata":
 			s.Agents = append(s.Agents, &nerdydata.Agent{})
 		}
@@ -138,7 +141,7 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 				gologger.Error().Msgf(agent.Name(), "agent given but keys not found")
 				continue agentLabel
 			}
-			ch, err := agent.Query(s.Session, &sources.Query{
+			ch, err := agent.Query(ctx, s.Session, &sources.Query{
 				Query: q,
 				Limit: s.Options.Limit,
 			})
@@ -199,7 +202,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 // AllAgents returns all supported uncover Agents
 func (s *Service) AllAgents() []string {
 	return []string{
-		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise", "nerdydata",
+		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise", "daydaymap", "nerdydata",
 	}
 }
 

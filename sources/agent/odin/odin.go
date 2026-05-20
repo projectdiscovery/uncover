@@ -2,6 +2,7 @@ package odin
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,7 +27,7 @@ func (agent *Agent) Name() string {
 	return "odin"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.OdinToken == "" {
 		return nil, errors.New("empty odin token")
 	}
@@ -40,6 +41,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		var startCursor []float64
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			reqBody := OdinRequest{
 				Limit: query.Limit,
 				Query: query.Query,
@@ -47,7 +51,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			if len(startCursor) == 2 {
 				reqBody.Start = startCursor
 			}
-			odinResp := agent.query(session, &reqBody, results)
+			odinResp := agent.query(ctx, session, &reqBody, results)
 			if odinResp == nil {
 				break
 			}
@@ -69,16 +73,16 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(session *sources.Session, odinReq *OdinRequest, results chan sources.Result) *OdinResponse {
+func (agent *Agent) query(ctx context.Context, session *sources.Session, odinReq *OdinRequest, results chan sources.Result) *OdinResponse {
 	reqBody, err := json.Marshal(odinReq)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("failed to marshal request: %v", err)}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: fmt.Errorf("failed to marshal request: %v", err)})
 		return nil
 	}
 
-	httpReq, err := sources.NewHTTPRequest(http.MethodPost, OdinAPIURL, bytes.NewReader(reqBody))
+	httpReq, err := sources.NewHTTPRequest(ctx, http.MethodPost, OdinAPIURL, bytes.NewReader(reqBody))
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
@@ -87,7 +91,7 @@ func (agent *Agent) query(session *sources.Session, odinReq *OdinRequest, result
 
 	resp, err := session.Do(httpReq, agent.Name())
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 	defer func() {
@@ -96,7 +100,7 @@ func (agent *Agent) query(session *sources.Session, odinReq *OdinRequest, result
 
 	var odinResp OdinResponse
 	if err := json.NewDecoder(resp.Body).Decode(&odinResp); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: fmt.Errorf("failed to decode odin response: %v", err)}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: fmt.Errorf("failed to decode odin response: %v", err)})
 		return nil
 	}
 
@@ -110,7 +114,9 @@ func (agent *Agent) query(session *sources.Session, odinReq *OdinRequest, result
 			rawBytes, _ := json.Marshal(host)
 			result.Raw = rawBytes
 
-			results <- result
+			if !sources.SendResult(ctx, results, result) {
+				return &odinResp
+			}
 		}
 	}
 

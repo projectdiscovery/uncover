@@ -1,6 +1,7 @@
 package criminalip
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -23,7 +24,7 @@ func (agent *Agent) Name() string {
 	return "criminalip"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.CriminalIPToken == "" {
 		return nil, errors.New("empty criminalip keys")
 	}
@@ -36,12 +37,15 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		currentPage := 0
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			criminalipRequest := &CriminalIPRequest{
 				Query:  query.Query,
 				Offset: currentPage,
 			}
 
-			criminalipResponse := agent.query(URL, session, criminalipRequest, results)
+			criminalipResponse := agent.query(ctx, URL, session, criminalipRequest, results)
 			if criminalipResponse == nil {
 				break
 			}
@@ -65,10 +69,10 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string, criminalipRequest *CriminalIPRequest) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string, criminalipRequest *CriminalIPRequest) (*http.Response, error) {
 	criminalipURL := fmt.Sprintf(URL, url.QueryEscape(criminalipRequest.Query), criminalipRequest.Offset)
 
-	request, err := sources.NewHTTPRequest(http.MethodGet, criminalipURL, nil)
+	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, criminalipURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -76,17 +80,16 @@ func (agent *Agent) queryURL(session *sources.Session, URL string, criminalipReq
 	return session.Do(request, agent.Name())
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, criminalipRequest *CriminalIPRequest, results chan sources.Result) *CriminalIPResponse {
-	// query certificates
-	resp, err := agent.queryURL(session, URL, criminalipRequest)
+func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, criminalipRequest *CriminalIPRequest, results chan sources.Result) *CriminalIPResponse {
+	resp, err := agent.queryURL(ctx, session, URL, criminalipRequest)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
 	criminalipResponse := &CriminalIPResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(criminalipResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 	if criminalipResponse.Status == http.StatusOK && criminalipResponse.Data.Count > 0 {
@@ -97,7 +100,9 @@ func (agent *Agent) query(URL string, session *sources.Session, criminalipReques
 			result.Host = criminalipResult.Domain
 			raw, _ := json.Marshal(criminalipResult)
 			result.Raw = raw
-			results <- result
+			if !sources.SendResult(ctx, results, result) {
+				return criminalipResponse
+			}
 		}
 	}
 

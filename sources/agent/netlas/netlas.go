@@ -1,6 +1,7 @@
 package netlas
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -20,7 +21,7 @@ func (agent *Agent) Name() string {
 	return "netlas"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.NetlasToken == "" {
 		return nil, errors.New("empty netlas keys")
 	}
@@ -33,12 +34,15 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		numberOfResults := 0
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			netlasRequest := &Request{
 				Query: query.Query,
 				Start: numberOfResults,
 			}
 
-			netlasResponse := agent.query(netlasRequest.buildURL(), session, results)
+			netlasResponse := agent.query(ctx, netlasRequest.buildURL(), session, results)
 			if netlasResponse == nil {
 				break
 			}
@@ -54,16 +58,16 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(URL string, session *sources.Session, results chan sources.Result) *Response {
-	resp, err := agent.queryURL(session, URL)
+func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, results chan sources.Result) *Response {
+	resp, err := agent.queryURL(ctx, session, URL)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
 	netlasResponse := &Response{}
 	if err := json.NewDecoder(resp.Body).Decode(netlasResponse); err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
@@ -74,14 +78,17 @@ func (agent *Agent) query(URL string, session *sources.Session, results chan sou
 		result.Host = netlasResult.Data.Host
 		raw, _ := json.Marshal(netlasResult)
 		result.Raw = raw
-		results <- result
+		if !sources.SendResult(ctx, results, result) {
+			return netlasResponse
+		}
 	}
 
 	return netlasResponse
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string) (*http.Response, error) {
 	request, err := sources.NewHTTPRequest(
+		ctx,
 		http.MethodGet,
 		URL,
 		nil,
