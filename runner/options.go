@@ -37,6 +37,7 @@ type Options struct {
 	OutputFields         string
 	JSON                 bool
 	Raw                  bool
+	CSV                  bool
 	Limit                int
 	Silent               bool
 	Verbose              bool
@@ -122,6 +123,7 @@ func ParseOptions() *Options {
 		flagSet.StringVarP(&options.OutputFields, "field", "f", "ip:port", "field to display in output (ip,port,host)"),
 		flagSet.BoolVarP(&options.JSON, "json", "j", false, "write output in JSONL(ines) format"),
 		flagSet.BoolVarP(&options.Raw, "raw", "r", false, "write raw output as received by the remote api"),
+		flagSet.BoolVarP(&options.CSV, "csv", "c", false, "write output in CSV format"),
 		flagSet.IntVarP(&options.Limit, "limit", "l", 100, "limit the number of results to return"),
 		flagSet.BoolVarP(&options.NoColor, "no-color", "nc", false, "disable colors in output"),
 	)
@@ -201,6 +203,7 @@ func ParseOptions() *Options {
 
 	// Validate the options passed by the user and if any
 	// invalid options have been used, exit.
+	options.configureOutput()
 	if err := options.validateOptions(); err != nil {
 		gologger.Fatal().Msgf("Program exiting: %s\n", err)
 	}
@@ -219,6 +222,9 @@ func (options *Options) configureOutput() {
 	}
 	if options.Silent {
 		gologger.DefaultLogger.SetMaxLevel(levels.LevelSilent)
+	}
+	if options.CSV && options.OutputFields == "ip:port" {
+		options.OutputFields = "ip,port,host"
 	}
 }
 
