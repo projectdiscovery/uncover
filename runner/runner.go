@@ -58,8 +58,17 @@ func NewRunner(options *Options) (*Runner, error) {
 	return runner, nil
 }
 
-// RunEnumeration runs the subdomain enumeration flow on the targets specified
+// Run runs the subdomain enumeration flow on the targets specified
 func (r *Runner) Run(ctx context.Context) error {
+	// CSV is only the effective format when no higher-precedence output mode
+	// (JSON/Raw) is set; otherwise skip the header so we don't emit a stray row.
+	csvOutput := r.options.CSV && !r.options.JSON && !r.options.Raw
+	var csvFields []string
+	if csvOutput {
+		csvFields = parseFields(r.options.OutputFields)
+		r.outputWriter.WriteCSVRow(csvFields)
+	}
+
 	resultCallback := func(result sources.Result) {
 		optionFields := r.options.OutputFields
 		switch {
@@ -71,6 +80,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		case r.options.Raw:
 			gologger.Verbose().Label(result.Source).Msgf("%s\n", result.RawData())
 			r.outputWriter.WriteString(result.RawData())
+		case csvOutput:
+			if r.options.Verbose {
+				gologger.Verbose().Label(result.Source).Msgf("%s\n", strings.Join(getFieldValues(result, csvFields), ","))
+			}
+			r.outputWriter.WriteCSVData(result, csvFields)
 		default:
 			port := fmt.Sprint(result.Port)
 			replacer := strings.NewReplacer(
