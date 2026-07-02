@@ -2,7 +2,6 @@ package runner
 
 import (
 	"bytes"
-	"strings"
 	"testing"
 
 	"github.com/projectdiscovery/uncover/sources"
@@ -20,23 +19,54 @@ func TestOutputWriter_WriteCSVData(t *testing.T) {
 	fields := []string{"ip", "port", "host"}
 	writer.WriteCSVRow(fields)
 
+	// Host contains a comma and quotes to exercise RFC-4180 escaping.
 	result := sources.Result{
 		IP:   "192.168.1.1",
 		Port: 80,
-		Host: "localhost",
+		Host: `local,"host"`,
 	}
 
 	writer.WriteCSVData(result, fields)
+	// A second identical write must be suppressed as a duplicate.
+	writer.WriteCSVData(result, fields)
 
-	output := buf.String()
-	expectedHeader := "ip,port,host\n"
-	expectedRow := "192.168.1.1,80,localhost\n"
-
-	if !strings.Contains(output, expectedHeader) {
-		t.Errorf("Expected output to contain header %q, got %q", expectedHeader, output)
+	expected := "ip,port,host\n192.168.1.1,80,\"local,\"\"host\"\"\"\n"
+	if got := buf.String(); got != expected {
+		t.Fatalf("unexpected CSV output:\n got: %q\nwant: %q", got, expected)
 	}
-	if !strings.Contains(output, expectedRow) {
-		t.Errorf("Expected output to contain row %q, got %q", expectedRow, output)
+}
+
+func TestOutputWriter_WriteCSVData_DistinctProjections(t *testing.T) {
+	writer, err := NewOutputWriter()
+	if err != nil {
+		t.Fatalf("Failed to create OutputWriter: %s", err)
+	}
+
+	var buf bytes.Buffer
+	writer.AddWriters(&buf)
+
+	// Same IP but different hosts must produce two rows when host is projected.
+	writer.WriteCSVData(sources.Result{IP: "1.1.1.1", Port: 80, Host: "a.example.com"}, []string{"ip", "port", "host"})
+	writer.WriteCSVData(sources.Result{IP: "1.1.1.1", Port: 80, Host: "b.example.com"}, []string{"ip", "port", "host"})
+
+	expected := "1.1.1.1,80,a.example.com\n1.1.1.1,80,b.example.com\n"
+	if got := buf.String(); got != expected {
+		t.Fatalf("distinct rows were incorrectly deduplicated:\n got: %q\nwant: %q", got, expected)
+	}
+}
+
+func TestGetFieldValues(t *testing.T) {
+	result := sources.Result{IP: "1.1.1.1", Port: 443, Host: "example.com", Url: "https://example.com"}
+	got := getFieldValues(result, []string{"IP", "port", "host", "url", "unknown"})
+	want := []string{"1.1.1.1", "443", "example.com", "https://example.com", ""}
+
+	if len(got) != len(want) {
+		t.Fatalf("expected %d values, got %d (%v)", len(want), len(got), got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("field %d: expected %q, got %q", i, want[i], got[i])
+		}
 	}
 }
 

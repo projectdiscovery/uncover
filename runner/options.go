@@ -268,6 +268,17 @@ func (options *Options) validateOptions() error {
 		return errors.New("both verbose and silent mode specified")
 	}
 
+	// Only one output format may be selected at a time.
+	formats := 0
+	for _, enabled := range []bool{options.JSON, options.Raw, options.CSV} {
+		if enabled {
+			formats++
+		}
+	}
+	if formats > 1 {
+		return errors.New("only one of -json, -raw, -csv can be used at a time")
+	}
+
 	// Validate threads and options
 	if genericutil.EqualsAll(0,
 		len(options.Engine),
