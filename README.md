@@ -64,6 +64,9 @@ uncover requires **go1.21** to install successfully. Run the following command t
 go install -v github.com/projectdiscovery/uncover/cmd/uncover@latest
 ```
 
+On Windows, `go install` places the binary under `%USERPROFILE%\go\bin` (or `$env:GOBIN` if set).
+Ensure that directory is on your `PATH`, then open a **new** terminal before running `uncover`.
+
 ## Usage
 
 ```sh
