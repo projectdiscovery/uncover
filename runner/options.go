@@ -14,7 +14,7 @@ import (
 	"github.com/projectdiscovery/gologger/formatter"
 	"github.com/projectdiscovery/gologger/levels"
 	"github.com/projectdiscovery/uncover/sources"
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 	fileutil "github.com/projectdiscovery/utils/file"
 	folderutil "github.com/projectdiscovery/utils/folder"
 	genericutil "github.com/projectdiscovery/utils/generic"
@@ -186,11 +186,10 @@ func ParseOptions() *Options {
 
 	// we make the assumption that input queries aren't that much
 	if fileutil.HasStdin() {
-		stdchan, err := fileutil.ReadFileWithReader(os.Stdin)
-		if err != nil {
-			gologger.Fatal().Msgf("couldn't read stdin: %s\n", err)
-		}
-		for query := range stdchan {
+		for query, err := range fileutil.LinesReader(os.Stdin) {
+			if err != nil {
+				gologger.Fatal().Msgf("couldn't read stdin: %s\n", err)
+			}
 			options.Query = append(options.Query, query)
 		}
 	}
@@ -230,7 +229,7 @@ func (options *Options) configureOutput() {
 
 func (options *Options) loadConfigFrom(location string) error {
 	if !fileutil.FileExists(location) {
-		return errorutil.New("config file %s does not exist", location)
+		return errkit.Newf("config file %s does not exist", location)
 	}
 	return fileutil.Unmarshal(fileutil.YAML, []byte(location), options)
 }

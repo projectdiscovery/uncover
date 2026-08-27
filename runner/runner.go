@@ -9,7 +9,7 @@ import (
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover"
 	"github.com/projectdiscovery/uncover/sources"
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
@@ -51,7 +51,7 @@ func NewRunner(options *Options) (*Runner, error) {
 	if runner.options.OutputFile != "" {
 		outputFile, err := os.Create(runner.options.OutputFile)
 		if err != nil {
-			return nil, errorutil.New("could not create output file %s: %s", options.OutputFile, err)
+			return nil, errkit.Newf("could not create output file %s: %s", options.OutputFile, err)
 		}
 		runner.outputWriter.AddWriters(outputFile)
 	}

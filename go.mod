@@ -13,7 +13,7 @@ require (
 	github.com/projectdiscovery/gologger v1.1.70
 	github.com/projectdiscovery/mapcidr v1.1.34
 	github.com/projectdiscovery/ratelimit v0.0.88
-	github.com/projectdiscovery/retryablehttp-go v1.3.11
+	github.com/projectdiscovery/retryablehttp-go v1.3.13
 	github.com/stretchr/testify v1.11.1
 )
 
@@ -98,11 +98,11 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.23 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
-	github.com/projectdiscovery/fastdialer v0.5.7 // indirect
-	github.com/projectdiscovery/hmap v0.0.100 // indirect
+	github.com/projectdiscovery/fastdialer v0.5.8 // indirect
+	github.com/projectdiscovery/hmap v0.0.101 // indirect
 	github.com/projectdiscovery/machineid v0.0.0-20250715113114-c77eb3567582 // indirect
 	github.com/projectdiscovery/networkpolicy v0.1.39 // indirect
-	github.com/projectdiscovery/retryabledns v1.0.114 // indirect
+	github.com/projectdiscovery/retryabledns v1.0.115 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.3 // indirect
