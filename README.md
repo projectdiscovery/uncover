@@ -113,6 +113,7 @@ OUTPUT:
    -f, -field string   field to display in output (ip,port,host) (default "ip:port")
    -j, -json           write output in JSONL(ines) format
    -r, -raw            write raw output as received by the remote api
+   -c, -csv            write output in CSV format (defaults to ip,port,host fields)
    -l, -limit int      limit the number of results to return (default 100)
    -nc, -no-color      disable colors in output
 
