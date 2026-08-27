@@ -9,9 +9,9 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/projectdiscovery/awesome-search-queries v0.0.0-20241111181020-ad0097bd63a1
 	github.com/projectdiscovery/fdmax v0.0.4
-	github.com/projectdiscovery/goflags v0.1.70
+	github.com/projectdiscovery/goflags v0.1.74
 	github.com/projectdiscovery/gologger v1.1.70
-	github.com/projectdiscovery/mapcidr v1.1.34
+	github.com/projectdiscovery/mapcidr v1.1.97
 	github.com/projectdiscovery/ratelimit v0.0.88
 	github.com/projectdiscovery/retryablehttp-go v1.3.13
 	github.com/stretchr/testify v1.11.1
