@@ -52,6 +52,7 @@
   - **[Driftnet](https://driftnet.io)**
   - **[DayDayMap](https://www.daydaymap.com)**
   - **[NerdyData](https://www.nerdydata.com/?utm_source=projectdiscovery/uncover)**
+  - **[ScanMalware](https://scanmalware.com)**
 - Multiple API key input support
 - Automatic API key randomization
 - **stdin** / **stdout** support for input
@@ -79,12 +80,13 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google,driftnet,daydaymap) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google,driftnet,daydaymap,scanmalware) (default shodan)
    -asq, -awesome-search-queries string[]  use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')
 
 SEARCH-ENGINE:
    -s, -shodan string[]       search query for shodan (example: -shodan 'query.txt')
    -sd, -shodan-idb string[]  search query for shodan-idb (example: -shodan-idb 'query.txt')
+   -sm, -scanmalware string[] search query for scanmalware (example: -scanmalware 'domain:*.example.com')
    -ff, -fofa string[]        search query for fofa (example: -fofa 'query.txt')
    -cs, -censys string[]      search query for censys (example: -censys 'query.txt')
    -qk, -quake string[]       search query for quake (example: -quake 'query.txt')
@@ -485,6 +487,7 @@ https://129.206.117.248
 - `query` flag supports **all and only filters supported by search engine.**
 - results are limited to `100` as default and can be increased with `limit` flag.
 - `shodan-idb` API doesn't requires an API key and works out of the box.
+- `scanmalware` API doesn't require an API key either. It searches an archive of sandboxed URL scans, so it returns URLs and hostnames rather than `ip:port`; `-f host` or `-f url` is the useful output here.
 - `shodan-idb` API is used as **default** engine when **IP/CIDR** is provided as input.
 
 -----
