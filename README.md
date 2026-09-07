@@ -52,6 +52,7 @@
   - **[Driftnet](https://driftnet.io)**
   - **[DayDayMap](https://www.daydaymap.com)**
   - **[NerdyData](https://www.nerdydata.com/?utm_source=projectdiscovery/uncover)**
+  - **[Subdomain Center](https://www.subdomain.center)**
 - Multiple API key input support
 - Automatic API key randomization
 - **stdin** / **stdout** support for input
@@ -179,6 +180,9 @@ daydaymap:
 nerdydata:
   - NERDYDATA_API_KEY_1
   - NERDYDATA_API_KEY_2
+subdomaincenter:
+  - SUBDOMAINCENTER_API_KEY_1
+  - SUBDOMAINCENTER_API_KEY_2
 ```
 
 When multiple keys/credentials are specified for same provider in the config file, random key will be used for each execution.
@@ -418,6 +422,31 @@ echo 8.8.8.8/20 | uncover -e driftnet
 8.8.8.8:853
 ...
 ```
+
+### Subdomain Center keyword search
+
+**uncover** supports the [Subdomain Center](https://www.subdomain.center) `ammonites` engine, which finds hosts anywhere in the dataset carrying a given subdomain label — handy for turning up forgotten admin panels, VPN gateways or staging environments across the internet.
+
+The query is the label to search for. Scope it to a single zone with `domain:`, and widen it from an exact label match to a prefix match with `match:prefix`.
+
+```console
+uncover -subdomaincenter 'jenkins' -l 5 -silent
+
+prod.jenkins.dental2024-de.space
+www.jenkins.sayitright.space
+jenkins.conergy.us
+www.jenkins.dosugbarsmo.info
+qa.jenkins.black-friday-aanbiedingen.click
+```
+
+```console
+uncover -e subdomaincenter -q 'admin domain:hackerone.com match:prefix' -silent
+
+admin.hackerone.com
+admine.hackerone.com
+```
+
+An API key is optional here: without one the API answers from its anonymous tier with a capped sample of the result set, and with one it returns the full set, paginated.
 
 ### Field Format
 

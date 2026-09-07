@@ -22,6 +22,7 @@ type Keys struct {
 	GreyNoiseKey    string
 	Daydaymap       string
 	NerdyDataToken  string
+	SubdomainCenter string
 }
 
 func (keys Keys) Empty() bool {
@@ -45,5 +46,6 @@ func (keys Keys) Empty() bool {
 		keys.DriftnetToken == "" &&
 		keys.GreyNoiseKey == "" &&
 		keys.Daydaymap == "" &&
-		keys.NerdyDataToken == ""
+		keys.NerdyDataToken == "" &&
+		keys.SubdomainCenter == ""
 }

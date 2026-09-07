@@ -34,6 +34,8 @@ var DefaultRateLimits = map[string]*ratelimit.Options{
 	"driftnet":   {Key: "driftnet", MaxCount: 5, Duration: time.Second},
 	"greynoise":  {Key: "greynoise", MaxCount: 1, Duration: time.Second},
 	"nerdydata":  {Key: "nerdydata", MaxCount: 1, Duration: time.Second},
+	// the anonymous tier allows 5 requests/min per IP; keyed plans allow more
+	"subdomaincenter": {Key: "subdomaincenter", MaxCount: 5, Duration: time.Minute},
 }
 
 // Session handles session agent sessions

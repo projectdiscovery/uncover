@@ -333,3 +333,23 @@ func (h greynoiseTestcases) Execute() error {
 
 	return nil
 }
+
+type subdomaincenterTestcases struct{}
+
+func (h subdomaincenterTestcases) Execute() error {
+	// The API answers anonymously with a capped sample, so a key is optional
+	// here and only widens the result set.
+	if token := os.Getenv("SUBDOMAINCENTER_API_KEY"); token != "" {
+		subdomaincenterToken := fmt.Sprintf(`subdomaincenter: [%s]`, token)
+		_ = os.WriteFile(ConfigFile, []byte(subdomaincenterToken), 0644)
+		defer func() {
+			_ = os.RemoveAll(ConfigFile)
+		}()
+	}
+
+	results, err := testutils.RunUncoverAndGetResults(debug, "-subdomaincenter", "jenkins")
+	if err != nil {
+		return err
+	}
+	return expectResultsGreaterThanCount(results, 0)
+}
