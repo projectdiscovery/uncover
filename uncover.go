@@ -17,10 +17,10 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/greynoise"
 	"github.com/projectdiscovery/uncover/sources/agent/hunter"
 	"github.com/projectdiscovery/uncover/sources/agent/hunterhow"
+	"github.com/projectdiscovery/uncover/sources/agent/nerdydata"
 	"github.com/projectdiscovery/uncover/sources/agent/netlas"
 	"github.com/projectdiscovery/uncover/sources/agent/odin"
 	"github.com/projectdiscovery/uncover/sources/agent/onyphe"
-	"github.com/projectdiscovery/uncover/sources/agent/nerdydata"
 	"github.com/projectdiscovery/uncover/sources/agent/publicwww"
 	"github.com/projectdiscovery/uncover/sources/agent/quake"
 	"github.com/projectdiscovery/uncover/sources/agent/shodan"
@@ -161,7 +161,9 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 						if !ok {
 							return
 						}
-						relay <- res
+						if !sources.SendResult(ctx, relay, res) {
+							return
+						}
 					}
 				}
 			}(ch, megaChan, ctx)
