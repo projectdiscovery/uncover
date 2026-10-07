@@ -1,15 +1,15 @@
-# Base
-FROM golang:1.24.1-alpine AS builder
-RUN apk add --no-cache git build-base
-WORKDIR /app
-COPY . /app
-RUN go mod download
-RUN go build -o ./cmd/uncover ./cmd/uncover
-
-# Release
 FROM alpine:3.18.2
+
+LABEL org.opencontainers.image.authors="ProjectDiscovery"
+LABEL org.opencontainers.image.description="Quickly discover exposed hosts on the internet using multiple search engines."
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.title="uncover"
+LABEL org.opencontainers.image.url="https://github.com/projectdiscovery/uncover"
+
 RUN apk -U upgrade --no-cache \
     && apk add --no-cache bind-tools ca-certificates
-COPY --from=builder /app/cmd/uncover/uncover /usr/local/bin/
+
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/uncover /usr/local/bin/
 
 ENTRYPOINT ["uncover"]
