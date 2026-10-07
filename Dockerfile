@@ -1,4 +1,4 @@
-FROM alpine:3.18.2
+FROM alpine:latest
 
 LABEL org.opencontainers.image.authors="ProjectDiscovery"
 LABEL org.opencontainers.image.description="Quickly discover exposed hosts on the internet using multiple search engines."
