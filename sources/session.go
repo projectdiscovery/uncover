@@ -34,6 +34,8 @@ var DefaultRateLimits = map[string]*ratelimit.Options{
 	"driftnet":   {Key: "driftnet", MaxCount: 5, Duration: time.Second},
 	"greynoise":  {Key: "greynoise", MaxCount: 1, Duration: time.Second},
 	"nerdydata":  {Key: "nerdydata", MaxCount: 1, Duration: time.Second},
+	// Anonymous API, documented at 600 req/min; 5/s leaves headroom.
+	"scanmalware": {Key: "scanmalware", MaxCount: 5, Duration: time.Second},
 }
 
 // Session handles session agent sessions
