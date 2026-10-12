@@ -1,10 +1,21 @@
 package sources
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+func TestAccountBalance_JSONZeroRemaining(t *testing.T) {
+	balance := &AccountBalance{
+		Engine:    "shodan",
+		Remaining: 0,
+	}
+	data, err := json.Marshal(balance)
+	require.NoError(t, err)
+	require.Contains(t, string(data), `"remaining":0`)
+}
 
 func TestAccountBalance_String(t *testing.T) {
 	// Case 1: Custom message set

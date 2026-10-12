@@ -2,6 +2,7 @@ package uncover
 
 import (
 	"context"
+	"path/filepath"
 	"testing"
 
 	"github.com/projectdiscovery/uncover/sources"
@@ -38,6 +39,13 @@ func TestService_ExecuteCheckCredits_AllProvidersNoKeys(t *testing.T) {
 }
 
 func TestService_CheckCredits_Method(t *testing.T) {
+	origConfig := sources.DefaultProviderConfigLocation
+	sources.DefaultProviderConfigLocation = filepath.Join(t.TempDir(), "provider-config.yaml")
+	t.Cleanup(func() {
+		sources.DefaultProviderConfigLocation = origConfig
+	})
+	t.Setenv("SHODAN_API_KEY", "")
+
 	opts := &Options{
 		Agents: []string{"shodan"},
 	}

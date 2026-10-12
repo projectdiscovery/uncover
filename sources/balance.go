@@ -9,7 +9,7 @@ import (
 // AccountBalance represents credit and quota details for a search engine provider
 type AccountBalance struct {
 	Engine    string            `json:"engine"`
-	Remaining int64             `json:"remaining,omitempty"`
+	Remaining int64             `json:"remaining"`
 	Details   map[string]string `json:"details,omitempty"`
 	Message   string            `json:"message,omitempty"`
 }

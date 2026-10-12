@@ -36,8 +36,8 @@ func (agent *Agent) Balance(ctx context.Context, session *sources.Session) (*sou
 		return nil, err
 	}
 
-	if hunterResponse.Code != http.StatusOK && hunterResponse.Code != 0 && hunterResponse.Msg != "" {
-		return nil, fmt.Errorf("hunter error: %s", hunterResponse.Msg)
+	if hunterResponse.Code != http.StatusOK {
+		return nil, fmt.Errorf("hunter error (code %d): %s", hunterResponse.Code, hunterResponse.Msg)
 	}
 
 	details := map[string]string{

@@ -52,3 +52,24 @@ func TestHunterBalanceEmptyKeys(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "empty hunter keys")
 }
+
+func TestHunterBalanceErrorCode(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"code":401,"msg":"invalid api key"}`)
+	}))
+	defer ts.Close()
+
+	originalURL := URL
+	URL = ts.URL + "?api-key=%s&search=%s&page=%d&page_size=%d&is_web=%d&start_time=%s&end_time=%s"
+	defer func() { URL = originalURL }()
+
+	keys := &sources.Keys{HunterToken: "test-hunter-key"}
+	session, err := sources.NewSession(keys, 1, 5, 0, []string{"hunter"}, time.Second, "")
+	require.NoError(t, err)
+
+	agent := &Agent{}
+	_, err = agent.Balance(context.Background(), session)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "hunter error (code 401): invalid api key")
+}
