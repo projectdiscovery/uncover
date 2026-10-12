@@ -13,7 +13,7 @@ import (
 	"github.com/projectdiscovery/uncover/sources"
 )
 
-const (
+var (
 	URL = "https://hunter.qianxin.com/openApi/search?api-key=%s&search=%s&page=%d&page_size=%d&is_web=%d&start_time=%s&end_time=%s"
 )
 

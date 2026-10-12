@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -28,8 +29,13 @@ func NewRunner(options *Options) (*Runner, error) {
 	runner := &Runner{options: options}
 	appendAllQueries(options)
 
+	engineList := options.Engine
+	if options.CheckCredits && len(options.Engine) == 0 {
+		engineList = uncover.AllBalanceAgents()
+	}
+
 	opts := uncover.Options{
-		Agents:  options.Engine,
+		Agents:  engineList,
 		Queries: options.Query,
 		Limit:   options.Limit,
 		Proxy:   options.Proxy,
@@ -58,8 +64,12 @@ func NewRunner(options *Options) (*Runner, error) {
 	return runner, nil
 }
 
-// RunEnumeration runs the subdomain enumeration flow on the targets specified
+// Run runs the subdomain enumeration flow or credit balance check
 func (r *Runner) Run(ctx context.Context) error {
+	if r.options.CheckCredits {
+		return r.CheckCredits(ctx)
+	}
+
 	resultCallback := func(result sources.Result) {
 		optionFields := r.options.OutputFields
 		switch {
@@ -96,6 +106,25 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 	}
 	return r.service.ExecuteWithCallback(ctx, resultCallback)
+}
+
+// CheckCredits queries account remaining credits across configured search engine providers
+func (r *Runner) CheckCredits(ctx context.Context) error {
+	allProvidersMode := len(r.options.Engine) == 0
+	balanceCallback := func(balance *sources.AccountBalance) {
+		if r.options.JSON {
+			data, err := json.Marshal(balance)
+			if err == nil {
+				gologger.Silent().Msg(string(data))
+				r.outputWriter.WriteString(string(data))
+			}
+		} else {
+			msg := fmt.Sprintf("[%s] %s", balance.Engine, balance.String())
+			gologger.Info().Msg(msg)
+			r.outputWriter.WriteString(msg)
+		}
+	}
+	return r.service.ExecuteCheckCredits(ctx, allProvidersMode, balanceCallback)
 }
 
 // Close closes its resources

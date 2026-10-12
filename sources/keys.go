@@ -47,3 +47,26 @@ func (keys Keys) Empty() bool {
 		keys.Daydaymap == "" &&
 		keys.NerdyDataToken == ""
 }
+
+func (keys Keys) HasKeysFor(agent string) bool {
+	switch agent {
+	case "shodan":
+		return keys.Shodan != ""
+	case "censys":
+		return keys.CensysToken != "" && keys.CensysOrgId != ""
+	case "fofa":
+		return keys.FofaKey != ""
+	case "hunter":
+		return keys.HunterToken != ""
+	case "quake":
+		return keys.QuakeToken != ""
+	case "zoomeye":
+		return keys.ZoomEyeToken != ""
+	case "netlas":
+		return keys.NetlasToken != ""
+	case "criminalip":
+		return keys.CriminalIPToken != ""
+	default:
+		return false
+	}
+}
