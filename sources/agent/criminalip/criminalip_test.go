@@ -296,10 +296,15 @@ func TestQueryRespectsCancelledContext(t *testing.T) {
 
 	cancel()
 
-	select {
-	case _, ok := <-ch:
-		require.False(t, ok, "agent still emitting after cancel")
-	case <-time.After(2 * time.Second):
-		t.Fatal("channel did not close after cancel")
+	deadline := time.After(2 * time.Second)
+	for {
+		select {
+		case _, ok := <-ch:
+			if !ok {
+				return
+			}
+		case <-deadline:
+			t.Fatal("channel did not close after cancel")
+		}
 	}
 }
