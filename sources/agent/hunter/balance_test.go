@@ -13,17 +13,21 @@ import (
 )
 
 func TestHunterBalance(t *testing.T) {
+	require.Contains(t, UserInfoURL, "/openApi/userInfo")
+	require.NotContains(t, UserInfoURL, "search=")
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		require.Equal(t, http.MethodGet, r.Method)
-		require.Contains(t, r.URL.RawQuery, "api-key=test-hunter-key")
+		require.Equal(t, "test-hunter-key", r.URL.Query().Get("api-key"))
+		require.Empty(t, r.URL.Query().Get("search"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"code":200,"data":{"total":10,"rest_quota":"1250","consume_quota":"50","arr":[]}}`)
+		fmt.Fprint(w, `{"code":200,"message":"success","data":{"rest_free_point":10,"rest_equity_point":100,"type":"个人账号","personal_info":{"user_name":"hunter-user"}}}`)
 	}))
 	defer ts.Close()
 
-	originalURL := URL
-	URL = ts.URL + "?api-key=%s&search=%s&page=%d&page_size=%d&is_web=%d&start_time=%s&end_time=%s"
-	defer func() { URL = originalURL }()
+	originalURL := UserInfoURL
+	UserInfoURL = ts.URL + "?api-key=%s"
+	defer func() { UserInfoURL = originalURL }()
 
 	keys := &sources.Keys{HunterToken: "test-hunter-key"}
 	session, err := sources.NewSession(keys, 1, 5, 0, []string{"hunter"}, time.Second, "")
@@ -35,11 +39,32 @@ func TestHunterBalance(t *testing.T) {
 	require.NotNil(t, balance)
 
 	require.Equal(t, "hunter", balance.Engine)
-	require.Equal(t, int64(1250), balance.Remaining)
-	require.Equal(t, "1250", balance.Details["Rest Quota"])
-	require.Equal(t, "50", balance.Details["Consume Quota"])
-	require.Contains(t, balance.Message, "Remaining Quota: 1250")
-	require.Contains(t, balance.Message, "Consumed Quota: 50")
+	require.Equal(t, int64(110), balance.Remaining)
+	require.Equal(t, "10", balance.Details["Free Points"])
+	require.Equal(t, "100", balance.Details["Equity Points"])
+	require.Equal(t, "个人账号", balance.Details["Account Type"])
+	require.Equal(t, "hunter-user", balance.Details["Username"])
+	require.Contains(t, balance.Message, "Free Points: 10")
+	require.Contains(t, balance.Message, "Equity Points: 100")
+}
+
+func TestHunterBalanceStringCode(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `{"code":"200","data":{"rest_free_point":4,"rest_equity_point":6}}`)
+	}))
+	defer ts.Close()
+
+	originalURL := UserInfoURL
+	UserInfoURL = ts.URL + "?api-key=%s"
+	defer func() { UserInfoURL = originalURL }()
+
+	keys := &sources.Keys{HunterToken: "test-hunter-key"}
+	session, err := sources.NewSession(keys, 1, 5, 0, []string{"hunter"}, time.Second, "")
+	require.NoError(t, err)
+
+	balance, err := (&Agent{}).Balance(context.Background(), session)
+	require.NoError(t, err)
+	require.Equal(t, int64(10), balance.Remaining)
 }
 
 func TestHunterBalanceEmptyKeys(t *testing.T) {
@@ -56,13 +81,13 @@ func TestHunterBalanceEmptyKeys(t *testing.T) {
 func TestHunterBalanceErrorCode(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"code":401,"msg":"invalid api key"}`)
+		fmt.Fprint(w, `{"code":401,"message":"invalid api key"}`)
 	}))
 	defer ts.Close()
 
-	originalURL := URL
-	URL = ts.URL + "?api-key=%s&search=%s&page=%d&page_size=%d&is_web=%d&start_time=%s&end_time=%s"
-	defer func() { URL = originalURL }()
+	originalURL := UserInfoURL
+	UserInfoURL = ts.URL + "?api-key=%s"
+	defer func() { UserInfoURL = originalURL }()
 
 	keys := &sources.Keys{HunterToken: "test-hunter-key"}
 	session, err := sources.NewSession(keys, 1, 5, 0, []string{"hunter"}, time.Second, "")

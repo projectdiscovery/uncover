@@ -6,22 +6,21 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
 
-var (
-	AccountURL = "https://search.censys.io/api/v1/account"
-)
+// CreditsURL is the Platform account endpoint. It uses the same personal
+// access token and organization ID as search, and it does not spend credits.
+var CreditsURL = "https://api.platform.censys.io/v3/accounts/organizations/%s/credits"
 
-type AccountResponse struct {
-	Email string `json:"email"`
-	Quota struct {
-		Allowance int64  `json:"allowance"`
-		Used      int64  `json:"used"`
-		ResetsAt  string `json:"resets_at"`
-	} `json:"quota"`
+type creditsResponse struct {
+	Result struct {
+		Balance int64  `json:"balance"`
+		UID     string `json:"uid"`
+	} `json:"result"`
 }
 
 func (agent *Agent) Balance(ctx context.Context, session *sources.Session) (*sources.AccountBalance, error) {
@@ -29,40 +28,39 @@ func (agent *Agent) Balance(ctx context.Context, session *sources.Session) (*sou
 		return nil, errors.New("empty censys keys")
 	}
 
-	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, AccountURL, nil)
+	creditsURL := fmt.Sprintf(CreditsURL, url.PathEscape(session.Keys.CensysOrgId))
+	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, creditsURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	request.SetBasicAuth(session.Keys.CensysToken, session.Keys.CensysOrgId)
+	request.Header.Set("Authorization", "Bearer "+session.Keys.CensysToken)
+	request.Header.Set("Accept", "application/json")
 
 	resp, err := session.Do(request, agent.Name())
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	var accountResp AccountResponse
-	if err := json.NewDecoder(resp.Body).Decode(&accountResp); err != nil {
+	var credits creditsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&credits); err != nil {
 		return nil, err
 	}
 
-	remaining := accountResp.Quota.Allowance - accountResp.Quota.Used
+	remaining := credits.Result.Balance
 	details := map[string]string{
-		"Allowance": strconv.FormatInt(accountResp.Quota.Allowance, 10),
-		"Used":      strconv.FormatInt(accountResp.Quota.Used, 10),
-		"Remaining": strconv.FormatInt(remaining, 10),
+		"Credits": strconv.FormatInt(remaining, 10),
 	}
-	if accountResp.Quota.ResetsAt != "" {
-		details["Resets At"] = accountResp.Quota.ResetsAt
-	}
-	if accountResp.Email != "" {
-		details["Email"] = accountResp.Email
+	if credits.Result.UID != "" {
+		details["Organization"] = credits.Result.UID
 	}
 
 	return &sources.AccountBalance{
 		Engine:    agent.Name(),
 		Remaining: remaining,
 		Details:   details,
-		Message:   fmt.Sprintf("Remaining: %d / %d (Used: %d)", remaining, accountResp.Quota.Allowance, accountResp.Quota.Used),
+		Message:   fmt.Sprintf("Credits: %d", remaining),
 	}, nil
 }

@@ -13,21 +13,24 @@ import (
 )
 
 func TestCensysBalance(t *testing.T) {
+	require.Contains(t, CreditsURL, "api.platform.censys.io")
+	require.NotContains(t, CreditsURL, "search.censys.io")
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		require.Equal(t, http.MethodGet, r.Method)
-		user, pass, ok := r.BasicAuth()
-		require.True(t, ok)
-		require.Equal(t, "test-token", user)
-		require.Equal(t, "test-org", pass)
+		require.Equal(t, "/v3/accounts/organizations/test-org/credits", r.URL.Path)
+		require.Equal(t, "Bearer test-token", r.Header.Get("Authorization"))
+		_, _, ok := r.BasicAuth()
+		require.False(t, ok)
 
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"email":"test@example.com","quota":{"allowance":250,"used":15,"resets_at":"2026-11-01 00:00:00"}}`)
+		fmt.Fprint(w, `{"result":{"balance":235,"uid":"test-org","auto_replenish_config":{"enabled":false},"credit_expirations":[]}}`)
 	}))
 	defer ts.Close()
 
-	originalURL := AccountURL
-	AccountURL = ts.URL
-	defer func() { AccountURL = originalURL }()
+	originalURL := CreditsURL
+	CreditsURL = ts.URL + "/v3/accounts/organizations/%s/credits"
+	defer func() { CreditsURL = originalURL }()
 
 	keys := &sources.Keys{CensysToken: "test-token", CensysOrgId: "test-org"}
 	session, err := sources.NewSession(keys, 1, 5, 0, []string{"censys"}, time.Second, "")
@@ -40,16 +43,13 @@ func TestCensysBalance(t *testing.T) {
 
 	require.Equal(t, "censys", balance.Engine)
 	require.Equal(t, int64(235), balance.Remaining)
-	require.Equal(t, "250", balance.Details["Allowance"])
-	require.Equal(t, "15", balance.Details["Used"])
-	require.Equal(t, "235", balance.Details["Remaining"])
-	require.Equal(t, "2026-11-01 00:00:00", balance.Details["Resets At"])
-	require.Equal(t, "test@example.com", balance.Details["Email"])
-	require.Contains(t, balance.Message, "Remaining: 235 / 250 (Used: 15)")
+	require.Equal(t, "235", balance.Details["Credits"])
+	require.Equal(t, "test-org", balance.Details["Organization"])
+	require.Equal(t, "Credits: 235", balance.Message)
 }
 
 func TestCensysBalanceEmptyKeys(t *testing.T) {
-	keys := &sources.Keys{CensysToken: "test-token"} // Missing OrgId
+	keys := &sources.Keys{CensysToken: "test-token"}
 	session, err := sources.NewSession(keys, 1, 5, 0, []string{"censys"}, time.Second, "")
 	require.NoError(t, err)
 
@@ -57,4 +57,24 @@ func TestCensysBalanceEmptyKeys(t *testing.T) {
 	_, err = agent.Balance(context.Background(), session)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "empty censys keys")
+}
+
+func TestCensysBalanceHTTPError(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+	}))
+	defer ts.Close()
+
+	originalURL := CreditsURL
+	CreditsURL = ts.URL + "/v3/accounts/organizations/%s/credits"
+	defer func() { CreditsURL = originalURL }()
+
+	keys := &sources.Keys{CensysToken: "test-token", CensysOrgId: "test-org"}
+	session, err := sources.NewSession(keys, 1, 5, 0, []string{"censys"}, time.Second, "")
+	require.NoError(t, err)
+
+	agent := &Agent{}
+	_, err = agent.Balance(context.Background(), session)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "401")
 }

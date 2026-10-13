@@ -1,8 +1,8 @@
 package hunter
 
 import (
+	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,13 +12,63 @@ import (
 	"github.com/projectdiscovery/uncover/sources"
 )
 
+// UserInfoURL reports account points. Unlike the search API, it does not spend quota.
+var UserInfoURL = "https://hunter.qianxin.com/openApi/userInfo?api-key=%s"
+
+type apiCode int
+
+func (c *apiCode) UnmarshalJSON(data []byte) error {
+	data = bytes.TrimSpace(data)
+	if len(data) == 0 || string(data) == "null" {
+		return nil
+	}
+	if data[0] == '"' {
+		var raw string
+		if err := json.Unmarshal(data, &raw); err != nil {
+			return err
+		}
+		n, err := strconv.Atoi(raw)
+		if err != nil {
+			return err
+		}
+		*c = apiCode(n)
+		return nil
+	}
+	var n int
+	if err := json.Unmarshal(data, &n); err != nil {
+		return err
+	}
+	*c = apiCode(n)
+	return nil
+}
+
+type userInfoResponse struct {
+	Code    apiCode `json:"code"`
+	Msg     string  `json:"msg"`
+	Message string  `json:"message"`
+	Data    struct {
+		RestFreePoint   int64  `json:"rest_free_point"`
+		RestEquityPoint int64  `json:"rest_equity_point"`
+		Type            string `json:"type"`
+		PersonalInfo    struct {
+			UserName string `json:"user_name"`
+		} `json:"personal_info"`
+	} `json:"data"`
+}
+
+func (r userInfoResponse) errorText() string {
+	if r.Message != "" {
+		return r.Message
+	}
+	return r.Msg
+}
+
 func (agent *Agent) Balance(ctx context.Context, session *sources.Session) (*sources.AccountBalance, error) {
 	if session.Keys.HunterToken == "" {
 		return nil, errors.New("empty hunter keys")
 	}
 
-	base64Query := base64.URLEncoding.EncodeToString([]byte(`ip="1.1.1.1"`))
-	hunterURL := fmt.Sprintf(URL, session.Keys.HunterToken, base64Query, 1, 1, 0, "", "")
+	hunterURL := fmt.Sprintf(UserInfoURL, session.Keys.HunterToken)
 	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, hunterURL, nil)
 	if err != nil {
 		return nil, err
@@ -26,30 +76,38 @@ func (agent *Agent) Balance(ctx context.Context, session *sources.Session) (*sou
 	request.Header.Set("Accept", "application/json")
 
 	resp, err := session.Do(request, agent.Name())
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	var hunterResponse Response
-	if err := json.NewDecoder(resp.Body).Decode(&hunterResponse); err != nil {
+	var userInfo userInfoResponse
+	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
 		return nil, err
 	}
-
-	if hunterResponse.Code != http.StatusOK {
-		return nil, fmt.Errorf("hunter error (code %d): %s", hunterResponse.Code, hunterResponse.Msg)
+	if userInfo.Code != http.StatusOK {
+		return nil, fmt.Errorf("hunter error (code %d): %s", userInfo.Code, userInfo.errorText())
 	}
 
+	freePoints := userInfo.Data.RestFreePoint
+	equityPoints := userInfo.Data.RestEquityPoint
 	details := map[string]string{
-		"Rest Quota":    hunterResponse.Data.RestQuota,
-		"Consume Quota": hunterResponse.Data.ConsumeQuota,
+		"Free Points":   strconv.FormatInt(freePoints, 10),
+		"Equity Points": strconv.FormatInt(equityPoints, 10),
 	}
-	remaining, _ := strconv.ParseInt(hunterResponse.Data.RestQuota, 10, 64)
+	if userInfo.Data.Type != "" {
+		details["Account Type"] = userInfo.Data.Type
+	}
+	if userInfo.Data.PersonalInfo.UserName != "" {
+		details["Username"] = userInfo.Data.PersonalInfo.UserName
+	}
 
 	return &sources.AccountBalance{
 		Engine:    agent.Name(),
-		Remaining: remaining,
+		Remaining: freePoints + equityPoints,
 		Details:   details,
-		Message:   fmt.Sprintf("Remaining Quota: %s | Consumed Quota: %s", hunterResponse.Data.RestQuota, hunterResponse.Data.ConsumeQuota),
+		Message:   fmt.Sprintf("Free Points: %d | Equity Points: %d", freePoints, equityPoints),
 	}, nil
 }
