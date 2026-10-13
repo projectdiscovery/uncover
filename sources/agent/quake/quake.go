@@ -10,7 +10,7 @@ import (
 	"net/http"
 
 	"github.com/projectdiscovery/uncover/sources"
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 )
 
 const (
@@ -81,12 +81,12 @@ func (agent *Agent) query(ctx context.Context, URL string, session *sources.Sess
 		return nil
 	}
 	if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(quakeResponse); err != nil {
-		errx := errorutil.NewWithErr(err)
+		errx := errkit.FromError(err)
 		var errMap map[string]interface{}
 		if err := json.NewDecoder(bytes.NewReader(respdata)).Decode(&errMap); err == nil {
-			errx = errx.Msgf("failed to decode quake response: %v", errMap)
+			errx.Msgf("failed to decode quake response: %v", errMap)
 		} else {
-			errx = errx.Msgf("failed to decode quake response: %s", string(respdata))
+			errx.Msgf("failed to decode quake response: %s", string(respdata))
 		}
 		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: errx})
 		return nil

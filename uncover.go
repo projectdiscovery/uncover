@@ -27,7 +27,7 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/sources/agent/zoomeye"
 
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
@@ -125,9 +125,9 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 	}
 	switch {
 	case len(s.Agents) == 0:
-		return nil, errorutil.NewWithTag("uncover", "no agent/source specified")
+		return nil, errkit.New("no agent/source specified")
 	case !s.hasAnyAnonymousProvider() && !s.Provider.HasKeys():
-		return nil, errorutil.NewWithTag("uncover", "agents %v requires keys but no keys were found", s.Options.Agents)
+		return nil, errkit.Newf("agents %v requires keys but no keys were found", s.Options.Agents)
 	}
 
 	megaChan := make(chan sources.Result, DefaultChannelBuffSize)
@@ -184,7 +184,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 		return err
 	}
 	if callback == nil {
-		return errorutil.NewWithTag("uncover", "result callback cannot be nil")
+		return errkit.New("result callback cannot be nil")
 	}
 	for {
 		select {
@@ -208,13 +208,13 @@ func (s *Service) AllAgents() []string {
 
 func (s *Service) nilCheck() error {
 	if s.Provider == nil {
-		return errorutil.NewWithTag("uncover", "provider cannot be nil")
+		return errkit.New("provider cannot be nil")
 	}
 	if s.Options == nil {
-		return errorutil.NewWithTag("uncover", "options cannot be nil")
+		return errkit.New("options cannot be nil")
 	}
 	if s.Session == nil {
-		return errorutil.NewWithTag("uncover", "session cannot be nil")
+		return errkit.New("session cannot be nil")
 	}
 	return nil
 }

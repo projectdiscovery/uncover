@@ -10,7 +10,7 @@ import (
 
 	"github.com/projectdiscovery/ratelimit"
 	"github.com/projectdiscovery/retryablehttp-go"
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 )
 
 // DefaultRateLimits of all/most of sources are hardcoded by default to improve performance
@@ -100,7 +100,9 @@ func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, 
 			rateLimitOpts.Key = engine
 		}
 		if err = session.RateLimits.Add(rateLimitOpts); err != nil {
-			return nil, errorutil.NewWithErr(err).Msgf("failed to setup ratelimit of %v got %v", engine, err)
+			errx := errkit.FromError(err)
+			errx.Msgf("failed to setup ratelimit of %v got %v", engine, err)
+			return nil, errx
 		}
 	}
 
