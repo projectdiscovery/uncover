@@ -20,6 +20,9 @@ import (
 // are cheaper to retry individually.
 const pageSize = 10000
 
+// endpoint is the ammonites API origin. Tests point it at a local server.
+var endpoint = "https://api.subdomain.center"
+
 type Agent struct{}
 
 func (agent *Agent) Name() string {
@@ -41,6 +44,9 @@ func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *
 		numberOfResults := 0
 
 		for offset := 0; ; {
+			if query.Limit > 0 && numberOfResults >= query.Limit {
+				return
+			}
 			page, err := agent.queryPage(ctx, session, ammonitesRequest, apiKey, offset, query.Limit-numberOfResults)
 			if err != nil {
 				sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
@@ -176,5 +182,5 @@ func (r *request) buildURL(authenticated bool, offset, limit int) string {
 		query.Set("offset", strconv.Itoa(offset))
 	}
 
-	return "https://api.subdomain.center/?" + query.Encode()
+	return endpoint + "/?" + query.Encode()
 }
