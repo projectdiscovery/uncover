@@ -67,6 +67,7 @@ type Options struct {
 	Daydaymap            goflags.StringSlice
 	NerdyData            goflags.StringSlice
 	DisableUpdateCheck   bool
+	CheckCredits         bool
 }
 
 // ParseOptions parses the command line flags provided by a user
@@ -101,6 +102,8 @@ func ParseOptions() *Options {
 		flagSet.StringSliceVarP(&options.GreyNoise, "greynoise", "gn", nil, "search query for greynoise (example: -greynoise 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.Daydaymap, "daydaymap", "ddm", nil, "search query for daydaymap (example: -daydaymap 'query.txt')", goflags.FileStringSliceOptions),
 		flagSet.StringSliceVarP(&options.NerdyData, "nerdydata", "nd", nil, "search query for NerdyData (example: -nerdydata 'query.txt')", goflags.FileStringSliceOptions),
+		flagSet.BoolVarP(&options.CheckCredits, "check-credits", "cc", false, "check remaining credits for configured providers"),
+		flagSet.BoolVar(&options.CheckCredits, "credits", false, "check remaining credits for configured providers"),
 	)
 
 	flagSet.CreateGroup("config", "Config",
@@ -181,7 +184,9 @@ func ParseOptions() *Options {
 		len(options.GreyNoise),
 		len(options.Daydaymap),
 		len(options.NerdyData)) {
-		options.Engine = append(options.Engine, "shodan")
+		if !options.CheckCredits {
+			options.Engine = append(options.Engine, "shodan")
+		}
 	}
 
 	// we make the assumption that input queries aren't that much
@@ -236,6 +241,26 @@ func (options *Options) loadConfigFrom(location string) error {
 
 // validateOptions validates the configuration options passed
 func (options *Options) validateOptions() error {
+	// Both verbose and silent flags were used
+	if options.Verbose && options.Silent {
+		return errors.New("both verbose and silent mode specified")
+	}
+
+	// Only one output format may be selected at a time.
+	formats := 0
+	for _, enabled := range []bool{options.JSON, options.Raw, options.CSV} {
+		if enabled {
+			formats++
+		}
+	}
+	if formats > 1 {
+		return errors.New("only one of -json, -raw, -csv can be used at a time")
+	}
+
+	if options.CheckCredits {
+		return nil
+	}
+
 	// Check if domain, list of domains, or stdin info was provided.
 	// If none was provided, then return.
 	if genericutil.EqualsAll(0,
@@ -262,23 +287,8 @@ func (options *Options) validateOptions() error {
 		return errors.New("no query provided")
 	}
 
-	// Both verbose and silent flags were used
-	if options.Verbose && options.Silent {
-		return errors.New("both verbose and silent mode specified")
-	}
-
-	// Only one output format may be selected at a time.
-	formats := 0
-	for _, enabled := range []bool{options.JSON, options.Raw, options.CSV} {
-		if enabled {
-			formats++
-		}
-	}
-	if formats > 1 {
-		return errors.New("only one of -json, -raw, -csv can be used at a time")
-	}
-
 	// Validate threads and options
+
 	if genericutil.EqualsAll(0,
 		len(options.Engine),
 		len(options.Shodan),

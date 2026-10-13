@@ -17,10 +17,10 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/greynoise"
 	"github.com/projectdiscovery/uncover/sources/agent/hunter"
 	"github.com/projectdiscovery/uncover/sources/agent/hunterhow"
+	"github.com/projectdiscovery/uncover/sources/agent/nerdydata"
 	"github.com/projectdiscovery/uncover/sources/agent/netlas"
 	"github.com/projectdiscovery/uncover/sources/agent/odin"
 	"github.com/projectdiscovery/uncover/sources/agent/onyphe"
-	"github.com/projectdiscovery/uncover/sources/agent/nerdydata"
 	"github.com/projectdiscovery/uncover/sources/agent/publicwww"
 	"github.com/projectdiscovery/uncover/sources/agent/quake"
 	"github.com/projectdiscovery/uncover/sources/agent/shodan"
@@ -204,6 +204,73 @@ func (s *Service) AllAgents() []string {
 	return []string{
 		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise", "daydaymap", "nerdydata",
 	}
+}
+
+// AllBalanceAgents returns search engine agents that support querying account balance
+func AllBalanceAgents() []string {
+	return []string{
+		"shodan", "censys", "fofa", "hunter", "quake", "zoomeye", "netlas", "criminalip",
+	}
+}
+
+func (s *Service) AllBalanceAgents() []string {
+	return AllBalanceAgents()
+}
+
+// CheckCredits queries account remaining credits across configured search engine providers
+func (s *Service) CheckCredits(ctx context.Context, allProvidersMode bool) ([]*sources.AccountBalance, error) {
+	var balances []*sources.AccountBalance
+	err := s.ExecuteCheckCredits(ctx, allProvidersMode, func(balance *sources.AccountBalance) {
+		balances = append(balances, balance)
+	})
+	return balances, err
+}
+
+// ExecuteCheckCredits queries account remaining credits and invokes callback on each result
+func (s *Service) ExecuteCheckCredits(ctx context.Context, allProvidersMode bool, callback func(balance *sources.AccountBalance)) error {
+	if err := s.nilCheck(); err != nil {
+		return err
+	}
+	if callback == nil {
+		return errkit.New("balance callback cannot be nil")
+	}
+
+	keys := s.Provider.GetKeys()
+	checkedCount := 0
+
+	for _, agent := range s.Agents {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+
+		balanceAgent, ok := agent.(sources.BalanceAccount)
+		if !ok {
+			if !allProvidersMode {
+				gologger.Warning().Label(agent.Name()).Msg("balance check not supported for provider")
+			}
+			continue
+		}
+
+		if allProvidersMode && !keys.HasKeysFor(agent.Name()) {
+			continue
+		}
+
+		checkedCount++
+		balance, err := balanceAgent.Balance(ctx, s.Session)
+		if err != nil {
+			gologger.Warning().Label(agent.Name()).Msgf("%s\n", err)
+			continue
+		}
+		if balance != nil {
+			callback(balance)
+		}
+	}
+
+	if allProvidersMode && checkedCount == 0 {
+		gologger.Warning().Msg("no configured provider keys found")
+	}
+
+	return nil
 }
 
 func (s *Service) nilCheck() error {
