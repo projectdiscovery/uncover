@@ -73,10 +73,6 @@ func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *
 	return results, nil
 }
 
-func (agent *Agent) buildURL(endpoint string, req *CriminalIPRequest) (string, error) {
-	return req.buildURL(endpoint)
-}
-
 func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string, criminalipRequest *CriminalIPRequest) (*http.Response, error) {
 	criminalipURL, err := criminalipRequest.buildURL(URL)
 	if err != nil {
