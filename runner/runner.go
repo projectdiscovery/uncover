@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -9,7 +10,7 @@ import (
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover"
 	"github.com/projectdiscovery/uncover/sources"
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
@@ -28,8 +29,13 @@ func NewRunner(options *Options) (*Runner, error) {
 	runner := &Runner{options: options}
 	appendAllQueries(options)
 
+	engineList := options.Engine
+	if options.CheckCredits && len(options.Engine) == 0 {
+		engineList = uncover.AllBalanceAgents()
+	}
+
 	opts := uncover.Options{
-		Agents:  options.Engine,
+		Agents:  engineList,
 		Queries: options.Query,
 		Limit:   options.Limit,
 		Proxy:   options.Proxy,
@@ -51,15 +57,28 @@ func NewRunner(options *Options) (*Runner, error) {
 	if runner.options.OutputFile != "" {
 		outputFile, err := os.Create(runner.options.OutputFile)
 		if err != nil {
-			return nil, errorutil.New("could not create output file %s: %s", options.OutputFile, err)
+			return nil, errkit.Newf("could not create output file %s: %s", options.OutputFile, err)
 		}
 		runner.outputWriter.AddWriters(outputFile)
 	}
 	return runner, nil
 }
 
-// RunEnumeration runs the subdomain enumeration flow on the targets specified
+// Run runs the subdomain enumeration flow or credit balance check
 func (r *Runner) Run(ctx context.Context) error {
+	if r.options.CheckCredits {
+		return r.CheckCredits(ctx)
+	}
+
+	// CSV is only the effective format when no higher-precedence output mode
+	// (JSON/Raw) is set; otherwise skip the header so we don't emit a stray row.
+	csvOutput := r.options.CSV && !r.options.JSON && !r.options.Raw
+	var csvFields []string
+	if csvOutput {
+		csvFields = parseFields(r.options.OutputFields)
+		r.outputWriter.WriteCSVRow(csvFields)
+	}
+
 	resultCallback := func(result sources.Result) {
 		optionFields := r.options.OutputFields
 		switch {
@@ -71,6 +90,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		case r.options.Raw:
 			gologger.Verbose().Label(result.Source).Msgf("%s\n", result.RawData())
 			r.outputWriter.WriteString(result.RawData())
+		case csvOutput:
+			if r.options.Verbose {
+				gologger.Verbose().Label(result.Source).Msgf("%s\n", strings.Join(getFieldValues(result, csvFields), ","))
+			}
+			r.outputWriter.WriteCSVData(result, csvFields)
 		default:
 			port := fmt.Sprint(result.Port)
 			replacer := strings.NewReplacer(
@@ -96,6 +120,25 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 	}
 	return r.service.ExecuteWithCallback(ctx, resultCallback)
+}
+
+// CheckCredits queries account remaining credits across configured search engine providers
+func (r *Runner) CheckCredits(ctx context.Context) error {
+	allProvidersMode := len(r.options.Engine) == 0
+	balanceCallback := func(balance *sources.AccountBalance) {
+		if r.options.JSON {
+			data, err := json.Marshal(balance)
+			if err == nil {
+				gologger.Silent().Msg(string(data))
+				r.outputWriter.WriteString(string(data))
+			}
+		} else {
+			msg := fmt.Sprintf("[%s] %s", balance.Engine, balance.String())
+			gologger.Info().Msg(msg)
+			r.outputWriter.WriteString(msg)
+		}
+	}
+	return r.service.ExecuteCheckCredits(ctx, allProvidersMode, balanceCallback)
 }
 
 // Close closes its resources

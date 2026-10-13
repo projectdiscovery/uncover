@@ -17,10 +17,10 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/greynoise"
 	"github.com/projectdiscovery/uncover/sources/agent/hunter"
 	"github.com/projectdiscovery/uncover/sources/agent/hunterhow"
+	"github.com/projectdiscovery/uncover/sources/agent/nerdydata"
 	"github.com/projectdiscovery/uncover/sources/agent/netlas"
 	"github.com/projectdiscovery/uncover/sources/agent/odin"
 	"github.com/projectdiscovery/uncover/sources/agent/onyphe"
-	"github.com/projectdiscovery/uncover/sources/agent/nerdydata"
 	"github.com/projectdiscovery/uncover/sources/agent/publicwww"
 	"github.com/projectdiscovery/uncover/sources/agent/quake"
 	"github.com/projectdiscovery/uncover/sources/agent/shodan"
@@ -28,7 +28,7 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/subdomaincenter"
 	"github.com/projectdiscovery/uncover/sources/agent/zoomeye"
 
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
@@ -128,9 +128,9 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 	}
 	switch {
 	case len(s.Agents) == 0:
-		return nil, errorutil.NewWithTag("uncover", "no agent/source specified")
+		return nil, errkit.New("no agent/source specified")
 	case !s.hasAnyAnonymousProvider() && !s.Provider.HasKeys():
-		return nil, errorutil.NewWithTag("uncover", "agents %v requires keys but no keys were found", s.Options.Agents)
+		return nil, errkit.Newf("agents %v requires keys but no keys were found", s.Options.Agents)
 	}
 
 	megaChan := make(chan sources.Result, DefaultChannelBuffSize)
@@ -187,7 +187,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 		return err
 	}
 	if callback == nil {
-		return errorutil.NewWithTag("uncover", "result callback cannot be nil")
+		return errkit.New("result callback cannot be nil")
 	}
 	for {
 		select {
@@ -209,15 +209,82 @@ func (s *Service) AllAgents() []string {
 	}
 }
 
+// AllBalanceAgents returns search engine agents that support querying account balance
+func AllBalanceAgents() []string {
+	return []string{
+		"shodan", "censys", "fofa", "hunter", "quake", "zoomeye", "netlas", "criminalip",
+	}
+}
+
+func (s *Service) AllBalanceAgents() []string {
+	return AllBalanceAgents()
+}
+
+// CheckCredits queries account remaining credits across configured search engine providers
+func (s *Service) CheckCredits(ctx context.Context, allProvidersMode bool) ([]*sources.AccountBalance, error) {
+	var balances []*sources.AccountBalance
+	err := s.ExecuteCheckCredits(ctx, allProvidersMode, func(balance *sources.AccountBalance) {
+		balances = append(balances, balance)
+	})
+	return balances, err
+}
+
+// ExecuteCheckCredits queries account remaining credits and invokes callback on each result
+func (s *Service) ExecuteCheckCredits(ctx context.Context, allProvidersMode bool, callback func(balance *sources.AccountBalance)) error {
+	if err := s.nilCheck(); err != nil {
+		return err
+	}
+	if callback == nil {
+		return errkit.New("balance callback cannot be nil")
+	}
+
+	keys := s.Provider.GetKeys()
+	checkedCount := 0
+
+	for _, agent := range s.Agents {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+
+		balanceAgent, ok := agent.(sources.BalanceAccount)
+		if !ok {
+			if !allProvidersMode {
+				gologger.Warning().Label(agent.Name()).Msg("balance check not supported for provider")
+			}
+			continue
+		}
+
+		if allProvidersMode && !keys.HasKeysFor(agent.Name()) {
+			continue
+		}
+
+		checkedCount++
+		balance, err := balanceAgent.Balance(ctx, s.Session)
+		if err != nil {
+			gologger.Warning().Label(agent.Name()).Msgf("%s\n", err)
+			continue
+		}
+		if balance != nil {
+			callback(balance)
+		}
+	}
+
+	if allProvidersMode && checkedCount == 0 {
+		gologger.Warning().Msg("no configured provider keys found")
+	}
+
+	return nil
+}
+
 func (s *Service) nilCheck() error {
 	if s.Provider == nil {
-		return errorutil.NewWithTag("uncover", "provider cannot be nil")
+		return errkit.New("provider cannot be nil")
 	}
 	if s.Options == nil {
-		return errorutil.NewWithTag("uncover", "options cannot be nil")
+		return errkit.New("options cannot be nil")
 	}
 	if s.Session == nil {
-		return errorutil.NewWithTag("uncover", "session cannot be nil")
+		return errkit.New("session cannot be nil")
 	}
 	return nil
 }
