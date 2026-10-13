@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/projectdiscovery/gologger"
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 	fileutil "github.com/projectdiscovery/utils/file"
 	folderutil "github.com/projectdiscovery/utils/folder"
 	"github.com/projectdiscovery/utils/generic"
@@ -140,7 +140,7 @@ func (provider *Provider) LoadProviderConfig(location string) error {
 	if !fileutil.FileExists(location) {
 		//create provider config file if it doesn't exist
 		if err := fileutil.Marshal(fileutil.YAML, []byte(location), Provider{}); err != nil {
-			return errorutil.NewWithTag("uncover", "couldn't write provider config file(%s): %s\n", location, err)
+			return errkit.Newf("couldn't write provider config file(%s): %s", location, err)
 		}
 	}
 	return fileutil.Unmarshal(fileutil.YAML, []byte(location), provider)

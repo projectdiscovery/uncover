@@ -10,7 +10,7 @@ import (
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/uncover"
 	"github.com/projectdiscovery/uncover/sources"
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
@@ -57,7 +57,7 @@ func NewRunner(options *Options) (*Runner, error) {
 	if runner.options.OutputFile != "" {
 		outputFile, err := os.Create(runner.options.OutputFile)
 		if err != nil {
-			return nil, errorutil.New("could not create output file %s: %s", options.OutputFile, err)
+			return nil, errkit.Newf("could not create output file %s: %s", options.OutputFile, err)
 		}
 		runner.outputWriter.AddWriters(outputFile)
 	}
@@ -68,6 +68,15 @@ func NewRunner(options *Options) (*Runner, error) {
 func (r *Runner) Run(ctx context.Context) error {
 	if r.options.CheckCredits {
 		return r.CheckCredits(ctx)
+	}
+
+	// CSV is only the effective format when no higher-precedence output mode
+	// (JSON/Raw) is set; otherwise skip the header so we don't emit a stray row.
+	csvOutput := r.options.CSV && !r.options.JSON && !r.options.Raw
+	var csvFields []string
+	if csvOutput {
+		csvFields = parseFields(r.options.OutputFields)
+		r.outputWriter.WriteCSVRow(csvFields)
 	}
 
 	resultCallback := func(result sources.Result) {
@@ -81,6 +90,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		case r.options.Raw:
 			gologger.Verbose().Label(result.Source).Msgf("%s\n", result.RawData())
 			r.outputWriter.WriteString(result.RawData())
+		case csvOutput:
+			if r.options.Verbose {
+				gologger.Verbose().Label(result.Source).Msgf("%s\n", strings.Join(getFieldValues(result, csvFields), ","))
+			}
+			r.outputWriter.WriteCSVData(result, csvFields)
 		default:
 			port := fmt.Sprint(result.Port)
 			replacer := strings.NewReplacer(
