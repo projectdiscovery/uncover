@@ -38,7 +38,7 @@ func (agent *Agent) Balance(ctx context.Context, session *sources.Session) (*sou
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var apiInfo ApiInfoResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiInfo); err != nil {

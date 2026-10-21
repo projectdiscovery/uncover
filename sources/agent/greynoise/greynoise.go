@@ -204,7 +204,7 @@ func (agent *Agent) query(ctx context.Context, session *sources.Session, request
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		b, _ := io.ReadAll(resp.Body)
@@ -294,7 +294,7 @@ func collectHostnamesFromItem(it GNQLItem) []string {
 			return
 		}
 		if i := strings.LastIndex(h, ":"); i > 0 && i < len(h)-1 {
-			if !(strings.HasPrefix(h, "[") && strings.Contains(h, "]")) {
+			if !strings.HasPrefix(h, "[") || !strings.Contains(h, "]") {
 				h = h[:i]
 			}
 		}

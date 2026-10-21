@@ -21,7 +21,7 @@ func TestHunterBalance(t *testing.T) {
 		require.Equal(t, "test-hunter-key", r.URL.Query().Get("api-key"))
 		require.Empty(t, r.URL.Query().Get("search"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"code":200,"message":"success","data":{"rest_free_point":10,"rest_equity_point":100,"type":"个人账号","personal_info":{"user_name":"hunter-user"}}}`)
+		_, _ = fmt.Fprint(w, `{"code":200,"message":"success","data":{"rest_free_point":10,"rest_equity_point":100,"type":"个人账号","personal_info":{"user_name":"hunter-user"}}}`)
 	}))
 	defer ts.Close()
 
@@ -50,7 +50,7 @@ func TestHunterBalance(t *testing.T) {
 
 func TestHunterBalanceStringCode(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, `{"code":"200","data":{"rest_free_point":4,"rest_equity_point":6}}`)
+		_, _ = fmt.Fprint(w, `{"code":"200","data":{"rest_free_point":4,"rest_equity_point":6}}`)
 	}))
 	defer ts.Close()
 
@@ -81,7 +81,7 @@ func TestHunterBalanceEmptyKeys(t *testing.T) {
 func TestHunterBalanceErrorCode(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"code":401,"message":"invalid api key"}`)
+		_, _ = fmt.Fprint(w, `{"code":401,"message":"invalid api key"}`)
 	}))
 	defer ts.Close()
 

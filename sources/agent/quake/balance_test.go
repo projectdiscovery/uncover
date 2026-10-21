@@ -17,7 +17,7 @@ func TestQuakeBalance(t *testing.T) {
 		require.Equal(t, http.MethodGet, r.Method)
 		require.Equal(t, "test-quake-token", r.Header.Get("X-QuakeToken"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"code":0,"message":"Successful.","data":{"user_id":"u-123","email":"quake@example.com","credit":500,"month_remaining_quota":3000,"total_remaining_quota":8000}}`)
+		_, _ = fmt.Fprint(w, `{"code":0,"message":"Successful.","data":{"user_id":"u-123","email":"quake@example.com","credit":500,"month_remaining_quota":3000,"total_remaining_quota":8000}}`)
 	}))
 	defer ts.Close()
 
@@ -47,7 +47,7 @@ func TestQuakeBalance(t *testing.T) {
 func TestQuakeBalanceErrorCode(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"code":401,"message":"Authentication failed"}`)
+		_, _ = fmt.Fprint(w, `{"code":401,"message":"Authentication failed"}`)
 	}))
 	defer ts.Close()
 
