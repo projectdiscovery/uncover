@@ -19,4 +19,4 @@ jobs:
         uses: projectdiscovery/actions/setup/go@v1
 
       - name: Run golangci-lint
-        uses: projectdiscovery/actions/golangci-lint@v1
+        uses: projectdiscovery/actions/golangci-lint/v2@v1

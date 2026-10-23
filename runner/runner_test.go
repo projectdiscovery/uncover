@@ -70,8 +70,8 @@ func TestRunner_CheckCredits_NoKeys(t *testing.T) {
 	isolateProviderConfig(t)
 	tmpFile, err := os.CreateTemp("", "uncover-test-output-*.txt")
 	require.NoError(t, err)
-	defer os.Remove(tmpFile.Name())
-	tmpFile.Close()
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
+	_ = tmpFile.Close()
 
 	opts := &Options{
 		CheckCredits: true,

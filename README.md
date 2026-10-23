@@ -58,7 +58,7 @@
 
 ## Installation Instructions
 
-uncover requires **go1.21** to install successfully. Run the following command to get the repo -
+uncover requires **go1.26.10** to install successfully. Run the following command to get the repo -
 
 ```sh
 go install -v github.com/projectdiscovery/uncover/cmd/uncover@latest

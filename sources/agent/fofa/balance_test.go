@@ -17,7 +17,7 @@ func TestFofaBalance(t *testing.T) {
 		require.Equal(t, http.MethodGet, r.Method)
 		require.Contains(t, r.URL.RawQuery, "key=test-fofa-key")
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"error":false,"email":"user@fofa.so","username":"user","remain_api_query":9900,"remain_api_data":10000,"fofa_point":500}`)
+		_, _ = fmt.Fprint(w, `{"error":false,"email":"user@fofa.so","username":"user","remain_api_query":9900,"remain_api_data":10000,"fofa_point":500}`)
 	}))
 	defer ts.Close()
 
@@ -47,7 +47,7 @@ func TestFofaBalance(t *testing.T) {
 func TestFofaBalanceErrorResponse(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"error":true,"errmsg":"invalid key"}`)
+		_, _ = fmt.Fprint(w, `{"error":true,"errmsg":"invalid key"}`)
 	}))
 	defer ts.Close()
 

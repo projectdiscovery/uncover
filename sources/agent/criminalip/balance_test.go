@@ -17,7 +17,7 @@ func TestCriminalIPBalance(t *testing.T) {
 		require.Equal(t, http.MethodPost, r.Method)
 		require.Equal(t, "test-criminalip-token", r.Header.Get("x-api-key"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"status":200,"message":"success","data":{"email":"cip@example.com","membership":"Pro","query_count":30,"query_limit":100}}`)
+		_, _ = fmt.Fprint(w, `{"status":200,"message":"success","data":{"email":"cip@example.com","membership":"Pro","query_count":30,"query_limit":100}}`)
 	}))
 	defer ts.Close()
 

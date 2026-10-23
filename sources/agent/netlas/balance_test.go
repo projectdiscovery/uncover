@@ -17,7 +17,7 @@ func TestNetlasBalance(t *testing.T) {
 		require.Equal(t, http.MethodGet, r.Method)
 		require.Equal(t, "test-netlas-token", r.Header.Get("X-Api-Key"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"email":"netlas@example.com","coins":75,"plan":"business"}`)
+		_, _ = fmt.Fprint(w, `{"email":"netlas@example.com","coins":75,"plan":"business"}`)
 	}))
 	defer ts.Close()
 

@@ -17,7 +17,7 @@ func TestZoomEyeBalance(t *testing.T) {
 		require.Equal(t, http.MethodPost, r.Method)
 		require.Equal(t, "test-zoomeye-token", r.Header.Get("API-KEY"))
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"code":60000,"message":"success","plan":"standard","points":15000,"zoomeye_points":300}`)
+		_, _ = fmt.Fprint(w, `{"code":60000,"message":"success","plan":"standard","points":15000,"zoomeye_points":300}`)
 	}))
 	defer ts.Close()
 

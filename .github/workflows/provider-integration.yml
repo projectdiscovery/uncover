@@ -10,13 +10,11 @@ jobs:
     name: Test Builds
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.24.x
-
       - name: Check out code
         uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: projectdiscovery/actions/setup/go@v1
 
       - name: Integration Tests
         env:

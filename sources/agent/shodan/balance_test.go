@@ -17,7 +17,7 @@ func TestShodanBalance(t *testing.T) {
 		require.Equal(t, http.MethodGet, r.Method)
 		require.Contains(t, r.URL.RawQuery, "key=test-shodan-key")
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"query_credits":100,"scan_credits":25,"monitored_ips":5,"plan":"dev","unlocked":true}`)
+		_, _ = fmt.Fprint(w, `{"query_credits":100,"scan_credits":25,"monitored_ips":5,"plan":"dev","unlocked":true}`)
 	}))
 	defer ts.Close()
 
