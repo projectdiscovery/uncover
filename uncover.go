@@ -161,7 +161,9 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 						if !ok {
 							return
 						}
-						relay <- res
+						if !sources.SendResult(ctx, relay, res) {
+							return
+						}
 					}
 				}
 			}(ch, megaChan, ctx)
