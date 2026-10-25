@@ -316,7 +316,7 @@ func (h greynoiseTestcases) Execute() error {
 
 	greynoiseToken := fmt.Sprintf(`greynoise: [%s]`, token)
 	_ = os.WriteFile(ConfigFile, []byte(greynoiseToken), 0644)
-	defer os.RemoveAll(ConfigFile)
+	defer func() { _ = os.RemoveAll(ConfigFile) }()
 
 	results, err := testutils.RunUncoverAndGetResults(debug, "-e", "greynoise", "-q", "tag:scanner")
 	if err != nil {

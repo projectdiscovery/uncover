@@ -38,7 +38,7 @@ func (agent *Agent) Balance(ctx context.Context, session *sources.Session) (*sou
 
 	resp, err := session.Do(request, agent.Name())
 	if resp != nil && resp.Body != nil {
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 	}
 	if err != nil {
 		return nil, err

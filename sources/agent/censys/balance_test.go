@@ -24,7 +24,7 @@ func TestCensysBalance(t *testing.T) {
 		require.False(t, ok)
 
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{"result":{"balance":235,"uid":"test-org","auto_replenish_config":{"enabled":false},"credit_expirations":[]}}`)
+		_, _ = fmt.Fprint(w, `{"result":{"balance":235,"uid":"test-org","auto_replenish_config":{"enabled":false},"credit_expirations":[]}}`)
 	}))
 	defer ts.Close()
 

@@ -90,7 +90,7 @@ func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL 
 func (agent *Agent) query(ctx context.Context, URL string, session *sources.Session, criminalipRequest *CriminalIPRequest, results chan sources.Result) *CriminalIPResponse {
 	resp, err := agent.queryURL(ctx, session, URL, criminalipRequest)
 	if resp != nil && resp.Body != nil {
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 	}
 	if err != nil {
 		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})

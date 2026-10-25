@@ -153,7 +153,7 @@ func TestQueryMockServerAndEscaping(t *testing.T) {
 		receivedAuthHeader = r.Header.Get("x-api-key")
 
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{
+		_, _ = fmt.Fprint(w, `{
 			"status": 200,
 			"message": "Success",
 			"data": {
@@ -202,7 +202,7 @@ func TestQueryMockServerAndEscaping(t *testing.T) {
 func TestBatchSequentialQueries(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{
+		_, _ = fmt.Fprint(w, `{
 			"status": 200,
 			"message": "Success",
 			"data": {
@@ -259,7 +259,7 @@ func TestBatchSequentialQueries(t *testing.T) {
 func TestQueryRespectsCancelledContext(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, `{
+		_, _ = fmt.Fprint(w, `{
 			"status": 200,
 			"message": "Success",
 			"data": {

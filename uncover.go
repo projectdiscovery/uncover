@@ -23,6 +23,7 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/onyphe"
 	"github.com/projectdiscovery/uncover/sources/agent/publicwww"
 	"github.com/projectdiscovery/uncover/sources/agent/quake"
+	"github.com/projectdiscovery/uncover/sources/agent/scanmalware"
 	"github.com/projectdiscovery/uncover/sources/agent/shodan"
 	"github.com/projectdiscovery/uncover/sources/agent/shodanidb"
 	"github.com/projectdiscovery/uncover/sources/agent/subdomaincenter"
@@ -99,6 +100,8 @@ func New(opts *Options) (*Service, error) {
 			s.Agents = append(s.Agents, &daydaymap.Agent{})
 		case "nerdydata":
 			s.Agents = append(s.Agents, &nerdydata.Agent{})
+		case "scanmalware":
+			s.Agents = append(s.Agents, &scanmalware.Agent{})
 		case "subdomaincenter":
 			s.Agents = append(s.Agents, &subdomaincenter.Agent{})
 		}
@@ -164,7 +167,9 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 						if !ok {
 							return
 						}
-						relay <- res
+						if !sources.SendResult(ctx, relay, res) {
+							return
+						}
 					}
 				}
 			}(ch, megaChan, ctx)
@@ -205,7 +210,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 // AllAgents returns all supported uncover Agents
 func (s *Service) AllAgents() []string {
 	return []string{
-		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise", "daydaymap", "nerdydata", "subdomaincenter",
+		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise", "daydaymap", "nerdydata", "scanmalware", "subdomaincenter",
 	}
 }
 
@@ -289,9 +294,9 @@ func (s *Service) nilCheck() error {
 	return nil
 }
 
-// anonymousAgents answer queries without any API key configured, on a reduced
-// tier of the upstream service.
-var anonymousAgents = []string{"shodan-idb", "subdomaincenter"}
+// anonymousAgents query APIs that need no key, so a run selecting only these
+// must not be rejected for having no keys configured.
+var anonymousAgents = []string{"shodan-idb", "scanmalware", "subdomaincenter"}
 
 func isAnonymousAgent(name string) bool {
 	return stringsutil.EqualFoldAny(name, anonymousAgents...)
