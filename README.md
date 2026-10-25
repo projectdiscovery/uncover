@@ -79,7 +79,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google,driftnet,daydaymap) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,publicwww,criminalip,hunterhow,google,odin,binaryedge,onyphe,driftnet,greynoise,daydaymap,nerdydata) (default shodan)
    -asq, -awesome-search-queries string[]  use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')
 
 SEARCH-ENGINE:
@@ -94,10 +94,14 @@ SEARCH-ENGINE:
    -cl, -criminalip string[]  search query for criminalip (example: -criminalip 'query.txt')
    -pw, -publicwww string[]   search query for publicwww (example: -publicwww 'query.txt')
    -hh, -hunterhow string[]   search query for hunterhow (example: -hunterhow 'query.txt')
-   -gg, -google string[]       search query for google (example: -google 'query.txt')
+   -gg, -google string[]      search query for google (example: -google 'query.txt')
+   -od, -odin string[]        search query for odin (example: -odin 'query.txt')
+   -be, -binaryedge string[]  search query for binaryedge (example: -binaryedge 'query.txt')
    -on, -onyphe string[]      search query for onyphe (example: -onyphe 'query.txt')
    -df, -driftnet string[]    search query for driftnet (example: -driftnet 'query.txt')
+   -gn, -greynoise string[]   search query for greynoise (example: -greynoise 'query.txt')
    -ddm, -daydaymap string[]  search query for daydaymap (example: -daydaymap 'query.txt')
+   -nd, -nerdydata string[]   search query for NerdyData (example: -nerdydata 'query.txt')
 
 CONFIG:
    -pc, -provider string         provider configuration file (default "$CONFIG/uncover/provider-config.yaml")
