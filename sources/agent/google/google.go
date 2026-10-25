@@ -2,6 +2,7 @@ package google
 
 import (
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -20,7 +21,7 @@ func (agent *Agent) Name() string {
 	return "google"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 
 	if session.Keys.GoogleKey == "" || session.Keys.GoogleCX == "" {
 		return nil, errors.New("empty google keys")
@@ -36,12 +37,15 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 
 		escapedQuery := url.QueryEscape(query.Query)
 
-		size := 10 // Max number of search results to return.
+		size := 10
 		if query.Limit < size {
 			size = query.Limit
 		}
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			googleRequest := &Request{
 				SearchTerms: escapedQuery,
 				Count:       size,
@@ -52,7 +56,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				break
 			}
 
-			queryResult := agent.query(session, googleRequest, results)
+			queryResult := agent.query(ctx, session, googleRequest, results)
 			if queryResult == nil {
 				break
 			}
@@ -69,11 +73,11 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) query(session *sources.Session, googleRequest *Request, results chan sources.Result) []string {
+func (agent *Agent) query(ctx context.Context, session *sources.Session, googleRequest *Request, results chan sources.Result) []string {
 
-	resp, err := agent.queryURL(session, googleRequest)
+	resp, err := agent.queryURL(ctx, session, googleRequest)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
@@ -81,7 +85,7 @@ func (agent *Agent) query(session *sources.Session, googleRequest *Request, resu
 	if resp.Header.Get("Content-Encoding") == "gzip" {
 		gzipReader, errGzip := gzip.NewReader(resp.Body)
 		if errGzip != nil {
-			results <- sources.Result{Source: agent.Name(), Error: errGzip}
+			sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: errGzip})
 			return nil
 		}
 		defer func() {
@@ -89,12 +93,12 @@ func (agent *Agent) query(session *sources.Session, googleRequest *Request, resu
 		}()
 
 		if errDecode := json.NewDecoder(gzipReader).Decode(&apiResponse); errDecode != nil {
-			results <- sources.Result{Source: agent.Name(), Error: errDecode}
+			sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: errDecode})
 			return nil
 		}
 	} else {
 		if errDecode := json.NewDecoder(resp.Body).Decode(&apiResponse); errDecode != nil {
-			results <- sources.Result{Source: agent.Name(), Error: errDecode}
+			sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: errDecode})
 			return nil
 		}
 	}
@@ -108,7 +112,9 @@ func (agent *Agent) query(session *sources.Session, googleRequest *Request, resu
 			result.IP = googleResult.Link
 			raw, _ := json.Marshal(googleResult)
 			result.Raw = raw
-			results <- result
+			if !sources.SendResult(ctx, results, result) {
+				return lines
+			}
 			lines = append(lines, googleResult.Link)
 		}
 	}
@@ -116,10 +122,10 @@ func (agent *Agent) query(session *sources.Session, googleRequest *Request, resu
 	return lines
 }
 
-func (agent *Agent) queryURL(session *sources.Session, googleRequest *Request) (*http.Response, error) {
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, googleRequest *Request) (*http.Response, error) {
 
 	googleURL := googleRequest.buildURL(session.Keys.GoogleKey, session.Keys.GoogleCX)
-	request, err := sources.NewHTTPRequest(http.MethodGet, googleURL, nil)
+	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, googleURL, nil)
 	if err != nil {
 		return nil, err
 	}

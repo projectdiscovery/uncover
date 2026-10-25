@@ -50,6 +50,7 @@
   - **[Google](https://www.google.com)**
   - **[Onyphe](https://www.onyphe.io/)**
   - **[Driftnet](https://driftnet.io)**
+  - **[DayDayMap](https://www.daydaymap.com)**
   - **[NerdyData](https://www.nerdydata.com/?utm_source=projectdiscovery/uncover)**
 - Multiple API key input support
 - Automatic API key randomization
@@ -78,7 +79,7 @@ Usage:
 Flags:
 INPUT:
    -q, -query string[]   search query, supports: stdin,file,config input (example: -q 'example query', -q 'query.txt')
-   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google,driftnet) (default shodan)
+   -e, -engine string[]  search engine to query (shodan,shodan-idb,fofa,censys,quake,hunter,zoomeye,netlas,criminalip,publicwww,hunterhow,google,driftnet,daydaymap) (default shodan)
    -asq, -awesome-search-queries string[]  use awesome search queries to discover exposed assets on the internet (example: -asq 'jira')
 
 SEARCH-ENGINE:
@@ -96,6 +97,7 @@ SEARCH-ENGINE:
    -gg, -google string[]       search query for google (example: -google 'query.txt')
    -on, -onyphe string[]      search query for onyphe (example: -onyphe 'query.txt')
    -df, -driftnet string[]    search query for driftnet (example: -driftnet 'query.txt')
+   -ddm, -daydaymap string[]  search query for daydaymap (example: -daydaymap 'query.txt')
 
 CONFIG:
    -pc, -provider string         provider configuration file (default "$CONFIG/uncover/provider-config.yaml")
@@ -171,6 +173,9 @@ onyphe:
 driftnet:
   - DRIFTNET_API_KEY_1
   - DRIFTNET_API_KEY_2
+daydaymap:
+  - DAYDAYMAP_API_KEY_1
+  - DAYDAYMAP_API_KEY_2
 nerdydata:
   - NERDYDATA_API_KEY_1
   - NERDYDATA_API_KEY_2
@@ -197,10 +202,11 @@ export GOOGLE_API_KEY=xxx
 export GOOGLE_API_CX=xxx
 export ONYPHE_API_KEY=xxx
 export DRIFTNET_API_KEY=xxx
+export DAYDAYMAP_API_KEY=xxx
 export NERDYDATA_API_KEY=xxx
 ```
 
-Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.ai), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup), [Driftnet](https://driftnet.io/auth?state=signup) and [NerdyData](https://www.nerdydata.com/api?utm_source=projectdiscovery/uncover).
+Required API keys can be obtained by signing up on following platform [Shodan](https://account.shodan.io/register), [Censys](https://censys.io/register), [Fofa](https://fofa.info/toLogin), [Quake](https://quake.360.net/quake/#/index), [Hunter](https://user.skyeye.qianxin.com/user/register?next=https%3A//hunter.qianxin.com/api/uLogin&fromLogin=1), [ZoomEye](https://www.zoomeye.ai), [Netlas](https://app.netlas.io/registration/), [CriminalIP](https://www.criminalip.io/register), [Publicwww](https://publicwww.com/profile/signup.html), Google [[1]](https://developers.google.com/custom-search/v1/introduction#identify_your_application_to_google_with_api_key),[[2]](https://programmablesearchengine.google.com/controlpanel/create), [Onyphe](https://search.onyphe.io/signup), [Driftnet](https://driftnet.io/auth?state=signup), [DayDayMap](https://www.daydaymap.com) and [NerdyData](https://www.nerdydata.com/api?utm_source=projectdiscovery/uncover).
 
 ## Running Uncover
 
@@ -279,7 +285,7 @@ uncover -q dorks.txt
 **uncover** supports multiple search engine, as default **shodan** is used, `-e` flag can be used to run same query against any or all search engines.
 
 ```console
-echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas,criminalip,driftnet
+echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas,criminalip,driftnet,daydaymap
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/
@@ -311,7 +317,7 @@ echo jira | uncover -e shodan,censys,fofa,quake,hunter,zoomeye,netlas,criminalip
 
 
 ```console
-uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira' -zoomeye 'app:"Atlassian JIRA"' -netlas 'jira' -criminalip 'Jira' -driftnet 'field=product-tag:jira'
+uncover -shodan 'http.component:"Atlassian Jira"' -censys 'services.software.product=`Jira`' -fofa 'app="ATLASSIAN-JIRA"' -quake 'Jira' -hunter 'Jira' -zoomeye 'app:"Atlassian JIRA"' -netlas 'jira' -criminalip 'Jira' -driftnet 'field=product-tag:jira' -daydaymap 'Jira'
 
   __  ______  _________ _   _____  _____
  / / / / __ \/ ___/ __ \ | / / _ \/ ___/

@@ -22,12 +22,11 @@ func (agent *Agent) Name() string {
 	return "censys"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.CensysToken == "" || session.Keys.CensysOrgId == "" {
 		return nil, errors.New("empty censys keys")
 	}
 
-	// Create the Censys SDK client once
 	s := censyssdkgo.New(
 		censyssdkgo.WithOrganizationID(session.Keys.CensysOrgId),
 		censyssdkgo.WithSecurity(session.Keys.CensysToken),
@@ -44,12 +43,15 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		var numberOfResults int
 		nextCursor := ""
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			censysRequest := &CensysRequest{
 				Query:   query.Query,
 				PerPage: MaxPerPage,
 				Cursor:  nextCursor,
 			}
-			censysResponse := agent.query(session, s, censysRequest, results)
+			censysResponse := agent.query(ctx, s, censysRequest, results)
 			if censysResponse == nil {
 				break
 			}
@@ -69,9 +71,7 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(s *censyssdkgo.SDK, censysRequest *CensysRequest) (*operations.V3GlobaldataSearchQueryResponse, error) {
-	ctx := context.Background()
-
+func (agent *Agent) queryURL(ctx context.Context, s *censyssdkgo.SDK, censysRequest *CensysRequest) (*operations.V3GlobaldataSearchQueryResponse, error) {
 	return s.GlobalData.Search(ctx, operations.V3GlobaldataSearchQueryRequest{
 		SearchQueryInputBody: components.SearchQueryInputBody{
 			PageSize:  censyssdkgo.Int64(int64(censysRequest.PerPage)),
@@ -81,37 +81,35 @@ func (agent *Agent) queryURL(s *censyssdkgo.SDK, censysRequest *CensysRequest) (
 	})
 }
 
-func (agent *Agent) query(session *sources.Session, s *censyssdkgo.SDK, censysRequest *CensysRequest, results chan sources.Result) *operations.V3GlobaldataSearchQueryResponse {
-	// query certificates
-	resp, err := agent.queryURL(s, censysRequest)
+func (agent *Agent) query(ctx context.Context, s *censyssdkgo.SDK, censysRequest *CensysRequest, results chan sources.Result) *operations.V3GlobaldataSearchQueryResponse {
+	resp, err := agent.queryURL(ctx, s, censysRequest)
 	if err != nil {
-		results <- sources.Result{Source: agent.Name(), Error: err}
-		// httputil.DrainResponseBody(resp)
+		sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 		return nil
 	}
 
 	if result := resp.ResponseEnvelopeSearchQueryResponse.Result; result != nil {
 		for _, censysResult := range result.Hits {
-
 			for _, host := range censysResult.WebpropertyV1.Resource.Endpoints {
-				result := sources.Result{Source: agent.Name()}
+				out := sources.Result{Source: agent.Name()}
 				if host.IP != nil {
-					result.IP = *host.IP
+					out.IP = *host.IP
 				}
 				if host.Hostname != nil {
-					result.Host = *host.Hostname
+					out.Host = *host.Hostname
 				}
 				if host.Port != nil {
-					result.Port = *host.Port
+					out.Port = *host.Port
 				}
 				if host.HTTP != nil && host.HTTP.URI != nil {
-					result.Url = *host.HTTP.URI
+					out.Url = *host.HTTP.URI
 				}
 				raw, _ := json.Marshal(host)
-				result.Raw = raw
-				results <- result
+				out.Raw = raw
+				if !sources.SendResult(ctx, results, out) {
+					return resp
+				}
 			}
-
 		}
 	}
 

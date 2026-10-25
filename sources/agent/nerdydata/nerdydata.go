@@ -1,6 +1,7 @@
 package nerdydata
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,7 +18,7 @@ func (agent *Agent) Name() string {
 	return "nerdydata"
 }
 
-func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan sources.Result, error) {
+func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *sources.Query) (chan sources.Result, error) {
 	if session.Keys.NerdyDataToken == "" {
 		return nil, errors.New("empty NerdyData keys")
 	}
@@ -34,6 +35,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 		nextPage := ""
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
 			nerdydataRequest := &Request{
 				Query: query.Query,
 				Page:  nextPage,
@@ -42,9 +46,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 			var resp *http.Response
 			var err error
 			for attempt := 0; attempt < maxRetries; attempt++ {
-				resp, err = agent.queryURL(session, nerdydataRequest.buildURL(), session.Keys.NerdyDataToken)
+				resp, err = agent.queryURL(ctx, session, nerdydataRequest.buildURL(), session.Keys.NerdyDataToken)
 				if err != nil {
-					results <- sources.Result{Source: agent.Name(), Error: err}
+					sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 					return
 				}
 				if resp.StatusCode != http.StatusAccepted {
@@ -56,31 +60,35 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				if backoff > maxBackoff {
 					backoff = maxBackoff
 				}
-				time.Sleep(backoff)
+				select {
+				case <-ctx.Done():
+					return
+				case <-time.After(backoff):
+				}
 			}
 			if resp.StatusCode == http.StatusAccepted {
 				resp.Body.Close()
-				results <- sources.Result{
+				sources.SendResult(ctx, results, sources.Result{
 					Source: agent.Name(),
 					Error:  fmt.Errorf("server returned 202 after %d retries", maxRetries),
-				}
+				})
 				return
 			}
 
 			if resp.StatusCode != http.StatusOK {
 				body, _ := io.ReadAll(resp.Body)
 				resp.Body.Close()
-				results <- sources.Result{
+				sources.SendResult(ctx, results, sources.Result{
 					Source: agent.Name(),
 					Error:  fmt.Errorf("unexpected status %d: %s", resp.StatusCode, body),
-				}
+				})
 				return
 			}
 
 			var apiResponse Response
 			if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
 				resp.Body.Close()
-				results <- sources.Result{Source: agent.Name(), Error: err}
+				sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 				return
 			}
 			resp.Body.Close()
@@ -101,7 +109,9 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 				result.Url = s.URL
 				raw, _ := json.Marshal(s)
 				result.Raw = raw
-				results <- result
+				if !sources.SendResult(ctx, results, result) {
+					return
+				}
 				numberOfResults++
 			}
 
@@ -115,8 +125,8 @@ func (agent *Agent) Query(session *sources.Session, query *sources.Query) (chan 
 	return results, nil
 }
 
-func (agent *Agent) queryURL(session *sources.Session, URL string, token string) (*http.Response, error) {
-	request, err := sources.NewHTTPRequest(http.MethodGet, URL, nil)
+func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, URL string, token string) (*http.Response, error) {
+	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, URL, nil)
 	if err != nil {
 		return nil, err
 	}
