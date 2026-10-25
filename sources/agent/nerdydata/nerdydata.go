@@ -55,7 +55,7 @@ func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *
 					break
 				}
 				// 202 = server-side timeout; back off and retry with same cursor
-				resp.Body.Close()
+				_ = resp.Body.Close()
 				backoff := baseBackoff * (1 << attempt)
 				if backoff > maxBackoff {
 					backoff = maxBackoff
@@ -67,7 +67,7 @@ func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *
 				}
 			}
 			if resp.StatusCode == http.StatusAccepted {
-				resp.Body.Close()
+				_ = resp.Body.Close()
 				sources.SendResult(ctx, results, sources.Result{
 					Source: agent.Name(),
 					Error:  fmt.Errorf("server returned 202 after %d retries", maxRetries),
@@ -77,7 +77,7 @@ func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *
 
 			if resp.StatusCode != http.StatusOK {
 				body, _ := io.ReadAll(resp.Body)
-				resp.Body.Close()
+				_ = resp.Body.Close()
 				sources.SendResult(ctx, results, sources.Result{
 					Source: agent.Name(),
 					Error:  fmt.Errorf("unexpected status %d: %s", resp.StatusCode, body),
@@ -87,11 +87,11 @@ func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *
 
 			var apiResponse Response
 			if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
-				resp.Body.Close()
+				_ = resp.Body.Close()
 				sources.SendResult(ctx, results, sources.Result{Source: agent.Name(), Error: err})
 				return
 			}
-			resp.Body.Close()
+			_ = resp.Body.Close()
 
 			if len(apiResponse.Sites) == 0 {
 				break
