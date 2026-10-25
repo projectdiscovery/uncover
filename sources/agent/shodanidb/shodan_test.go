@@ -17,7 +17,7 @@ import (
 // the downstream relay (uncover.Service.Execute) has exited via ctx.Done.
 func TestQueryRespectsCancelledContext(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, `{"ip":"1.2.3.4","ports":[80,443,22,8080,8443,21,25,53,110,143],"hostnames":["a","b","c"]}`)
+		_, _ = fmt.Fprint(w, `{"ip":"1.2.3.4","ports":[80,443,22,8080,8443,21,25,53,110,143],"hostnames":["a","b","c"]}`)
 	}))
 	t.Cleanup(ts.Close)
 
