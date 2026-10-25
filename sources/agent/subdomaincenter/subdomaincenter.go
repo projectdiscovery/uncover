@@ -54,7 +54,7 @@ func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *
 			}
 
 			for _, host := range page.hosts {
-				if numberOfResults >= query.Limit {
+				if query.Limit > 0 && numberOfResults >= query.Limit {
 					return
 				}
 				raw, _ := json.Marshal(host)

@@ -83,6 +83,30 @@ func TestQueryStopsAtLimit(t *testing.T) {
 	require.Equal(t, 1, requests)
 }
 
+func TestQueryWithoutLimitReturnsAllHosts(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode([]string{"one.example", "two.example"})
+	}))
+	t.Cleanup(server.Close)
+
+	original := endpoint
+	endpoint = server.URL
+	t.Cleanup(func() { endpoint = original })
+
+	session, err := sources.NewSession(&sources.Keys{}, 0, 5, 0, []string{"subdomaincenter"}, time.Second, "")
+	require.NoError(t, err)
+
+	ch, err := (&Agent{}).Query(context.Background(), session, &sources.Query{Query: "vpn"})
+	require.NoError(t, err)
+
+	var hosts []string
+	for result := range ch {
+		require.NoError(t, result.Error)
+		hosts = append(hosts, result.Host)
+	}
+	require.Equal(t, []string{"one.example", "two.example"}, hosts)
+}
+
 func TestAnonymousQueryDoesNotPaginate(t *testing.T) {
 	var requests int
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
