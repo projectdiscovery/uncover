@@ -161,7 +161,11 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 						if !ok {
 							return
 						}
-						relay <- res
+						select {
+						case <-ctx.Done():
+							return
+						case relay <- res:
+						}
 					}
 				}
 			}(ch, megaChan, ctx)
