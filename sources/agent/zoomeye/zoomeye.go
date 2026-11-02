@@ -5,9 +5,11 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"net/http"
-
 	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
@@ -15,6 +17,28 @@ import (
 var (
 	URL = "https://api.zoomeye.ai/v2/search"
 )
+
+// ResolveURL returns the resolved URL for ZoomEye given a host override, fallback default URL and path.
+func ResolveURL(host, defaultURL, defaultPath string) string {
+	if host == "" {
+		return defaultURL
+	}
+	host = strings.TrimSpace(host)
+	if strings.HasPrefix(host, "http://") || strings.HasPrefix(host, "https://") {
+		u, err := url.Parse(host)
+		if err == nil {
+			if u.Path == "" || u.Path == "/" {
+				u.Path = defaultPath
+			}
+			return u.String()
+		}
+	}
+	cleanHost := strings.TrimRight(host, "/")
+	if !strings.HasPrefix(cleanHost, "api.") && !strings.Contains(cleanHost, "/") {
+		cleanHost = "api." + cleanHost
+	}
+	return fmt.Sprintf("https://%s%s", cleanHost, defaultPath)
+}
 
 type Agent struct{}
 
@@ -34,6 +58,8 @@ func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *
 	}
 	results := make(chan sources.Result)
 
+	apiURL := ResolveURL(session.Keys.ZoomEyeHost, URL, "/v2/search")
+
 	go func() {
 		defer close(results)
 
@@ -49,7 +75,7 @@ func (agent *Agent) Query(ctx context.Context, session *sources.Session, query *
 				PageSize: 100,
 			}
 
-			zoomeyeResponse := agent.query(ctx, URL, session, zoomeyeRequest, results)
+			zoomeyeResponse := agent.query(ctx, apiURL, session, zoomeyeRequest, results)
 			if zoomeyeResponse == nil {
 				break
 			}

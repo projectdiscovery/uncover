@@ -8,6 +8,7 @@ type Keys struct {
 	FofaKey         string
 	QuakeToken      string
 	HunterToken     string
+	ZoomEyeHost     string
 	ZoomEyeToken    string
 	NetlasToken     string
 	CriminalIPToken string

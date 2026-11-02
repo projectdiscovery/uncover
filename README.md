@@ -155,7 +155,7 @@ hunter:
   - HUNTER_API_KEY_2
 zoomeye:
   - ZOOMEYE_API_KEY_1
-  - ZOOMEYE_API_KEY_2
+  - ZOOMEYE_API_KEY_2:zoomeye.org
 netlas:
   - NETLAS_API_KEY_1
   - NETLAS_API_KEY_2
@@ -201,6 +201,7 @@ export FOFA_KEY=xxx
 export QUAKE_TOKEN=xxx
 export HUNTER_API_KEY=xxx
 export ZOOMEYE_API_KEY=xxx
+export ZOOMEYE_HOST=zoomeye.org
 export NETLAS_API_KEY=xxx
 export CRIMINALIP_API_KEY=xxx
 export PUBLICWWW_API_KEY=xxx
