@@ -17,15 +17,16 @@ import (
 	"github.com/projectdiscovery/uncover/sources/agent/greynoise"
 	"github.com/projectdiscovery/uncover/sources/agent/hunter"
 	"github.com/projectdiscovery/uncover/sources/agent/hunterhow"
+	"github.com/projectdiscovery/uncover/sources/agent/nerdydata"
 	"github.com/projectdiscovery/uncover/sources/agent/netlas"
 	"github.com/projectdiscovery/uncover/sources/agent/odin"
 	"github.com/projectdiscovery/uncover/sources/agent/onyphe"
-	"github.com/projectdiscovery/uncover/sources/agent/nerdydata"
-	"github.com/projectdiscovery/uncover/sources/agent/subdomaincenter"
 	"github.com/projectdiscovery/uncover/sources/agent/publicwww"
 	"github.com/projectdiscovery/uncover/sources/agent/quake"
+	"github.com/projectdiscovery/uncover/sources/agent/scanmalware"
 	"github.com/projectdiscovery/uncover/sources/agent/shodan"
 	"github.com/projectdiscovery/uncover/sources/agent/shodanidb"
+	"github.com/projectdiscovery/uncover/sources/agent/subdomaincenter"
 	"github.com/projectdiscovery/uncover/sources/agent/zoomeye"
 
 	errorutil "github.com/projectdiscovery/utils/errors"
@@ -99,6 +100,8 @@ func New(opts *Options) (*Service, error) {
 			s.Agents = append(s.Agents, &daydaymap.Agent{})
 		case "nerdydata":
 			s.Agents = append(s.Agents, &nerdydata.Agent{})
+		case "scanmalware":
+			s.Agents = append(s.Agents, &scanmalware.Agent{})
 		case "subdomaincenter", "subdomain-center":
 			s.Agents = append(s.Agents, &subdomaincenter.Agent{})
 		}
@@ -140,7 +143,7 @@ func (s *Service) Execute(ctx context.Context) (<-chan sources.Result, error) {
 	agentLabel:
 		for _, agent := range s.Agents {
 			keys := s.Provider.GetKeys()
-			if keys.Empty() && agent.Name() != "shodan-idb" && agent.Name() != "subdomaincenter" {
+			if keys.Empty() && agent.Name() != "shodan-idb" && agent.Name() != "scanmalware" && agent.Name() != "subdomaincenter" {
 				gologger.Error().Msgf(agent.Name(), "agent given but keys not found")
 				continue agentLabel
 			}
@@ -209,7 +212,7 @@ func (s *Service) ExecuteWithCallback(ctx context.Context, callback func(result 
 // AllAgents returns all supported uncover Agents
 func (s *Service) AllAgents() []string {
 	return []string{
-		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise", "daydaymap", "nerdydata", "subdomaincenter",
+		"shodan", "censys", "fofa", "shodan-idb", "quake", "hunter", "zoomeye", "netlas", "criminalip", "publicwww", "hunterhow", "google", "odin", "binaryedge", "onyphe", "driftnet", "greynoise", "daydaymap", "nerdydata", "scanmalware", "subdomaincenter",
 	}
 }
 
@@ -228,6 +231,7 @@ func (s *Service) nilCheck() error {
 
 func (s *Service) hasAnyAnonymousProvider() bool {
 	return stringsutil.EqualFoldAny("shodan-idb", s.Options.Agents...) ||
+		stringsutil.EqualFoldAny("scanmalware", s.Options.Agents...) ||
 		stringsutil.EqualFoldAny("subdomaincenter", s.Options.Agents...) ||
 		stringsutil.EqualFoldAny("subdomain-center", s.Options.Agents...)
 }
