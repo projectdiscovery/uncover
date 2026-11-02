@@ -88,7 +88,15 @@ func (provider *Provider) GetKeys() Keys {
 	}
 
 	if len(provider.ZoomEye) > 0 {
-		keys.ZoomEyeToken = provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
+		zoomeye := provider.ZoomEye[rand.Intn(len(provider.ZoomEye))]
+		parts := strings.Split(zoomeye, ":")
+		keys.ZoomEyeToken = parts[0]
+		if len(parts) >= 2 {
+			keys.ZoomEyeHost = strings.Join(parts[1:], ":")
+		}
+	}
+	if host, ok := os.LookupEnv("ZOOMEYE_HOST"); ok && host != "" && keys.ZoomEyeHost == "" {
+		keys.ZoomEyeHost = host
 	}
 
 	if len(provider.Netlas) > 0 {
@@ -167,7 +175,13 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.CriminalIP = appendIfExists(provider.CriminalIP, "CRIMINALIP_API_KEY")
 	provider.Publicwww = appendIfExists(provider.Publicwww, "PUBLICWWW_API_KEY")
 	provider.HunterHow = appendIfExists(provider.HunterHow, "HUNTERHOW_API_KEY")
-	provider.ZoomEye = appendIfExists(provider.ZoomEye, "ZOOMEYE_API_KEY")
+	if val1, ok := os.LookupEnv("ZOOMEYE_API_KEY"); ok {
+		if val2, ok2 := os.LookupEnv("ZOOMEYE_HOST"); ok2 && val2 != "" {
+			provider.ZoomEye = append(provider.ZoomEye, fmt.Sprintf("%s:%s", val1, val2))
+		} else {
+			provider.ZoomEye = append(provider.ZoomEye, val1)
+		}
+	}
 	provider.Driftnet = appendIfExists(provider.Driftnet, "DRIFTNET_API_KEY")
 	provider.Daydaymap = appendIfExists(provider.Daydaymap, "DAYDAYMAP_API_KEY")
 

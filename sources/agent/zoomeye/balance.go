@@ -33,7 +33,8 @@ func (agent *Agent) Balance(ctx context.Context, session *sources.Session) (*sou
 		return nil, errors.New("empty zoomeye keys")
 	}
 
-	request, err := sources.NewHTTPRequest(ctx, http.MethodPost, UserInfoURL, nil)
+	userInfoURL := ResolveURL(session.Keys.ZoomEyeHost, UserInfoURL, "/v2/userinfo")
+	request, err := sources.NewHTTPRequest(ctx, http.MethodPost, userInfoURL, nil)
 	if err != nil {
 		return nil, err
 	}
