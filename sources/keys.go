@@ -1,27 +1,28 @@
 package sources
 
 type Keys struct {
-	CensysToken     string
-	CensysOrgId     string
-	Shodan          string
-	FofaEmail       string
-	FofaKey         string
-	QuakeToken      string
-	HunterToken     string
-	ZoomEyeToken    string
-	NetlasToken     string
-	CriminalIPToken string
-	PublicwwwToken  string
-	HunterHowToken  string
-	GoogleKey       string
-	GoogleCX        string
-	OdinToken       string
-	BinaryEdgeToken string
-	OnypheKey       string
-	DriftnetToken   string
-	GreyNoiseKey    string
-	Daydaymap       string
-	NerdyDataToken  string
+	CensysToken          string
+	CensysOrgId          string
+	Shodan               string
+	FofaEmail            string
+	FofaKey              string
+	QuakeToken           string
+	HunterToken          string
+	ZoomEyeToken         string
+	NetlasToken          string
+	CriminalIPToken      string
+	PublicwwwToken       string
+	HunterHowToken       string
+	GoogleKey            string
+	GoogleCX             string
+	OdinToken            string
+	BinaryEdgeToken      string
+	OnypheKey            string
+	DriftnetToken        string
+	GreyNoiseKey         string
+	Daydaymap            string
+	NerdyDataToken       string
+	SubdomainCenterToken string
 }
 
 func (keys Keys) Empty() bool {
@@ -45,5 +46,6 @@ func (keys Keys) Empty() bool {
 		keys.DriftnetToken == "" &&
 		keys.GreyNoiseKey == "" &&
 		keys.Daydaymap == "" &&
-		keys.NerdyDataToken == ""
+		keys.NerdyDataToken == "" &&
+		keys.SubdomainCenterToken == ""
 }

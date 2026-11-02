@@ -38,7 +38,8 @@ type Provider struct {
 	Driftnet   []string `yaml:"driftnet"`
 	GreyNoise  []string `yaml:"greynoise"`
 	Daydaymap  []string `yaml:"daydaymap"`
-	NerdyData  []string `yaml:"nerdydata"`
+	NerdyData       []string `yaml:"nerdydata"`
+	SubdomainCenter []string `yaml:"subdomaincenter"`
 }
 
 // NewProvider loads provider keys from default location and env variables
@@ -131,6 +132,9 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.NerdyData) > 0 {
 		keys.NerdyDataToken = provider.NerdyData[rand.Intn(len(provider.NerdyData))]
 	}
+	if len(provider.SubdomainCenter) > 0 {
+		keys.SubdomainCenterToken = provider.SubdomainCenter[rand.Intn(len(provider.SubdomainCenter))]
+	}
 
 	return keys
 }
@@ -183,6 +187,7 @@ func (provider *Provider) LoadProviderKeysFromEnv() {
 	provider.Onyphe = appendIfExists(provider.Onyphe, "ONYPHE_API_KEY")
 	provider.GreyNoise = appendIfExists(provider.GreyNoise, "GREYNOISE_API_KEY")
 	provider.NerdyData = appendIfExists(provider.NerdyData, "NERDYDATA_API_KEY")
+	provider.SubdomainCenter = appendIfExists(provider.SubdomainCenter, "SUBDOMAINCENTER_API_KEY")
 }
 
 // HasKeys returns true if at least one agent/source has keys
@@ -206,6 +211,7 @@ func (provider *Provider) HasKeys() bool {
 		len(provider.GreyNoise) > 0,
 		len(provider.Daydaymap) > 0,
 		len(provider.NerdyData) > 0,
+		len(provider.SubdomainCenter) > 0,
 	)
 }
 
