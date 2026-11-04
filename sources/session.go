@@ -51,7 +51,7 @@ func NewSession(keys *Keys, retryMax, timeout, rateLimit int, engines []string, 
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 100,
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			MinVersion: tls.VersionTLS12,
 		},
 		ResponseHeaderTimeout: time.Duration(timeout) * time.Second,
 		Proxy: func(req *http.Request) (*url.URL, error) {
