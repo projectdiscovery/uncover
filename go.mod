@@ -8,7 +8,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/projectdiscovery/awesome-search-queries v0.0.0-20241111181020-ad0097bd63a1
-	github.com/projectdiscovery/fdmax v0.0.4
+	github.com/projectdiscovery/fdmax v0.0.6
 	github.com/projectdiscovery/goflags v0.2.1
 	github.com/projectdiscovery/gologger v1.1.75
 	github.com/projectdiscovery/mapcidr v1.1.97
@@ -38,7 +38,7 @@ require (
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.58.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
