@@ -174,8 +174,8 @@ github.com/projectdiscovery/retryabledns v1.0.116 h1:tK28PJ4tLO7bgM89RpIFjkfTPMS
 github.com/projectdiscovery/retryabledns v1.0.116/go.mod h1:r3vH0AKYtJ9fculcqRFrdVYe2ABcHwZeR4C6j3rqCbY=
 github.com/projectdiscovery/retryablehttp-go v1.3.31 h1:0hSEZ5+jj6Oo1IL8qrytD36TK/qCxfe543jEaRqSTjs=
 github.com/projectdiscovery/retryablehttp-go v1.3.31/go.mod h1:/WEa7YejxTCXEMLCGfGYaC3JsgXgzuqw8rv8cb4buEc=
-github.com/projectdiscovery/utils v0.11.12 h1:Ok9rlfsSjJXDSUX99CPHrrEQb1Htk2LdWiMcLWbPXuw=
-github.com/projectdiscovery/utils v0.11.12/go.mod h1:TJgsyVjB02CavwZVFzUzPg6YOSJXQxLhL808JCiQKlU=
+github.com/projectdiscovery/utils v0.11.13 h1:Mn3/rtyQvtn8XZy0UnVkxbAmn0afbHtWuMHUEztwWSw=
+github.com/projectdiscovery/utils v0.11.13/go.mod h1:TJgsyVjB02CavwZVFzUzPg6YOSJXQxLhL808JCiQKlU=
 github.com/refraction-networking/utls v1.8.2 h1:j4Q1gJj0xngdeH+Ox/qND11aEfhpgoEvV+S9iJ2IdQo=
 github.com/refraction-networking/utls v1.8.2/go.mod h1:jkSOEkLqn+S/jtpEHPOsVv/4V4EVnelwbMQl4vCWXAM=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
