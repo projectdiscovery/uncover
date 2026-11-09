@@ -13,7 +13,7 @@ require (
 	github.com/projectdiscovery/gologger v1.1.75
 	github.com/projectdiscovery/mapcidr v1.1.97
 	github.com/projectdiscovery/ratelimit v0.0.94
-	github.com/projectdiscovery/retryablehttp-go v1.3.31
+	github.com/projectdiscovery/retryablehttp-go v1.3.34
 	github.com/stretchr/testify v1.12.1
 )
 
@@ -47,7 +47,6 @@ require (
 	aead.dev/minisign v0.2.0 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Mzack9999/gcache v0.0.0-20230410081825-519e28eab057 // indirect
-	github.com/Mzack9999/go-http-digest-auth-client v0.6.1-0.20220414142836-eb8883508809 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/akrylysov/pogreb v0.10.1 // indirect
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
@@ -84,10 +83,10 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/projectdiscovery/fastdialer v0.6.1 // indirect
-	github.com/projectdiscovery/hmap v0.0.102 // indirect
+	github.com/projectdiscovery/hmap v0.0.104 // indirect
 	github.com/projectdiscovery/machineid v0.0.0-20250715113114-c77eb3567582 // indirect
 	github.com/projectdiscovery/networkpolicy v0.1.57 // indirect
-	github.com/projectdiscovery/retryabledns v1.0.116 // indirect
+	github.com/projectdiscovery/retryabledns v1.0.118 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.3 // indirect
