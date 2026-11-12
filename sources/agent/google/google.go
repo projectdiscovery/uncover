@@ -7,13 +7,33 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/projectdiscovery/uncover/sources"
 )
 
 const (
-	baseURL = "https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&q=%s&start=%d&num=%d"
+	baseURL     = "https://www.googleapis.com/customsearch/v1"
+	defaultPath = "/customsearch/v1"
 )
+
+// ResolveURL returns the Custom Search endpoint for a host override, or the Google endpoint when host is empty.
+func ResolveURL(host string) string {
+	host = strings.TrimSpace(host)
+	if host == "" {
+		return baseURL
+	}
+	if strings.HasPrefix(host, "http://") || strings.HasPrefix(host, "https://") {
+		u, err := url.Parse(host)
+		if err == nil {
+			if u.Path == "" || u.Path == "/" {
+				u.Path = defaultPath
+			}
+			return strings.TrimRight(u.String(), "/")
+		}
+	}
+	return "https://" + strings.TrimRight(host, "/") + defaultPath
+}
 
 type Agent struct{}
 
@@ -124,7 +144,7 @@ func (agent *Agent) query(ctx context.Context, session *sources.Session, googleR
 
 func (agent *Agent) queryURL(ctx context.Context, session *sources.Session, googleRequest *Request) (*http.Response, error) {
 
-	googleURL := googleRequest.buildURL(session.Keys.GoogleKey, session.Keys.GoogleCX)
+	googleURL := googleRequest.buildURL(ResolveURL(session.Keys.GoogleHost), session.Keys.GoogleKey, session.Keys.GoogleCX)
 	request, err := sources.NewHTTPRequest(ctx, http.MethodGet, googleURL, nil)
 	if err != nil {
 		return nil, err

@@ -170,7 +170,7 @@ hunterhow:
   - HUNTERHOW_API_KEY_2
 google:
   - GOOGLE_API_KEY_1:Google_API_CX_1
-  - GOOGLE_API_KEY_2:Google_API_CX_2
+  - GOOGLE_API_KEY_2:Google_API_CX_2:search.example.com
 onyphe:
   - ONYPHE_API_KEY_1 
   - ONYPHE_API_KEY_2
@@ -208,6 +208,7 @@ export PUBLICWWW_API_KEY=xxx
 export HUNTERHOW_API_KEY=xxx
 export GOOGLE_API_KEY=xxx
 export GOOGLE_API_CX=xxx
+export GOOGLE_HOST=search.example.com
 export ONYPHE_API_KEY=xxx
 export DRIFTNET_API_KEY=xxx
 export DAYDAYMAP_API_KEY=xxx
