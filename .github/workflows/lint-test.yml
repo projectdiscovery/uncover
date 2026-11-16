@@ -9,7 +9,6 @@ on:
 
 jobs:
   lint-test:
-    if: "! endsWith(github.actor, '[bot]')"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
