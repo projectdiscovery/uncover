@@ -116,10 +116,16 @@ func (provider *Provider) GetKeys() Keys {
 	if len(provider.Google) > 0 {
 		googleKeys := provider.Google[rand.Intn(len(provider.Google))]
 		parts := strings.Split(googleKeys, ":")
-		if len(parts) == 2 {
+		if len(parts) >= 2 {
 			keys.GoogleKey = parts[0]
 			keys.GoogleCX = parts[1]
 		}
+		if len(parts) >= 3 {
+			keys.GoogleHost = strings.Join(parts[2:], ":")
+		}
+	}
+	if host, ok := os.LookupEnv("GOOGLE_HOST"); ok && host != "" && keys.GoogleHost == "" {
+		keys.GoogleHost = host
 	}
 	if len(provider.Odin) > 0 {
 		keys.OdinToken = provider.Odin[rand.Intn(len(provider.Odin))]

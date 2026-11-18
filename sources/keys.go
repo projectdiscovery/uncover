@@ -16,6 +16,7 @@ type Keys struct {
 	HunterHowToken  string
 	GoogleKey       string
 	GoogleCX        string
+	GoogleHost      string
 	OdinToken       string
 	BinaryEdgeToken string
 	OnypheKey       string
